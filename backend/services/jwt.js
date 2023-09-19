@@ -18,7 +18,7 @@ const generateToken = async (payload, secretSignature, tokenLife) => {
 			},
 		);
 	} catch (error) {
-		console.log(`Error in generate access token:  + ${error}`);
+		console.log(`Error in generate access token: ${error}`);
 		return null;
 	}
 };
@@ -27,7 +27,7 @@ const verifyToken = async (token, secretKey) => {
 	try {
 		return await verify(token, secretKey);
 	} catch (error) {
-		console.log(`Error in verify access token:  + ${error}`);
+		console.log(`Error in verify access token: ${error}`);
 		return null;
 	}
 };

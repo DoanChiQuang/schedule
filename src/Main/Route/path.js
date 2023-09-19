@@ -1,7 +1,15 @@
 export const DASH_PATH = '/'
-export const HOME_PATH = 'home'
-export const SIGNIN_PATH = 'signin'
 
+// Auth
+export const SIGNIN_PATH = 'signin'
 export const FORGOTPASSWORD_PATH = 'forgot-password'
-export const VERIFYCODE_PATH = 'verify-code'
-export const RESETPASSWORD_PATH = 'reset-password'
+
+// Manage
+export const MANAGE_PATH = 'manage'
+export const HOME_PATH = 'home'
+export const CALENDER_PATH = 'calender'
+export const CUSTOMER_PATH = 'customer'
+export const YARD_PATH = 'yard'
+export const STAFF_PATH = 'staff'
+export const LOGOUT_PATH = 'logout'
+

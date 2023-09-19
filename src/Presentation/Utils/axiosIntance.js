@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { Navigate } from 'react-router-dom'
+import { DASH_PATH, SIGNIN_PATH } from '../../Main/Route/path'
 const API_URL = 'http://localhost:5000'
 
 const axiosInstance = axios.create({
@@ -24,22 +26,15 @@ axiosInstance.interceptors.response.use(
     (response) => {
         return response
     },
-
+    
     async (error) => {
-        const originalRequest = error.config
-        if (error.response.status === 401 && !originalRequest._retry) {
-            if (error.response.data.message === 'Unauthorized') {
-                // REQUEST A NEW ACCESS TOKEN
-                const response = await axios.get(`${API_URL}/auth/refresh`)
-                // STORE ACCESS TOKEN
-                if (response.status === 200) {
-                    localStorage.setItem('access_token', response.data.accessToken)
-                    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`
-                    return axiosInstance(originalRequest)
-                }
-            }
+        console.log(error)
+        if (error?.response?.status === 401) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user');
+            <Navigate to={DASH_PATH + SIGNIN_PATH} replace />
         }
-        // NOT FOUND RESPONSE        
+        // NOT FOUND RESPONSE
         if(error?.response) {
             return Promise.reject({message: error.response?.data?.message})
         }

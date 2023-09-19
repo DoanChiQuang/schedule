@@ -8,7 +8,7 @@ import { VscEyeClosed, VscEye } from 'react-icons/vsc'
 import useApi from '../../../Hooks/useApi'
 import { signin } from '../../../Api/auth'
 import { useNavigate } from 'react-router-dom'
-import { DASH_PATH, FORGOTPASSWORD_PATH, HOME_PATH } from '../../../../Main/Route/path'
+import { DASH_PATH, FORGOTPASSWORD_PATH, MANAGE_PATH } from '../../../../Main/Route/path'
 
 const schema = yup.object({
     username: yup.string().required("Tài khoản không được để trống."),
@@ -38,7 +38,8 @@ export default function SignInPage() {
     useEffect(() => {
         if(data) {
             localStorage.setItem('access_token', data?.token)
-            navigation(DASH_PATH + HOME_PATH)
+            localStorage.setItem('user', JSON.stringify(data?.user))
+            navigation(DASH_PATH + MANAGE_PATH)
         }
     }, [data])
 
