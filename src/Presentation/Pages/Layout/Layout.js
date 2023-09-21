@@ -10,6 +10,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -36,6 +37,11 @@ const Layout = (props) => {
             name: "Sân",
             route: path.YARD_PATH,
             iconElement: <YardIcon />
+        },
+        {
+            name: "Thời gian",
+            route: path.TIME_PATH,
+            iconElement: <AccessTimeIcon />
         }
     ];
 

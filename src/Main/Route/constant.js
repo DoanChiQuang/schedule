@@ -6,6 +6,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import Calendar from '../../Presentation/Pages/Manage/Calendar'
 import Customer from '../../Presentation/Pages/Manage/Customer'
 import Yard from '../../Presentation/Pages/Manage/Yard'
+import Time from '../../Presentation/Pages/Manage/Time'
 const Routes = [
     {
         path: path.DASH_PATH,
@@ -48,6 +49,10 @@ const Routes = [
             {
                 path: path.YARD_PATH,
                 element: <Yard />
+            },
+            {
+                path: path.TIME_PATH,
+                element: <Time />
             },
             {
                 path: '',
