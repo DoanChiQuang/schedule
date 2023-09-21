@@ -1,16 +1,5 @@
 import mongoose from "mongoose";
 
-const timeDetailSchema = new mongoose.Schema({
-    startTime: {
-        type: String,
-        required: true
-    },
-    endTime: {
-        type: String,
-        required: true
-    }
-});
-
 const timeSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -32,7 +21,10 @@ const timeSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    timeDetail: timeDetailSchema
+    timeDetail: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'TimeDetails'
+    }]
 });
 
 export default mongoose.model('Times', timeSchema);

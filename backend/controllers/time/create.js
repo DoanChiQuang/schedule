@@ -1,62 +1,72 @@
+import mongoose from 'mongoose';
 import Time from '../../models/time.js';
+import TimeDetail from '../../models/timeDetail.js';
 
 export const create = async (req, res, next) => {
     try {
-        // const { name, startTime, endTime, period } = req.body;
-        // if(!name) {
-        //     const error = new Error('Tên không hợp lệ.')
-        //     error.statusCode = 400
-        //     next(error)
-        //     return
-        // }
+        const { name, startTime, endTime, period } = req.body;
+        if(!name) {
+            const error = new Error('Tên không hợp lệ.')
+            error.statusCode = 400
+            next(error)
+            return
+        }
 
-        // if(!startTime) {
-        //     const error = new Error('Thời gian bắt đầu không hợp lệ.')
-        //     error.statusCode = 400
-        //     next(error)
-        //     return
-        // }
+        if(!startTime) {
+            const error = new Error('Thời gian bắt đầu không hợp lệ.')
+            error.statusCode = 400
+            next(error)
+            return
+        }
 
-        // if(!endTime) {
-        //     const error = new Error('Thời gian kết thúc không hợp lệ.')
-        //     error.statusCode = 400
-        //     next(error)
-        //     return
-        // }
+        if(!endTime) {
+            const error = new Error('Thời gian kết thúc không hợp lệ.')
+            error.statusCode = 400
+            next(error)
+            return
+        }
 
-        // if(!period) {
-        //     const error = new Error('Khoảng thời gian không hợp lệ.')
-        //     error.statusCode = 400
-        //     next(error)
-        //     return
-        // }
+        if(!period) {
+            const error = new Error('Khoảng thời gian không hợp lệ.')
+            error.statusCode = 400
+            next(error)
+            return
+        }
 
-        const startTime = '9:00';
-        const endTime = '22:00';
-        const period = parseInt('30');
+        const QWhere = { default: true };
+        const QUpdate = { $set: { default: false } };
+        
+        const result = await Time.updateMany(QWhere, QUpdate);
 
         const startTimeInMinute = convertToMinute(startTime);
-        const startEndInMinute = convertToMinute(endTime);        
+        const startEndInMinute = convertToMinute(endTime);
+        const periodConverted = parseInt(period);
 
-        const TimeDetail = [];
-        for (let index = startTimeInMinute; index < startEndInMinute; index+=period) {            
-            TimeDetail.push({startTime: convertToHour(index), endTime: convertToHour(index+period)});
+        const TimeDetails = [];
+        for (let index = startTimeInMinute; index < startEndInMinute; index+=periodConverted) {            
+            const timeDetail = new TimeDetail({ 
+                _id: new mongoose.Types.ObjectId(),
+                startTime: convertToHour(index), 
+                endTime: convertToHour(index + periodConverted) 
+            });
+            TimeDetails.push(timeDetail);
         }
+
+        await TimeDetail.insertMany(TimeDetails);
                 
-		// const customer = await Customer.create({
-        //     name,
-        //     phonenum,
-        //     bankAccountNo,
-        //     bankAccountName,
-        //     bankName,
-        //     discount: discount || 0
-		// });
+		const time = await Time.create({
+            name: name,
+            startTime: startTime,
+            endTime: endTime,
+            period: period,
+            timeDetail: TimeDetails.map(item => item._id)
+        });
 
         return res.json({
             status: 200,
-            message: "Thêm khách hàng thành công.",
+            message: "Thành công.",
             success: true,                
-            data: TimeDetail
+            data: []
         });
 	} 
 	catch (error) {

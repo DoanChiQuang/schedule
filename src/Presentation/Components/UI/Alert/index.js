@@ -10,7 +10,7 @@ const AlertComponent = ({visible, message="", onClick, type}) => {
             <Box sx={[styles.modal]}>
                 <Box sx={{marginBottom: 2}}>
                     <Typography variant="body1" fontWeight={"bold"} color={type === "success" ? theme.palette.primary.main : "red"}>Thông báo</Typography>
-                    <Typography variant="body   1" color={type === "success" ? theme.palette.primary.main : "red"}>{message}</Typography>
+                    <Typography variant="body1" color={type === "success" ? theme.palette.primary.main : "red"}>{message}</Typography>
                 </Box>
                 <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
                     <Button variant='contained' type='submit' disabled={false} onClick={onClick}>OK</Button>
