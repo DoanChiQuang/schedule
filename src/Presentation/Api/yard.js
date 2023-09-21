@@ -9,5 +9,5 @@ export const create = (params) => {
 }
 
 export const remove = (params) => {
-    return axiosInstance.get('/api/yard/remove', params);
+    return axiosInstance.post('/api/yard/delete', params);
 }

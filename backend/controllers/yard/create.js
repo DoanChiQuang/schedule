@@ -37,7 +37,7 @@ export const create = async (req, res, next) => {
             });
         }
         else{
-            const yardCheck = await Yard.findOne({name: name});
+            const yardCheck = await Yard.findOne({name: name, del: 0});
             if(yardCheck) {
                 const error = new Error('Tên đã tồn tại.');
                 error.statusCode = 400;

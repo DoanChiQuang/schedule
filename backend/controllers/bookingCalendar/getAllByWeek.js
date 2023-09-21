@@ -22,27 +22,34 @@ export const getAll = async (req, res, next) => {
             let endNum = new Date(Date.UTC(year, month+1, 0, 0, 0, 0)).getDate();
             let detailsCal = [];
 
-            
-            if(dateStart > dateEnd && month == monthEnd) {
-                startNum = 1;
-                endNum = new Date(endDate).getDate();
-            }
-            cal.details.forEach(da => {
-                let detailsDate = [];
-                for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
-                    if(da.day == new Date(year, month, dateNum).getDay()) {
-                        detailsDate.push(new Date(Date.UTC(year, month, dateNum, 0, 0, 0)));
+            if(cal.isCustomer){
+                if(dateStart > dateEnd && month == monthEnd) {
+                    startNum = 1;
+                    endNum = new Date(endDate).getDate();
+                }
+                cal.details.forEach(da => {
+                    let detailsDate = [];
+                    for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
+                        if(da.day == new Date(year, month, dateNum).getDay()) {
+                            detailsDate.push(new Date(Date.UTC(year, month, dateNum, 0, 0, 0)));
+                        }
                     }
-                }
 
-                if (detailsDate.length){
-                    detailsCal.push({
-                        date: detailsDate,
-                        yard: da.yard,
-                        periodTime: da.periodTime
-                    });
-                }
-            });
+                    if (detailsDate.length){
+                        detailsCal.push({
+                            date: detailsDate,
+                            yard: da.yard,
+                            periodTime: da.periodTime
+                        });
+                    }
+                });
+            }else{
+                detailsCal.push({
+                    date: new Date(cal.startDate),
+                    yard: cal.details[0].yard,
+                    periodTime: cal.details[0].periodTime
+                });
+            }
             if(detailsCal.length){
                 allBookingCal.push({
                     id: cal._id,
