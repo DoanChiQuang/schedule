@@ -4,7 +4,7 @@ export const remove = async (req, res, next) => {
     try {
         const { id } = req.body;
         if(!id) {
-            const error = new Error('Không có khách hàng nào để xóa.')
+            const error = new Error('Không có sân nào để xóa.')
             error.statusCode = 400
             next(error)
             return

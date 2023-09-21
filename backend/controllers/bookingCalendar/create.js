@@ -154,8 +154,8 @@ export const create = async (req, res, next) => {
                 details.forEach(d => {
                     if(d) {
                         details_sch.push({
-                            startDate: new Date(startDate),
-                            endDate: new Date(endDate),
+                            startDate: new Date(d.date),
+                            endDate: new Date(d.date),
                             details: {
                                 day: new Date(d.date).getDay(),
                                 yard: d.yard,
