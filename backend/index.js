@@ -5,6 +5,8 @@ import DBConnect from "./config/DBConnect.js";
 import AuthRoute from "./routes/auth.js";
 import CustomerRoute from "./routes/customer.js";
 import TimeRoute from "./routes/time.js";
+import BookingCRoute from "./routes/bookingCalendar.js";
+import Yard from "./routes/yard.js";
 import { isAuth } from './middleware/index.js';
 
 dotenv.config();
@@ -17,6 +19,8 @@ const connection = DBConnect;
 app.use("/api/auth", AuthRoute);
 app.use("/api/customer", isAuth, CustomerRoute);
 app.use("/api/time", isAuth, TimeRoute);
+app.use("/api/booking-calendar", isAuth, BookingCRoute);
+app.use("/api/yard", isAuth, Yard);
 
 app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({
