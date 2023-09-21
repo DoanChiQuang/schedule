@@ -6,6 +6,7 @@ const yardSchema = new mongoose.Schema({
     },
     branch: {
         type: Number,
+        default: 1
     },
     del: {
         type: Number,

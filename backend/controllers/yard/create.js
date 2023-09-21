@@ -9,12 +9,12 @@ export const create = async (req, res, next) => {
             next(error);
             return;
         }
-        if(!branch) {
-            const error = new Error('Chi nhánh không hợp lệ.');
-            error.statusCode = 400;
-            next(error);
-            return;
-        }
+        // if(!branch) {
+        //     const error = new Error('Chi nhánh không hợp lệ.');
+        //     error.statusCode = 400;
+        //     next(error);
+        //     return;
+        // }
         if (id){
             const yard = await Yard.findById(id);
             if(!yard) {
@@ -26,7 +26,7 @@ export const create = async (req, res, next) => {
 
             const result = await Yard.updateOne({_id: id}, {
                 name: name,
-                branch: branch
+                // branch: branch
             });
 
             return res.json({
@@ -46,8 +46,8 @@ export const create = async (req, res, next) => {
             }
 
             const yard = await Yard.create({
-                name,
-                branch
+                name
+                // branch
             });
 
             return res.json({
