@@ -15,7 +15,7 @@ const useApi = (apiFunc) => {
             setLoading(false);
             setSuccess(true);
 
-            setData(response?.data?.data)
+            setData(response?.data)
         } catch (error) {
             setLoading(false);
             setSuccess(false);
@@ -24,7 +24,7 @@ const useApi = (apiFunc) => {
         }
     }
 
-    return { data, error, message, loading, success, request }
+    return { data, error, message, loading, success, setData, request }
 }
 
 export default useApi;

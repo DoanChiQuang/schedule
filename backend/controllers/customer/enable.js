@@ -1,11 +1,11 @@
 import { ObjectId } from 'mongodb';
 import Customer from '../../models/customer.js';
 
-export const remove = async (req, res, next) => {
+export const enable = async (req, res, next) => {
     try {
         const { id } = req.body;
         if(!id) {
-            const error = new Error('Không có khách hàng nào để xóa.')
+            const error = new Error('Id không hợp lệ.')
             error.statusCode = 400
             next(error)
             return
@@ -14,15 +14,15 @@ export const remove = async (req, res, next) => {
         const QWhere = { _id: new ObjectId(id) };
         const QUpdate = {
             $set: {
-                del: 1
+                del: 0
             }
         }
 
-        const result = await Customer.updateOne(QWhere, QUpdate);
+        const result = await Customer.updateOne(QWhere, QUpdate);		
 
         return res.json({
             status: 200,
-            message: "Xóa khách hàng thành công.",
+            message: "Cập nhật khách hàng thành công.",
             success: true,                
             data: {}
         });		

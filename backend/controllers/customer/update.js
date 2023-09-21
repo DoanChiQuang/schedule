@@ -27,7 +27,7 @@ export const update = async (req, res, next) => {
         }
 
         const QWhere = { _id: new ObjectId(id) };
-        const QWpdate = {
+        const QUpdate = {
             $set: {
                 name,
                 phonenum, 
@@ -38,7 +38,7 @@ export const update = async (req, res, next) => {
             }
         }
 
-        const result = await Customer.updateOne(QWhere, QWpdate);		
+        const result = await Customer.updateOne(QWhere, QUpdate);		
 
         return res.json({
             status: 200,

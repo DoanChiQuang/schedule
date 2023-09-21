@@ -10,6 +10,7 @@ export default function InputController(props) {
         disable,
         type = 'text',
         InputProps,
+        defaultValue,
         handleOnChange = () => {},
         handleOnBlur = () => {}
     } = props
@@ -37,7 +38,7 @@ export default function InputController(props) {
                         onBlur={(event) => {
                             handleOnBlur(event)
                         }}
-                        value={value}
+                        value={defaultValue ? defaultValue : value}
                         fullWidth
                         disabled={disable}
                         InputProps={InputProps}

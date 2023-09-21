@@ -17,7 +17,7 @@ const schema = yup.object({
 
 export default function SignInPage() {
     const theme = useTheme()
-    const styles = customStyle(theme)    
+    const styles = customStyle(theme)
     const methods = useForm({
         defaultValues: {
             username: '',
@@ -37,8 +37,8 @@ export default function SignInPage() {
 
     useEffect(() => {
         if(data) {
-            localStorage.setItem('access_token', data?.token)
-            localStorage.setItem('user', JSON.stringify(data?.user))
+            localStorage.setItem('access_token', data?.data?.token)
+            localStorage.setItem('user', JSON.stringify(data?.data?.user))
             navigation(DASH_PATH + MANAGE_PATH)
         }
     }, [data])

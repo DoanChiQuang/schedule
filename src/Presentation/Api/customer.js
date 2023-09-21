@@ -13,5 +13,9 @@ export const update = (params) => {
 }
 
 export const remove = (params) => {
-    return axiosInstance.post('/api/customer/remove', params);
+    return axiosInstance.post('/api/customer/delete', params);
+}
+
+export const enable = (params) => {
+    return axiosInstance.post('/api/customer/enable', params);
 }
