@@ -12,7 +12,7 @@ export const getAll = async (req, res, next) => {
         const dateEnd = new Date(endDate).getDate();
 
 
-        const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(yearStart, monthStart, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(yearEnd, monthEnd, 1, 0, 0, 0))}});
+        const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(yearStart, monthStart, 1, 0, 0, 0)), '$lte': new Date(endDate)}});
 
         const allBookingCal = [];
         fetchAllCalendars.forEach(async cal => {
@@ -24,9 +24,13 @@ export const getAll = async (req, res, next) => {
 
             if(cal.isCustomer){
                 if(dateStart > dateEnd && month == monthEnd) {
+                    endNum = new Date(endDate).getDate();
                     startNum = 1;
+                }
+                if(dateStart < dateEnd) {
                     endNum = new Date(endDate).getDate();
                 }
+
                 cal.details.forEach(da => {
                     let detailsDate = [];
                     for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
