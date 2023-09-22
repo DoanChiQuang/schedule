@@ -3,10 +3,10 @@ import ProtectedRoute from './Components/ProtectedRoute'
 import * as path from './path'
 import { ErrorPage, SignInPage } from '../../Presentation/Pages'
 import { Navigate, Outlet } from 'react-router-dom'
-import Calendar from '../../Presentation/Pages/Manage/Calendar'
 import Customer from '../../Presentation/Pages/Manage/Customer'
 import Yard from '../../Presentation/Pages/Manage/Yard'
 import Time from '../../Presentation/Pages/Manage/Time'
+import BookingCalendar from '../../Presentation/Pages/Manage/Calendar'
 const Routes = [
     {
         path: path.DASH_PATH,
@@ -40,7 +40,7 @@ const Routes = [
         children: [
             {
                 path: path.CALENDER_PATH,
-                element: <Calendar />
+                element: <BookingCalendar />
             },
             {
                 path: path.CUSTOMER_PATH,
