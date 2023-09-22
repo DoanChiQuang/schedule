@@ -8,6 +8,8 @@ import Customer from '../../Presentation/Pages/Manage/Customer'
 import Yard from '../../Presentation/Pages/Manage/Yard'
 import Time from '../../Presentation/Pages/Manage/Time'
 import User from '../../Presentation/Pages/Manage/User'
+import ChangePass from '../../Presentation/Pages/Manage/User/changePass'
+import Logout from '../../Presentation/Pages/Auth/SignOut'
 const Routes = [
     {
         path: path.DASH_PATH,
@@ -58,6 +60,14 @@ const Routes = [
             {
                 path: path.USER_PATH,
                 element: <User />
+            },
+            {
+                path: path.FORGOTPASSWORD_PATH,
+                element: <ChangePass />
+            },
+            {
+                path: path.LOGOUT_PATH,
+                element: <Logout />
             },
             {
                 path: '',

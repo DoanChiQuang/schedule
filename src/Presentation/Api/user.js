@@ -20,6 +20,10 @@ export const enable = (params) => {
     return axiosInstance.post('/api/user/enable', params);
 }
 
+export const changePass = (params) => {
+    return axiosInstance.post('/api/user/reset-pass', params);
+}
+
 export const setPermission = (params) => {
     return axiosInstance.post('/api/user/set-permission', params);
 }

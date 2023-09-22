@@ -1,7 +1,7 @@
 import axiosInstance from "../Utils/axiosIntance";
 
 export const getAll = (params) => {
-    return axiosInstance.get('/api/yard/get-all', params);
+    return axiosInstance.post('/api/yard/get-all', params);
 }
 
 export const create = (params) => {
