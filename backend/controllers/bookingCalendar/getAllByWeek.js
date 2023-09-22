@@ -1,9 +1,21 @@
 import BookingCal from '../../models/bookingCalendar.js';
-import Customer from '../../models/customer.js';
 
 export const getAll = async (req, res, next) => {
     try {
         const {startDate, endDate} = req.body;
+        if(!startDate) {
+            const error = new Error('Thời gian bắt đầu không hợp lệ.')
+            error.statusCode = 400
+            next(error)
+            return
+        }
+
+        if(!startDate) {
+            const error = new Error('Thời gian kết thúc không hợp lệ.')
+            error.statusCode = 400
+            next(error)
+            return
+        }
         const yearStart = new Date(startDate).getFullYear();
         const yearEnd = new Date(endDate).getFullYear();
         const monthStart = new Date(startDate).getMonth();
