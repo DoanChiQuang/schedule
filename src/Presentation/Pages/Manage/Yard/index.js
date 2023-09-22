@@ -40,15 +40,15 @@ const Yard = () => {
 
     const columns = [
         // { field: 'id', headerName: 'STT', width: 70 },
-        { field: 'name', headerName: 'Tên sân', width: 230 },
-        { field: 'branch', headerName: 'Chi nhánh', width: 120, },
+        { field: 'name', headerName: 'Tên sân', width: 250 },
+        { field: 'branch', headerName: 'Chi nhánh', width: 220, },
         { field: 'action', 
             headerName: '#', 
             width: 160,
             renderCell: (params) => {
                 return (
                     <Box>
-                        <IconButton color="warning" size="small" onClick={() => onClickUpdate(params.value)}>
+                        <IconButton size="small" onClick={() => onClickUpdate(params.value)}>
                             <EditIcon size={24} />
                         </IconButton>
                         <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
@@ -82,21 +82,21 @@ const Yard = () => {
                 });
                 setYardError(false);
                 break;
-            case 'branch':
-                if(!value) {
-                    setYardErrorData({
-                        key: key,
-                        message: 'Chi nhánh không được để trống.'
-                    });
-                    setYardError(true);
-                    return;
-                }
-                setYardErrorData({
-                    key: '',
-                    message: ''
-                });
-                setYardError(false);
-                break;
+            // case 'branch':
+            //     if(!value) {
+            //         setYardErrorData({
+            //             key: key,
+            //             message: 'Chi nhánh không được để trống.'
+            //         });
+            //         setYardError(true);
+            //         return;
+            //     }
+            //     setYardErrorData({
+            //         key: '',
+            //         message: ''
+            //     });
+            //     setYardError(false);
+            //     break;
         }
     }
 
@@ -136,7 +136,7 @@ const Yard = () => {
     }
     // Stuff
     const canSaveData = () => {
-        if(!yardData.name || !yardData.branch) return false;
+        if(!yardData.name) return false;
         return true;
     }
 
@@ -149,7 +149,7 @@ const Yard = () => {
         setYardData({
             id: data._id,
             name: data.name,
-            branch: data.branch,
+            // branch: data.branch,
         });
         onOpenModal();
     }
@@ -160,7 +160,7 @@ const Yard = () => {
             const data = dataGetAll.data.map(element => ({
                 id: element._id,
                 name: element.name,
-                branch: element.branch,
+                branch: "Chi nhánh "+element.branch,
                 action: element
             }))
             setRows(data)
@@ -244,7 +244,7 @@ const Yard = () => {
                                     fullWidth
                                 />
                             </Box>
-                            <Box mb={2}>
+                            {/* <Box mb={2}>
                                 <TextField
                                     label="Chi nhánh (1, 2,...)"
                                     defaultValue={yardData.branch}
@@ -254,7 +254,7 @@ const Yard = () => {
                                     helperText={yardError && yardErrorData.key === 'branch' && yardErrorData.message}
                                     fullWidth
                                 />
-                            </Box>
+                            </Box> */}
                     
                             <Box display={'flex'} justifyContent={'flex-end'}>
                                 <Button 

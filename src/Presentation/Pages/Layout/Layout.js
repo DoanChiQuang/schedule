@@ -48,7 +48,7 @@ const Layout = (props) => {
     const MenuUser = [        
         {
             name: "Nhân viên",
-            route: path.STAFF_PATH,
+            route: path.USER_PATH,
             iconElement: <ManageAccountsIcon />
         },
         {

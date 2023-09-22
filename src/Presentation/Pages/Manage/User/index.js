@@ -2,40 +2,41 @@ import { Alert, Box, Button, Chip, Modal, TextField, Tooltip, Typography } from 
 import React, { useEffect, useState } from "react";
 import Layout from "../../Layout/Layout";
 import { DataGrid } from '@mui/x-data-grid';
-import { CUSTOMER_PATH } from "../../../../Main/Route/path";
+import { USER_PATH } from "../../../../Main/Route/path";
 import AddIcon from '@mui/icons-material/Add';
 import useApi from "../../../Hooks/useApi";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PermissionIcon from '@mui/icons-material/LockOpen';
+import Key from '@mui/icons-material/Key';
 import CheckIcon from '@mui/icons-material/Check';
-import { getAll, create, remove, update, enable } from "../../../Api/customer";
+import { getAll, create, remove, update, enable, setPermission } from "../../../Api/user";
 import { useTheme } from "@emotion/react";
 import IconButton from '@mui/material/IconButton';
 import { Loading, AlertComponent } from "../../../Components/UI";
 import { phoneRegExp } from "../../../Utils/regexValidation";
 
-const Customer = () => {
+const User = () => {
     
     const { data: dataGetAll, loading: loadingGetAll, error: errorGetAll, message: messageGetAll, request: requestGetAll, setData: setDataGetAll } = useApi(getAll);
     const { data: dataCreate, loading: loadingCreate, error: errorCreate, message: messageCreate, request: requestCreate, setData: setDataCreate } = useApi(create);
     const { data: dataUpdate, loading: loadingUpdate, error: errorUpdate, message: messageUpdate, request: requestUpdate, setData: setDataUpdate } = useApi(update);
     const { data: dataRemove, loading: loadingRemove, error: errorRemove, message: messageRemove, request: requestRemove, setData: setDataRemove } = useApi(remove);    
     const { data: dataEnable, loading: loadingEnable, error: errorEnable, message: messageEnable, request: requestEnable, setData: setDataEnable } = useApi(enable);    
+    const { data: dataPermission, loading: loadingPermission, error: errorPermission, message: messagePermission, request: requestPermission, setData: setDataPermission} = useApi(setPermission);    
 
     const theme = useTheme();
     const styles = style(theme);
     const [rows, setRows] = useState([]);
     const [toggleModal, setToggleModal] = useState(false);
-    const [cusData, setCusData] = useState({
+    const [toggleModalPass, setToggleModalPass] = useState(false);
+    const [userData, setUserData] = useState({
+        username: '',
         name: '',
-        phonenum: '',
-        bankAccountNo: '',
-        bankAccountName: '',
-        bankName: '',
-        discount: 0
+        role: '',
     });
-    const [cusError, setCusError] = useState(false);
-    const [cusErrorData, setCusErrorData] = useState({
+    const [userError, setUserError] = useState(false);
+    const [userErrorData, setUserErrorData] = useState({
         key: '',
         message: ''
     });
@@ -43,16 +44,13 @@ const Customer = () => {
     const [alert, setAlert] = useState(false);
     const [alertType, setAlertType] = useState('');
     const [alertMess, setAlertMess] = useState('');
-    const loading = loadingGetAll || loadingCreate || loadingUpdate || loadingRemove || loadingEnable;
+    const loading = loadingGetAll || loadingCreate || loadingUpdate || loadingRemove || loadingEnable || loadingPermission;
 
 
     const columns = [
-        { field: 'name', headerName: 'Tên', width: 180 },
-        { field: 'phonenum', headerName: 'Số điện thoại', width: 140 },
-        { field: 'bankAccountNo', headerName: 'Số tài khoản NH', width: 160},
-        { field: 'bankAccountName', headerName: 'Tên tài khoản NH', width: 160},
-        { field: 'bankName', headerName: 'Tên NH', width: 160},
-        { field: 'discount', headerName: 'Chiết khấu', width: 120},
+        { field: 'username', headerName: 'Tên đăng nhập', width: 220 },
+        { field: 'name', headerName: 'Họ và tên', width: 340 },
+        { field: 'role', headerName: 'Loại tài khoản', width: 160},
         { 
             field: 'status', 
             headerName: 'Trạng thái', 
@@ -79,20 +77,37 @@ const Customer = () => {
                         </Tooltip>
                     )
                 } else {
-                    return (
-                        <Box>
-                            <Tooltip title="Sửa">
-                                <IconButton size="small" onClick={() => onClickUpdate(params.value)}>
-                                    <EditIcon size={24} />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Tắt">
-                                <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
-                                    <DeleteIcon size={24} />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                    )
+                    if (params.value.role !== "admin") {
+                        return (
+                            <Box>
+                                <Tooltip title="Sửa">
+                                    <IconButton size="small" onClick={() => onClickUpdate(params.value)}>
+                                        <EditIcon size={24} />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Đổi mật khẩu">
+                                    <IconButton size="small" onClick={() => onClickChangePass(params.value)}>
+                                        <Key size={24} />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Phân quyền">
+                                {/* onClick={() => onClickSetPermission(params.value)} */}
+                                    <IconButton size="small" >
+                                        <PermissionIcon size={24} />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Tắt">
+                                    <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
+                                        <DeleteIcon size={24} />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                        )
+                    }else{
+                        return (
+                            <Box></Box>
+                        )
+                    }
                 }                
             }
         }
@@ -101,91 +116,78 @@ const Customer = () => {
     // Event
     const onChangeTextField = (key, value) => {
         onValidateTextField(key, value);        
-        setCusData({...cusData, [key]: value});
+        setUserData({...userData, [key]: value});
     }
 
     const onValidateTextField = (key, value) => {
         switch (key) {
-            case 'name':
+            case 'username':
                 if(!value) {                    
-                    setCusErrorData({
+                    setUserErrorData({
+                        key: key,
+                        message: 'Tên đăng nhập không được để trống.'
+                    });
+                    setUserError(true);
+                    return;
+                }
+                if(value.trim().split(" ").length > 1) {                    
+                    setUserErrorData({
+                        key: key,
+                        message: 'Tên đăng nhập không được chứa khoảng trắng.'
+                    });
+                    setUserError(true);
+                    return;
+                }
+                setUserErrorData({
+                    key: '',
+                    message: ''
+                });
+                setUserError(false);
+                break;
+            case 'name':
+                if(!value) {
+                    setUserErrorData({
                         key: key,
                         message: 'Tên không được để trống.'
                     });
-                    setCusError(true);
+                    setUserError(true);
                     return;
                 }
-                setCusErrorData({
+                setUserErrorData({
                     key: '',
                     message: ''
                 });
-                setCusError(false);
-                break;
-            case 'phonenum':
-                if(!value) {
-                    setCusErrorData({
-                        key: key,
-                        message: 'Số điện thoại không được để trống.'
-                    });
-                    setCusError(true);
-                    return;
-                }
-                if(!phoneRegExp.test(value)) {
-                    setCusErrorData({
-                        key: key,
-                        message: 'Số điện thoại không hợp lệ.'
-                    });
-                    setCusError(true);
-                    return;
-                }
-                setCusErrorData({
-                    key: '',
-                    message: ''
-                });
-                setCusError(false);
-                break;
-            case 'discount':                
-                if(value < 0) {                    
-                    setCusErrorData({
-                        key: key,
-                        message: 'Chiết khấu tối thiểu 0%'
-                    });
-                    setCusError(true);
-                    return;
-                }
-                if(value > 100) {                    
-                    setCusErrorData({
-                        key: key,
-                        message: 'Chiết khấu tối đa 100%'
-                    });
-                    setCusError(true);
-                    return;
-                }
-                setCusErrorData({
-                    key: '',
-                    message: ''
-                });
-                setCusError(false);                
+                setUserError(false);
                 break;
         }
     }
 
     const onCloseModal = () => {
         if(submitType === 'update') setSubmitType('create');
-        setCusData({
+        setUserData({
+            username: '',
             name: '',
-            phonenum: '',
-            bankAccountNo: '',
-            bankAccountName: '',
-            bankName: '',
-            discount: 0
         });
-        setCusErrorData({
+        setUserErrorData({
             key: '',
             message: ''
         });
-        setCusError(false);
+        setUserError(false);
         setToggleModal(false);
+    }
+
+    const onCloseModalPass = () => {
+        if(submitType === 'updatepass') setSubmitType('create');
+        setUserData({
+            username: '',
+            password: '',
+        });
+        setUserErrorData({
+            key: '',
+            message: ''
+        });
+        setUserError(false);
+        setToggleModalPass(false);
     }
 
     const onOpenModal = () => {
@@ -194,25 +196,31 @@ const Customer = () => {
 
     const onSaveData = () => {
         if(submitType === 'create') {
-            requestCreate(cusData);
+            requestCreate(userData);
         }
-        if(submitType === 'update') {
-            requestUpdate(cusData);
+        if(submitType === 'update' || submitType === 'updatepass') {
+            requestUpdate(userData);
         }
     }
 
     const onClickUpdate = (data) => {
         setSubmitType('update');
-        setCusData({
+        setUserData({
             id: data._id,
+            username: data.username,
             name: data.name,
-            phonenum: data.phonenum,
-            bankAccountNo: data.bankAccountNo,
-            bankAccountName: data.bankAccountName,
-            bankName: data.bankName,
-            discount: data.discount
         });
         onOpenModal();
+    }
+
+    const onClickChangePass = (data) => {
+        setSubmitType('updatepass');
+        setUserData({
+            id: data._id,
+            username: data.username,
+            password: data.password,
+        });
+        setToggleModalPass(true);
     }
 
     const onCloseAlert = () => {
@@ -220,6 +228,16 @@ const Customer = () => {
             requestGetAll();
         }
         onCloseModal();
+        setAlert(false);
+        setAlertType('');
+        setAlertMess('');
+    }
+
+    const onCloseAlertPass = () => {
+        if(alertType === 'success') {            
+            requestGetAll();
+        }
+        onCloseModalPass();
         setAlert(false);
         setAlertType('');
         setAlertMess('');
@@ -235,7 +253,12 @@ const Customer = () => {
     
     // Stuff
     const canSaveData = () => {
-        if(!cusData.name || !cusData.phonenum) return false;
+        if(!userData.username || !userData.name || userData.username.trim().split(" ").length > 1) return false;
+        return true;
+    }
+
+    const canSaveDataPass = () => {
+        // if(userData.password.length < 6) return false;
         return true;
     }
 
@@ -248,12 +271,9 @@ const Customer = () => {
         if(dataGetAll) {
             const data = dataGetAll.data.map(element => ({
                 id: element._id,
+                username: element.username,
                 name: element.name,
-                phonenum: element.phonenum,
-                bankAccountNo: element.bankAccountNo,
-                bankAccountName: element.bankAccountName,
-                bankName: element.bankName,
-                discount: element.discount,
+                role: element.role,
                 status: element.del ? 'Đã xóa' : 'Hoạt động',
                 action: element
             }))
@@ -333,7 +353,7 @@ const Customer = () => {
             children={
                 <Box>
                     <Box display={'flex'} flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
-                        <Typography variant="h6" fontWeight={'bold'}>Quản lý khách hàng</Typography>
+                        <Typography variant="h6" fontWeight={'bold'}>Quản lý tài khoản</Typography>
                         <Button variant="contained" onClick={() => onOpenModal()}><AddIcon /> Thêm mới</Button>
                     </Box>
                     <Box sx={{width: '100%'}}> 
@@ -348,75 +368,73 @@ const Customer = () => {
                     </Box>
                     <Modal open={toggleModal} onClose={() => onCloseModal()}>
                         <Box sx={styles.modal}>
-                            <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin cá nhân</Typography>
-                            <Box display={'flex'} flexDirection={'row'} sx={{mb: 2}}>
+                            <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin tài khoản</Typography>
+                            <Box mb={2}>
                                 <TextField
-                                    label="Họ và Tên"
-                                    defaultValue={cusData.name}
+                                    label="Tên đăng nhập"
+                                    defaultValue={userData.username}
+                                    onChange={(e) => onChangeTextField('username', e.target.value)}
+                                    error={userError && userErrorData.key === 'username' && true}
+                                    helperText={userError && userErrorData.key === 'username' && userErrorData.message}
+                                    fullWidth
+                                />
+                            </Box>
+                            <Box mb={2}>
+                                <TextField
+                                    label="Họ và tên"
+                                    defaultValue={userData.name}
                                     onChange={(e) => onChangeTextField('name', e.target.value)}
-                                    error={cusError && cusErrorData.key === 'name' && true}
-                                    helperText={cusError && cusErrorData.key === 'name' && cusErrorData.message}
-                                    sx={{mr: 1}}
-                                    fullWidth
-                                />
-                                <TextField
-                                    label="Số điện thoại"
-                                    defaultValue={cusData.phonenum}
-                                    onChange={(e) => onChangeTextField('phonenum', e.target.value)}
-                                    error={cusError && cusErrorData.key === 'phonenum' && true}
-                                    helperText={cusError && cusErrorData.key === 'phonenum' && cusErrorData.message}
-                                    sx={{ml: 1}}
-                                    fullWidth
-                                />
-                            </Box>
-                            <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin ngân hàng</Typography>
-                            <Box mb={2}>
-                                <TextField
-                                    label="Tài khoản NH"
-                                    defaultValue={cusData.bankAccountNo}
-                                    onChange={(e) => onChangeTextField('bankAccountNo', e.target.value)}
-                                    error={cusError && cusErrorData.key === 'bankAccountNo' && true}
-                                    helperText={cusError && cusErrorData.key === 'bankAccountNo' && cusErrorData.message}
+                                    error={userError && userErrorData.key === 'name' && true}
+                                    helperText={userError && userErrorData.key === 'name' && userErrorData.message}
                                     fullWidth
                                 />
                             </Box>
                             <Box mb={2}>
                                 <TextField
-                                    label="Tên tài khoản NH"
-                                    defaultValue={cusData.bankAccountName}
-                                    onChange={(e) => onChangeTextField('bankAccountName', e.target.value)}
-                                    error={cusError && cusErrorData.key === 'bankAccountName' && true}
-                                    helperText={cusError && cusErrorData.key === 'bankAccountName' && cusErrorData.message}
+                                    label="Mật khẩu mặc định"
+                                    defaultValue={submitType=="create"? "123456":''}
+                                    disabled={true}
                                     fullWidth
-                                />
-                            </Box>
-                            <Box mb={2}>
-                                <TextField
-                                    label="Tên NH"
-                                    defaultValue={cusData.bankName}
-                                    onChange={(e) => onChangeTextField('bankName', e.target.value)}
-                                    error={cusError && cusErrorData.key === 'bankName' && true}
-                                    helperText={cusError && cusErrorData.key === 'bankName' && cusErrorData.message}
-                                    fullWidth
-                                />
-                            </Box>
-                            <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin khác</Typography>
-                            <Box mb={2}>
-                                <TextField
-                                    label="Chiết khấu"
-                                    defaultValue={cusData.discount}
-                                    onChange={(e) => onChangeTextField('discount', e.target.value)}
-                                    error={cusError && cusErrorData.key === 'discount' && true}
-                                    helperText={cusError && cusErrorData.key === 'discount' && cusErrorData.message}
-                                    type="number"
-                                    InputProps={{ inputProps: { min: 0, max: 10 } }}
-                                    fullWidth
-                                />
+                                    />
                             </Box>
                             <Box display={'flex'} justifyContent={'flex-end'}>
                                 <Button 
                                     variant='contained' 
-                                    disabled={!!loading || cusError && true || !canSaveData()}
+                                    disabled={!!loading || userError && true || !canSaveData()}
+                                    onSubmit={() => onSaveData()}
+                                    onClick={() => onSaveData()}
+                                >
+                                    Lưu
+                                </Button>
+                            </Box>
+                        </Box>
+                    </Modal>
+
+                    <Modal open={toggleModalPass} onClose={() => onCloseModalPass()}>
+                        <Box sx={styles.modal}>
+                            <Typography variant="body1" fontWeight={"bold"} mb={2}>Đổi mật khẩu</Typography>
+                            <Box mb={2}>
+                                <TextField
+                                    label="Tài khoản"
+                                    defaultValue={userData.username}
+                                    disabled={true}
+                                    fullWidth
+                                />
+                            </Box>
+                            <Box mb={2}>
+                                <TextField
+                                    label="Mật khẩu mới"
+                                    defaultValue={"123456"}
+                                    onChange={(e) => onChangeTextField('password', e.target.value)}
+                                    error={userError && userErrorData.key === 'password' && true}
+                                    helperText={userError && userErrorData.key === 'password' && userErrorData.message}
+                                    fullWidth
+                                    />
+                            </Box>
+                            <Box display={'flex'} justifyContent={'flex-end'}>
+                                <Button 
+                                    variant='contained' 
+                                    disabled={!!loading || userError && true || !canSaveDataPass()}
                                     onSubmit={() => onSaveData()}
                                     onClick={() => onSaveData()}
                                 >
@@ -426,10 +444,10 @@ const Customer = () => {
                         </Box>
                     </Modal>
                     <Loading visible={loading} />
-                    <AlertComponent visible={alert} message={alertMess} type={alertType} onClick={() => onCloseAlert()} />
+                    <AlertComponent visible={alert} message={alertMess} type={alertType} onClick={() => submitType=="updatepass"? onCloseAlertPass():onCloseAlert()} />
                 </Box>
             }
-            route={CUSTOMER_PATH} 
+            route={USER_PATH}
         />
     );
 }
@@ -444,7 +462,8 @@ const style = (theme) => ({
         boxShadow: 24,
         borderRadius: 1,
         p: 4,
+        minWidth: "400px"
     }
 })
 
-export default Customer;
+export default User;

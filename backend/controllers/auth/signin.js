@@ -7,7 +7,7 @@ export const signin = async (req, res, next) => {
     try {
         const { username, password } = req.body;
 
-        const fetchUser = await User.findOne({ username });
+        const fetchUser = await User.findOne({ username: username, del: 0 });
         const user = fetchUser?.toObject();
         if(!user) {
             const error = new Error('Tài khoản hoặc mật khẩu không hợp lệ.')
