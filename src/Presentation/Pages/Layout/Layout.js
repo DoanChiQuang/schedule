@@ -155,7 +155,7 @@ const Layout = (props) => {
                         <Box sx={{
                             marginRight: '30px'
                             }}>
-                            <Typography variant="h6">{JSON.parse(localStorage.getItem("user")).name}</Typography>
+                            <Typography variant="h6">{JSON.parse(localStorage.getItem("user"))?.name}</Typography>
                         </Box>
                     </Box>
                 </Toolbar>

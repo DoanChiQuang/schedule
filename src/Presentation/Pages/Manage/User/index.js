@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Chip, Modal, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, Modal, TextField, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Layout from "../../Layout/Layout";
 import { DataGrid } from '@mui/x-data-grid';
@@ -14,7 +14,6 @@ import { getAll, create, remove, update, enable, setPermission } from "../../../
 import { useTheme } from "@emotion/react";
 import IconButton from '@mui/material/IconButton';
 import { Loading, AlertComponent } from "../../../Components/UI";
-import { phoneRegExp } from "../../../Utils/regexValidation";
 
 const User = () => {
     
@@ -97,7 +96,7 @@ const User = () => {
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Tắt">
-                                    <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
+                                    <IconButton  size="small" onClick={() => onClickRemove({id: params.value._id})}>
                                         <DeleteIcon size={24} />
                                     </IconButton>
                                 </Tooltip>

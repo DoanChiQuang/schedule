@@ -7,22 +7,20 @@ import AddIcon from '@mui/icons-material/Add';
 import useApi from "../../../Hooks/useApi";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { remove, update, enable } from "../../../Api/customer";
 import { useTheme } from "@emotion/react";
 import IconButton from '@mui/material/IconButton';
 import { Loading, AlertComponent } from "../../../Components/UI";
 import { numberRegExp } from "../../../Utils/regexValidation";
-import { getAll, create } from "../../../Api/time";
+import * as apiTime from "../../../Api/time";
 import { DesktopTimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 
 const Time = () => {
     
-    const { data: dataGetAll, loading: loadingGetAll, error: errorGetAll, message: messageGetAll, request: requestGetAll, setData: setDataGetAll } = useApi(getAll);
-    const { data: dataCreate, loading: loadingCreate, error: errorCreate, message: messageCreate, request: requestCreate, setData: setDataCreate } = useApi(create);
-    const { data: dataUpdate, loading: loadingUpdate, error: errorUpdate, message: messageUpdate, request: requestUpdate, setData: setDataUpdate } = useApi(update);
-    const { data: dataRemove, loading: loadingRemove, error: errorRemove, message: messageRemove, request: requestRemove, setData: setDataRemove } = useApi(remove);    
-    const { data: dataEnable, loading: loadingEnable, error: errorEnable, message: messageEnable, request: requestEnable, setData: setDataEnable } = useApi(enable);    
+    const { data: dataGetAll, loading: loadingGetAll, error: errorGetAll, message: messageGetAll, request: requestGetAll, setData: setDataGetAll } = useApi(apiTime.getAll);
+    const { data: dataCreate, loading: loadingCreate, error: errorCreate, message: messageCreate, request: requestCreate, setData: setDataCreate } = useApi(apiTime.create);
+    const { data: dataUpdate, loading: loadingUpdate, error: errorUpdate, message: messageUpdate, request: requestUpdate, setData: setDataUpdate } = useApi(apiTime.update);
+    const { data: dataRemove, loading: loadingRemove, error: errorRemove, message: messageRemove, request: requestRemove, setData: setDataRemove } = useApi(apiTime.remove);
 
     const theme = useTheme();
     const styles = style(theme);
@@ -43,7 +41,7 @@ const Time = () => {
     const [alert, setAlert] = useState(false);
     const [alertType, setAlertType] = useState('');
     const [alertMess, setAlertMess] = useState('');
-    const loading = loadingGetAll || loadingCreate || loadingUpdate || loadingRemove || loadingEnable;
+    const loading = loadingGetAll || loadingCreate || loadingUpdate || loadingRemove;
 
 
     const columns = [
@@ -79,7 +77,7 @@ const Time = () => {
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Xóa">
-                        <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
+                        <IconButton size="small" onClick={() => onClickRemove({id: params.value._id})}>
                             <DeleteIcon size={24} />
                         </IconButton>
                     </Tooltip>
@@ -184,7 +182,6 @@ const Time = () => {
         const cusDataNew = JSON.parse(cusDataStringify);        
         cusDataNew.startTime = dayjs(cusDataNew.startTime).format('HH:mm').toString();
         cusDataNew.endTime = dayjs(cusDataNew.endTime).format('HH:mm').toString();
-        console.log(cusDataNew)
         if(submitType === 'create') {
             requestCreate(cusDataNew);
         }
@@ -265,12 +262,6 @@ const Time = () => {
             setAlertMess(dataRemove.message);
             setDataRemove(null);
         }
-        if(dataEnable) {
-            setAlert(true);
-            setAlertType('success');
-            setAlertMess(dataEnable.message);
-            setDataEnable(null);
-        }
     }
 
     const handleReceiveErrorData = () => {
@@ -289,11 +280,6 @@ const Time = () => {
             setAlertType('error');
             setAlertMess(messageRemove);
         }
-        if(errorEnable) {
-            setAlert(true);
-            setAlertType('error');
-            setAlertMess(messageEnable);
-        }
     }
 
     useEffect(() => {
@@ -304,13 +290,13 @@ const Time = () => {
         handleFetchInitialData();
     }, [dataGetAll]);
 
-    // useEffect(() => {
-    //     handleReceiveSuccessData();
-    // }, [dataCreate, dataUpdate, dataRemove, dataEnable]);
+    useEffect(() => {
+        handleReceiveSuccessData();
+    }, [dataCreate, dataUpdate, dataRemove]);
 
-    // useEffect(() => {
-    //     handleReceiveErrorData();
-    // }, [errorCreate, errorUpdate, errorRemove, errorEnable]);
+    useEffect(() => {
+        handleReceiveErrorData();
+    }, [errorCreate, errorUpdate, errorRemove]);
 
     return (
         <Layout 
