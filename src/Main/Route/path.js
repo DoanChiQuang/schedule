@@ -11,6 +11,7 @@ export const CALENDER_PATH = 'calender'
 export const CUSTOMER_PATH = 'customer'
 export const TIME_PATH = 'time'
 export const YARD_PATH = 'yard'
+export const USER_PATH = 'user'
 export const STAFF_PATH = 'staff'
 export const LOGOUT_PATH = 'logout'
 

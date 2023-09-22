@@ -20,7 +20,15 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         default: "admin"
-    }
+    },
+	listYard: {
+		type: Array,
+		default: []
+	},
+	del: {
+		type: Number,
+		default: 0
+	}
 });
 
 export default mongoose.model('Users', userSchema);

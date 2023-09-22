@@ -79,7 +79,7 @@ const Time = () => {
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Xóa">
-                        <IconButton size="small" onClick={() => onClickRemove({id: params.value._id})}>
+                        <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
                             <DeleteIcon size={24} />
                         </IconButton>
                     </Tooltip>
