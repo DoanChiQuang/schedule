@@ -54,6 +54,13 @@ export const getAll = async (req, res, next) => {
                     periodTime: cal.details[0].periodTime
                 });
             }
+            // let payCheck = cal.isPay;
+            // let dateNowZ = new Date();
+            // const dateNow = new Date(Date.UTC(dateNowZ.getFullYear(), dateNowZ.getMonth(), dateNowZ.getDate(), 0, 0, 0));
+
+            // if((cal.endDate.getTime() - dateNow.getTime()) <= 86400000 && cal.isPay != 2) {
+            //     payCheck = 4;
+            // };
             if(detailsCal.length){
                 allBookingCal.push({
                     id: cal._id,
