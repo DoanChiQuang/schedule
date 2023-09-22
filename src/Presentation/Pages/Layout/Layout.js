@@ -146,7 +146,18 @@ const Layout = (props) => {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap component="div">HỆ THỐNG QUẢN LÝ ĐẶT SÂN</Typography>
+                    <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            width: '100%'
+                        }}>
+                        <Typography variant="h6" noWrap component="div">HỆ THỐNG QUẢN LÝ ĐẶT SÂN</Typography>
+                        <Box sx={{
+                            marginRight: '30px'
+                            }}>
+                            <Typography variant="h6">{JSON.parse(localStorage.getItem("user")).name}</Typography>
+                        </Box>
+                    </Box>
                 </Toolbar>
             </AppBar>
             <Box
