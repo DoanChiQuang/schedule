@@ -48,8 +48,8 @@ const User = () => {
 
 
     const columns = [
-        { field: 'username', headerName: 'Tên đăng nhập', width: 180 },
-        { field: 'name', headerName: 'Họ và tên', width: 140 },
+        { field: 'username', headerName: 'Tên đăng nhập', width: 220 },
+        { field: 'name', headerName: 'Họ và tên', width: 340 },
         { field: 'role', headerName: 'Loại tài khoản', width: 160},
         { 
             field: 'status', 
@@ -390,12 +390,12 @@ const User = () => {
                                 />
                             </Box>
                             <Box mb={2}>
-                            <TextField
-                                label="Mật khẩu mặc định"
-                                defaultValue={submitType=="create"? "123456":''}
-                                disabled={true}
-                                fullWidth
-                                />
+                                <TextField
+                                    label="Mật khẩu mặc định"
+                                    defaultValue={submitType=="create"? "123456":''}
+                                    disabled={true}
+                                    fullWidth
+                                    />
                             </Box>
                             <Box display={'flex'} justifyContent={'flex-end'}>
                                 <Button 
