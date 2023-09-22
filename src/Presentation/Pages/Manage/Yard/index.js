@@ -51,7 +51,7 @@ const Yard = () => {
                         <IconButton size="small" onClick={() => onClickUpdate(params.value)}>
                             <EditIcon size={24} />
                         </IconButton>
-                        <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
+                        <IconButton size="small" onClick={() => onClickRemove({id: params.value._id})}>
                             <DeleteIcon size={24} />
                         </IconButton>
                     </Box>

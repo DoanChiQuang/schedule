@@ -11,3 +11,11 @@ export const getAllTimeDetail = (params) => {
 export const create = (params) => {
     return axiosInstance.post('/api/time/create', params);
 }
+
+export const update = (params) => {
+    return axiosInstance.post('/api/time/update', params);
+}
+
+export const remove = (params) => {
+    return axiosInstance.post('/api/time/delete', params);
+}

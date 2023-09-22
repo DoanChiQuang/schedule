@@ -87,7 +87,7 @@ const Customer = () => {
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Tắt">
-                                <IconButton color="error" size="small" onClick={() => onClickRemove({id: params.value._id})}>
+                                <IconButton size="small" onClick={() => onClickRemove({id: params.value._id})}>
                                     <DeleteIcon size={24} />
                                 </IconButton>
                             </Tooltip>
