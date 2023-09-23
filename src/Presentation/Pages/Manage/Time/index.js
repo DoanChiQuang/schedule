@@ -310,7 +310,7 @@ const Time = () => {
                         <DataGrid
                             rows={rows}
                             columns={columns}
-                            initialState={{pagination: {paginationModel: { page: 0, pageSize: 5 }}}}
+                            initialState={{pagination: {paginationModel: { page: 0, pageSize: 8 }}}}
                             pageSizeOptions={[5, 10, 50, 100]}
                             rowSelection={false}
                             checkboxSelection={false}                            
