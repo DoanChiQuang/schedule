@@ -179,7 +179,7 @@ export const create = async (req, res, next) => {
                                 yard: d.yard,
                                 periodTime: d.periodTime,
                             },
-                            customerId: idCus,
+                            // customerId: idCus,
                             customerName: cusName,
                             customerPhone: sdt,
                             isCustomer: isCustomer,
