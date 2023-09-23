@@ -21,8 +21,8 @@ export const create = async (req, res, next) => {
                 bookCal.details.forEach(e => {
                     let day = [];
                     for(let i = startNum; i <= endNum; i++) {
-                        if(new Date(year, month, i).getDay() === e.day){
-                            day.push(new Date(year, month, i+1));
+                        if(new Date(Date.UTC(year, month, i, 0, 0 ,0)).getDay() === e.day){
+                            day.push(new Date(Date.UTC(year, month, i, 0, 0, 0)));
                             totalDate++;
                         }
                     }
@@ -118,8 +118,8 @@ export const create = async (req, res, next) => {
                     bookingCalIns.details.forEach(e => {
                         let day = [];
                         for(let i = startNum; i <= endNum; i++) {
-                            if(new Date(year, month, i).getDay() === e.day){
-                                day.push(new Date(year, month, i+1));
+                            if(new Date(Date.UTC(year, month, i, 0, 0, 0)).getDay() === e.day){
+                                day.push(new Date(Date.UTC(year, month, i, 0, 0, 0)));
                                 totalDate++;
                             }
                         }
