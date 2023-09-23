@@ -44,14 +44,14 @@ export const getAll = async (req, res, next) => {
                 }
 
                 cal.details.forEach(da => {
-                    let detailsDate = [];
+                    let detailsDate = '';
                     for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
                         if(da.day == new Date(year, month, dateNum).getDay()) {
-                            detailsDate.push(new Date(Date.UTC(year, month, dateNum, 0, 0, 0)));
+                            detailsDate = new Date(Date.UTC(year, month, dateNum, 0, 0, 0));
                         }
                     }
 
-                    if (detailsDate.length){
+                    if (detailsDate){
                         detailsCal.push({
                             date: detailsDate,
                             yard: da.yard,
