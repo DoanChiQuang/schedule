@@ -73,7 +73,7 @@ export const create = async (req, res, next) => {
                 const month = new Date(details[i].date).getMonth();
                 const year = new Date(details[i].date).getFullYear();
                 const day = new Date(details[i].date).getDay();
-                const fetchAllCalen = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(year, month+1, 0, 0, 0, 0))}, "details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}})
+                const fetchAllCalen = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month-1, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(year, month, 0, 0, 0, 0))}, "details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}})
                 
                 if(fetchAllCalen.length > 0){
                     dupl = true;
