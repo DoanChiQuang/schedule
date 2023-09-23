@@ -44,14 +44,14 @@ export const getAll = async (req, res, next) => {
                 }
 
                 cal.details.forEach(da => {
-                    let detailsDate = [];
+                    let detailsDate = '';
                     for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
                         if(da.day == new Date(year, month, dateNum).getDay()) {
-                            detailsDate.push(new Date(Date.UTC(year, month, dateNum, 0, 0, 0)));
+                            detailsDate = new Date(Date.UTC(year, month, dateNum, 0, 0, 0));
                         }
                     }
 
-                    if (detailsDate.length){
+                    if (detailsDate){
                         detailsCal.push({
                             date: detailsDate,
                             yard: da.yard,
@@ -66,6 +66,13 @@ export const getAll = async (req, res, next) => {
                     periodTime: cal.details[0].periodTime
                 });
             }
+            // let payCheck = cal.isPay;
+            // let dateNowZ = new Date();
+            // const dateNow = new Date(Date.UTC(dateNowZ.getFullYear(), dateNowZ.getMonth(), dateNowZ.getDate(), 0, 0, 0));
+
+            // if((cal.endDate.getTime() - dateNow.getTime()) <= 86400000 && cal.isPay != 2) {
+            //     payCheck = 4;
+            // };
             if(detailsCal.length){
                 allBookingCal.push({
                     id: cal._id,

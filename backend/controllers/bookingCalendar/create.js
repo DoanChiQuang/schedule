@@ -21,8 +21,8 @@ export const create = async (req, res, next) => {
                 bookCal.details.forEach(e => {
                     let day = [];
                     for(let i = startNum; i <= endNum; i++) {
-                        if(new Date(year, month, i).getDay() === e.day){
-                            day.push(new Date(year, month, i+1));
+                        if(new Date(Date.UTC(year, month, i, 0, 0 ,0)).getDay() === e.day){
+                            day.push(new Date(Date.UTC(year, month, i, 0, 0, 0)));
                             totalDate++;
                         }
                     }
@@ -67,6 +67,24 @@ export const create = async (req, res, next) => {
             //create
             let month = new Date(startDate).getMonth();
             let year = new Date(startDate).getFullYear();
+
+            let dupl = false;
+            for(let i = 0; i < details.length; i++){
+                const month = new Date(details[i].date).getMonth();
+                const year = new Date(details[i].date).getFullYear();
+                const day = new Date(details[i].date).getDay();
+                const fetchAllCalen = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month-1, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(year, month, 0, 0, 0, 0))}, "details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}})
+                
+                if(fetchAllCalen.length > 0){
+                    dupl = true;
+                }
+            }
+            if(dupl){
+                const error = new Error('Không tạo được lịch do trùng lịch với khách cố định.');
+                error.statusCode = 400;
+                next(error);
+                return;
+            }
             
             if(isCustomer) {
                 let details_sch = [];
@@ -100,8 +118,8 @@ export const create = async (req, res, next) => {
                     bookingCalIns.details.forEach(e => {
                         let day = [];
                         for(let i = startNum; i <= endNum; i++) {
-                            if(new Date(year, month, i).getDay() === e.day){
-                                day.push(new Date(year, month, i+1));
+                            if(new Date(Date.UTC(year, month, i, 0, 0, 0)).getDay() === e.day){
+                                day.push(new Date(Date.UTC(year, month, i, 0, 0, 0)));
                                 totalDate++;
                             }
                         }
@@ -161,7 +179,7 @@ export const create = async (req, res, next) => {
                                 yard: d.yard,
                                 periodTime: d.periodTime,
                             },
-                            customerId: idCus,
+                            // customerId: idCus,
                             customerName: cusName,
                             customerPhone: sdt,
                             isCustomer: isCustomer,
