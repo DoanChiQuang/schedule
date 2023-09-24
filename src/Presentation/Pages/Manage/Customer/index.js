@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Chip, Modal, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Modal, TextField, Tooltip, Typography, debounce } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Layout from "../../Layout/Layout";
 import { DataGrid } from '@mui/x-data-grid';
@@ -99,10 +99,10 @@ const Customer = () => {
     ];    
 
     // Event
-    const onChangeTextField = (key, value) => {
+    const onChangeTextField = debounce((key, value) => {
         onValidateTextField(key, value);        
         setCusData({...cusData, [key]: value});
-    }
+    }, 300)
 
     const onValidateTextField = (key, value) => {
         switch (key) {

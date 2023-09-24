@@ -9,5 +9,5 @@ export const create = (params) => {
 }
 
 export const remove = (params) => {
-    return axiosInstance.post('/api/booking-calendar/remove', params);
+    return axiosInstance.post('/api/booking-calendar/delete', params);
 }

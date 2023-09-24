@@ -2,7 +2,7 @@ import { useTheme } from "@emotion/react";
 import { Box, Button, Modal, Typography } from "@mui/material";
 import React from "react";
 
-const AlertComponent = ({visible, message="", onClick, type}) => {
+const AlertComponent = ({visible, message="", onClick, type, showCancel, onClickCancel}) => {
     const theme = useTheme();
     const styles = style(theme);
     return (
@@ -13,7 +13,8 @@ const AlertComponent = ({visible, message="", onClick, type}) => {
                     <Typography variant="body1" color={type === "success" ? theme.palette.primary.main : "red"}>{message}</Typography>
                 </Box>
                 <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-                    <Button variant='contained' type='submit' disabled={false} onClick={onClick}>OK</Button>
+                    {showCancel && <Button variant='contained' size="small" color="inherit" type='submit' disabled={false} onClick={onClickCancel} sx={{mr: 1}}>Hủy</Button>}
+                    <Button variant='contained' size="small" type='submit' disabled={false} onClick={onClick}>OK</Button>
                 </Box>
             </Box>
         </Modal>

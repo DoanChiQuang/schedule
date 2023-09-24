@@ -1,4 +1,4 @@
-import { Box, Button, Typography, Stack, Modal, TextField } from "@mui/material";
+import { Box, Button, Typography, Modal, TextField, debounce } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
@@ -60,10 +60,10 @@ const Yard = () => {
         }
     ];
 
-    const onChangeTextField = (key, value) => {
+    const onChangeTextField = debounce((key, value) => {
         onValidateTextField(key, value);        
         setYardData({...yardData, [key]: value});
-    }
+    }, 300)
 
     const onValidateTextField = (key, value) => {
         switch (key) {

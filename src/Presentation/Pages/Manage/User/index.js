@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Modal, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, Modal, TextField, Tooltip, Typography, debounce } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import Layout from "../../Layout/Layout";
 import { DataGrid } from '@mui/x-data-grid';
@@ -113,10 +113,10 @@ const User = () => {
     ];    
 
     // Event
-    const onChangeTextField = (key, value) => {
+    const onChangeTextField = debounce((key, value) => {
         onValidateTextField(key, value);        
         setUserData({...userData, [key]: value});
-    }
+    }, 300)
 
     const onValidateTextField = (key, value) => {
         switch (key) {

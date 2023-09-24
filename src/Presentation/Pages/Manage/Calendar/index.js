@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Layout from "../../Layout/Layout";
-import { Autocomplete, Box, Button, FormControlLabel, IconButton, Modal, Paper, Radio, RadioGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, styled, tooltipClasses, useTheme } from "@mui/material";
+import { Autocomplete, Box, Button, FormControlLabel, IconButton, Modal, Paper, Radio, RadioGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, debounce, styled, tooltipClasses, useTheme } from "@mui/material";
 import { CALENDER_PATH } from "../../../../Main/Route/path";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
@@ -16,17 +16,20 @@ import * as apiCustomer from "../../../Api/customer";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers";
 import { phoneRegExp } from "../../../Utils/regexValidation";
+import { AlertComponent, Loading } from "../../../Components/UI";
+import { type } from "@testing-library/user-event/dist/type";
 
 const Calendar = () => {
 
     const { data: dataGetAll, loading: loadingGetAll, error: errorGetAll, message: messageGetAll, request: requestGetAll, setData: setDataGetAll } = useApi(apiCalendar.getAll);
     const { data: dataCreate, loading: loadingCreate, error: errorCreate, message: messageCreate, request: requestCreate, setData: setDataCreate } = useApi(apiCalendar.create);
+    const { data: dataRemove, loading: loadingRemove, error: errorRemove, message: messageRemove, request: requestRemove, setData: setDataRemove } = useApi(apiCalendar.remove);
     const { data: dataGetAllTimeDetail, loading: loadingGetAllTimeDetail, error: errorGetAllTimeDetail, message: messageGetAllTimeDetail, request: requestGetAllTimeDetail, setData: setDataGetAllTimeDetail } = useApi(apiTime.getAllTimeDetail);
     const { data: dataYard, loading: loadingYard, error: errorYard, message: messageYard, request: requestYard, setData: setDataYard } = useApi(apiYard.getAll);
     const { data: dataCustomer, loading: loadingCustomer, error: errorCustomer, message: messageCustomer, request: requestCustomer, setData: setDataCustomer } = useApi(apiCustomer.getAll);
     
     const daysNameOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const loading = loadingGetAll || loadingGetAllTimeDetail || loadingYard || loadingCustomer || loadingCreate;
+    const loading = loadingGetAll || loadingGetAllTimeDetail || loadingYard || loadingCustomer || loadingCreate || loadingRemove;
     const theme = useTheme();
     const styles = style(theme);
     const [selectedCells, setSelectedCells] = useState([]);
@@ -37,6 +40,7 @@ const Calendar = () => {
     const [customers, setCustomers] = useState([]);
     const [toggleModal, setToggleModal] = useState(false);
     const [calData, setCalData] = useState({
+        id: "",
         startDate: "",
         endDate: "",
         isCustomer: 1,
@@ -52,13 +56,17 @@ const Calendar = () => {
         key: '',
         message: ''
     });
+    const [alert, setAlert] = useState(false);
+    const [alertMess, setAlertMess] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [submitType, setSubmitType] = useState('create');
+    const [confirmAlert, setConfirmAlert] = useState(false);
+    const [timeBookedId, setTimeBookedId] = useState('');
+    const [timeDetailUpdate, setTimeDetailUpdate] = useState([]);
+    const [filterSDate, setFilterSDate] = useState(dayjs());    
 
-    const fetchInitial = () => {        
-        const currentDate = dayjs("2023-09-22");
-        const { nextMonday, nextSunday } = getNextMondayAndSunday(currentDate);
-        const startDate = nextMonday.format("YYYY-MM-DD");
-        const endDate = nextSunday.format("YYYY-MM-DD");
-        requestGetAll({startDate: startDate, endDate: endDate});
+    const fetchInitial = () => {
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(7, 'day')))});
         requestGetAllTimeDetail();
         requestYard();
         requestCustomer();
@@ -67,22 +75,23 @@ const Calendar = () => {
     }
 
     const onSelectCell = (idTime, date, idYard) => {
-        if(isSelected(idTime, date, idYard)) {
-            const selectedCellsData =  selectedCells.filter((item) => (item.date !== date || item.time !== idTime || item.yard !== idYard));
-            setSelectedCells(selectedCellsData);
-            return;
-        };
-        setSelectedCells([...selectedCells, {date: date, time: idTime, yard: idYard}]);
-    }
+        setSelectedCells((prevSelectedCells) => {
+            if(isSelected(idTime, date, idYard)) {
+                return prevSelectedCells.filter(
+                    (item) => item.date !== date || item.time !== idTime || item.yard !== idYard
+                );
+            }
+            return [...prevSelectedCells, { date: date, time: idTime, yard: idYard }];
+        });
+    }    
 
-    const onChangeSelect = (event) => {                   
-        let isCustomer = 0;
-        if (event.target.value === 'customer') {
-            isCustomer = 1;
-        } else if (event.target.value === 'passenger') {          
-            isCustomer = 0;
-        }
-        setCalData({...calData, idCustomer: isCustomer === 0 ? "" : calData.idCustomer, isCustomer: isCustomer});
+    const onChangeSelect = (event) => {
+        const isCustomer = event.target.value === 'customer' ? 1 : 0;
+        setCalData({
+            ...calData,
+            idCustomer: isCustomer === 0 ? "" : calData.idCustomer,
+            isCustomer: isCustomer,
+        });
     };
 
     const onChangeSelectPayment = (event) => {                   
@@ -90,10 +99,10 @@ const Calendar = () => {
         setCalData({...calData, isPay: isPay});
     };
 
-    const onChangeCalData = (key, value) => {
-        onValidateTextField(key, value);        
+    const onChangeCalData = debounce((key, value) => {
+        onValidateTextField(key, value);
         setCalData({...calData, [key]: value});
-    }
+    }, 300)
 
     const onValidateTextField = (key, value) => {
         switch (key) {
@@ -139,25 +148,56 @@ const Calendar = () => {
     }
 
     const onCloseModal = () => {
-        // if(submitType === 'update') setSubmitType('create');
-        // setCalErrorData({
-        //     key: '',
-        //     message: ''
-        // });
-        // setCalError(false);
+        if(calData.id) { 
+            setCalData({
+                id: "",
+                startDate: "",
+                endDate: "",
+                isCustomer: 1,
+                idCustomer: "",
+                nameCustomer: "",
+                phoneCustomer: "",
+                isPay: 0,
+                note: "",
+                details: []
+            });
+        }
+        setCalErrorData({
+            key: '',
+            message: ''
+        });
+        setCalError(false);
         setToggleModal(false);
     }
 
-    const onOpenModal = () => {
+    const onOpenModal = (calData, timeDetail) => {
+        if(calData && timeDetail) {
+            const calDetails = calData.details.map(detail => {
+                return {                
+                    date: formatDateDot(detail.date),
+                    time: detail.periodTime,
+                    yard: detail.yard
+                };
+            });
+            setTimeDetailUpdate(timeDetail);
+            setCalData({
+                id: calData.id,
+                startDate: calData.startDate,
+                endDate: calData.endDate,
+                isCustomer: calData.isCustomer,
+                idCustomer: calData.customerId,
+                nameCustomer: calData.customerName,
+                phoneCustomer: calData.customerPhone,
+                isPay: calData.isPay,
+                note: calData.note,
+                details: calDetails
+            });
+        }        
         setToggleModal(true);
     }
 
     const onResetCalData = () => {
         setSelectedCells([]);
-    }
-
-    const convertCalData = () => {
-        
     }
 
     const onCreateCalendar = () => {
@@ -172,44 +212,49 @@ const Calendar = () => {
             ...calData,
             details: calDetails
         };
+        console.log(params);
         requestCreate(params);
     }
 
-    const getNextMondayAndSunday = (date) => {
-        const currentDate = date;
-        const daysUntilMonday = 1 - currentDate.day();
-        const daysUntilSunday = 7 - currentDate.day();
-
-        const nextMonday = currentDate.add(daysUntilMonday, "day");
-        const nextSunday = currentDate.add(daysUntilSunday, "day");
-
-        return {
-            nextMonday,
-            nextSunday,
-        };
+    const onCloseAlert = () => {
+        if(alertType === 'success') {            
+            requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(7, 'day')))});
+            const daysOfWeekNow = getCurrentWeekDates();
+            setDaysOfWeek(daysOfWeekNow);
+        }
+        onCloseModal();
+        setAlert(false);
+        setAlertType('');
+        setAlertMess('');
     }
+
+    const onOpenConfirmAlert = (id) => {
+        setConfirmAlert(true);
+        setTimeBookedId(id);
+    }
+
+    const onCloseConfirmAlert = () => {
+        setConfirmAlert(false);
+        setTimeBookedId('');
+    }
+
+    const onSubmitConfirmAlert = () => {
+        setConfirmAlert(false);
+        requestRemove({id: timeBookedId});
+    }    
 
     const getCurrentWeekDates = () => {
-        const currentDate = dayjs();
-          
-        const daysToSubtract = (currentDate.day() + 7 - 1) % 7;
-        const startOfWeek = currentDate.subtract(daysToSubtract, "day");
-        
         const weekDates = [];
-
-        for (let i = 0; i <= 6; i++) {
-            const day = startOfWeek.add(i, "day");
-            const dayName = day.format("dddd");
-            const formattedDate = day.format("DD.MM.YYYY");
-
-            weekDates.push({ name: `Thứ ${i + 2}`, date: formattedDate });
+      
+        for (let day = filterSDate; day.isBefore(filterSDate.add(7, 'day')); day = day.add(1, 'day')) {
+            const dayName = daysNameOfWeek[day.day()];
+            const formattedDate = day.format('DD.MM.YYYY');
+      
+            weekDates.push({ name: dayName, date: formattedDate });
         }
-        
-        const lastDay = weekDates[6];
-        lastDay.name = "Chủ nhật";
-
+      
         return weekDates;
-    }
+    };
 
     const getLastName = (fullname) => {
         const names = fullname.split(" ");
@@ -232,25 +277,13 @@ const Calendar = () => {
         const year = date.getUTCFullYear();
       
         return `${day}.${month}.${year}`;
-    }    
+    }
 
     const isSelected = (idTime, date, idYard) => {
-        let flag = false;
-        selectedCells.map((item, index) => {
-            if(item.date === date && item.time === idTime && item.yard === idYard) {
-                flag = true;
-            }
-        });
+        return selectedCells.some((item) => item.date === date && item.time === idTime && item.yard === idYard);
+    };
 
-        return flag;
-    }
-
-    const convertCusData = () => {
-        const cusDataNew = customers.map(item => (
-            { label: item.name, value: item._id}
-        ));
-        return cusDataNew.length > 0 ? cusDataNew : [];
-    }
+    const convertCusData = () => customers.map((item, index) => ({ label: index+1 + ' - ' + item.name, value: item._id })) || [];
 
     const covertCalDetail = () => {
         return selectedCells.reduce((acc, item) => {
@@ -279,6 +312,186 @@ const Calendar = () => {
         }
         return true;
     }
+
+    const handleReceiveSuccessData = () => {
+        if(dataCreate) {
+            setAlert(true);
+            setAlertType('success');
+            setAlertMess(dataCreate.message);
+            setDataCreate(null);
+            setSelectedCells([]);
+            setCalData({
+                startDate: "",
+                endDate: "",
+                isCustomer: 1,
+                idCustomer: "",
+                nameCustomer: "",
+                phoneCustomer: "",
+                isPay: 0,
+                note: "",
+                details: []
+            });
+        }
+        if(dataRemove) {
+            setAlert(true);
+            setAlertType('success');
+            setAlertMess(dataRemove.message);
+            setDataRemove(null);
+            setTimeBookedId('');
+            setCalData({
+                startDate: "",
+                endDate: "",
+                isCustomer: 1,
+                idCustomer: "",
+                nameCustomer: "",
+                phoneCustomer: "",
+                isPay: 0,
+                note: "",
+                details: []
+            });
+        }
+    }
+
+    const handleReceiveErrorData = () => {
+        if(errorCreate) {
+            setAlert(true);
+            setAlertType('error');
+            setAlertMess(messageCreate);
+        }
+
+        if(errorRemove) {
+            setAlert(true);
+            setAlertType('error');
+            setAlertMess(messageRemove);
+        }
+    }
+
+    const handleStartDateChange = (date) => {
+        setFilterSDate(date);
+    };
+
+    const timeSlotComponents = useMemo(() => {
+        return timeSlots.map((timeSlot, timeSlotIndex) => (
+            <TableRow key={timeSlot.id + '_' + timeSlotIndex}>
+                <TableCell style={{ borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, backgroundColor: '#4682B4', color: 'white' }}>
+                    <Typography variant="caption" fontWeight={'bold'}>{timeSlot.name}</Typography>                                            
+                </TableCell>
+                {daysOfWeek.map((day, dayIndex) => (
+                    yards.map((yard, yardIndex) => {
+                        const time = timeBooked.filter(item => {                                                    
+                            return (item.details.some(detail => formatDateDot(detail.date) === day.date && detail.yard === yard._id && detail.periodTime.includes(timeSlot.id)));
+                        });
+                        if(time.length > 0) {
+                            const timeSlotsDetail = timeSlots.filter(timeSlot => {
+                                return (time[0].details.some(detail => detail.periodTime.includes(timeSlot.id)));
+                            });
+
+                            const tooltipDetail = time[0].details.map(detail => {                                                        
+                                const date = new Date(detail.date);
+                                const dayOfWeekIndex = date.getDay();
+                                const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + formatDateDot(detail.date);
+                                const timeCell = timeSlotsDetail.filter(timeSlotDetail => detail.periodTime.includes(timeSlotDetail.id));
+                                const yardTemp = yards.filter(yard => yard._id === detail.yard);
+                                const yardCell = yardTemp[0].name;
+                                return {dateCell, timeCell, yardCell};
+                            });
+
+                            tooltipDetail.sort((a, b) => {
+                                const dateA = new Date(formatDate(a.dateCell.split(' - ')[1]));
+                                const dateB = new Date(formatDate(b.dateCell.split(' - ')[1]));
+                                return dateA - dateB;
+                            });
+                            
+                            return (
+                                <HtmlTooltip                                                            
+                                    title={
+                                        <React.Fragment key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex}>
+                                            <Box display={'flex'} justifyContent={'space-between'} alignItems={'flex-start'} borderBottom={'1px solid #ccc'} mb={1} pb={1}>
+                                                <Box>
+                                                    <Typography color="inherit" fontWeight={'bold'}>Anh/Chị: {time[0].customerName}</Typography>
+                                                    <Typography color="inherit">SĐT: {time[0].customerPhone}</Typography>
+                                                </Box>                                                                        
+                                                <Box ml={3}>
+                                                    <Tooltip title="Chi tiết">
+                                                        <IconButton size="small" onClick={() => onOpenModal(time[0], tooltipDetail)}>
+                                                            <AspectRatioIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Hủy">
+                                                        <IconButton size="small" onClick={() => onOpenConfirmAlert(time[0].id)}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Box>
+                                            </Box>                                                                    
+                                            {time[0].isCustomer ? 
+                                                <>
+                                                    <Typography variant="body1" fontWeight={"bold"}>Thời gian</Typography>
+                                                    <Table>
+                                                        <TableHead>
+                                                            <TableRow>
+                                                                <TableCell>Ngày</TableCell>
+                                                                <TableCell>Thời gian</TableCell>
+                                                                <TableCell>Sân</TableCell>
+                                                            </TableRow>
+                                                        </TableHead>
+                                                        <TableBody>                                                            
+                                                            {tooltipDetail.map((timeSlotDetail, timeSlotDetailIndex) => (
+                                                                <TableRow key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex + '_' + timeSlotDetail.id + '_' + timeSlotDetailIndex}>
+                                                                    <TableCell>{timeSlotDetail.dateCell}</TableCell>
+                                                                    <TableCell>
+                                                                        {timeSlotDetail.timeCell.map((item, index) => (
+                                                                            <React.Fragment key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex + '_' + timeSlotDetail.id + '_' + timeSlotDetailIndex + '_' + item.id + '_' + index}>
+                                                                                {item.name}
+                                                                                {index < timeSlotDetail.timeCell.length - 1 && <br />}
+                                                                            </React.Fragment>
+                                                                        ))}
+                                                                    </TableCell>
+                                                                    <TableCell>{timeSlotDetail.yardCell}</TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </>
+                                                :
+                                                <Box>
+                                                    <Typography color="inherit" fontWeight={'bold'}>{day.name + ' - ' + day.date}</Typography>
+                                                    <Typography color="inherit">Thời gian: {timeSlot.name}</Typography>
+                                                    <Typography color="inherit">Sân: {yard.name}</Typography>
+                                                </Box>
+                                            }                                                                    
+                                        </React.Fragment>
+                                    }
+                                    placement="right-start"
+                                >
+                                    <TableCellCustom                                                                
+                                        style={yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}}
+                                        sx={
+                                            time[0].isPay === 0 && {backgroundColor: '#d5d5d5'} || 
+                                            time[0].isPay === 1 && {backgroundColor: '#FFBF00'} ||
+                                            time[0].isPay === 2 && {backgroundColor: '#00A36C'}
+                                        }
+                                    >
+                                        <Typography variant="caption" fontWeight={'bold'} color={'white'}>{getLastName(time[0].customerName)}</Typography>
+                                    </TableCellCustom>
+                                </HtmlTooltip>
+                            )
+                        }
+                        else {
+                            return (
+                                <TableCellCustom
+                                    key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex}
+                                    style={yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}}
+                                    sx={isSelected(timeSlot.id, day.date, yard._id) ? {backgroundColor: theme.palette.primary.main} : {}}
+                                    onClick={() => onSelectCell(timeSlot.id, day.date, yard._id)}
+                                />
+                            )
+                        }
+                    })
+                ))}
+            </TableRow>
+        ))
+    }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells, onSelectCell])
 
     useEffect(() => {                
         fetchInitial();
@@ -323,30 +536,40 @@ const Calendar = () => {
     }, [selectedCells])
 
     useEffect(() => {
+        handleReceiveSuccessData();
+    }, [dataCreate, dataRemove]);
 
-    }, [calData])
-        
-    // console.log(calData);
-    // console.log(timeSlots);
-    // console.log(yards);
-    // console.log(timeBooked);
+    useEffect(() => {
+        handleReceiveErrorData();
+    }, [errorCreate, errorRemove]);
+
+    useEffect(() => {
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(7, 'day')))});
+        const daysOfWeekNow = getCurrentWeekDates();
+        setDaysOfWeek(daysOfWeekNow);
+    }, [filterSDate])
 
     return (
         <Layout 
             children={
                 <Box>
-                    {/* <Box mb={1}>
-                        <Button variant="outlined" startIcon={<NavigateBeforeIcon />} color="info" size="small" sx={{mr: 1}}>                            
-                            <Typography variant="button">Tuần trước</Typography>
-                        </Button>
-                        <Button variant="contained" color="info" size="small" sx={{mr: 1}}>
-                            <Typography variant="button">Tuần này</Typography>
-                        </Button>
-                        <Button variant="outlined" endIcon={<NavigateNextIcon />} color="info" size="small" sx={{mr: 1}}>
-                            <Typography variant="button">Tuần sau</Typography>                            
-                        </Button>
-                    </Box> */}
-                    <TableContainer component={Paper} style={{ height: '84vh', overflowX: 'auto' }}>
+                    <Box display={'flex'} mb={1}>                        
+                        <DatePicker
+                            label="Ngày bắt đầu"
+                            value={filterSDate}
+                            onChange={handleStartDateChange}
+                            renderInput={(props) => <TextField {...props} />}
+                            sx={{mr: 1}}
+                        />
+                        <DatePicker
+                            label="Ngày kết thúc"
+                            value={filterSDate.add(6,'day')}
+                            disabled={true}
+                            renderInput={(props) => <TextField {...props} />}
+                            sx={{mr: 1}}
+                        />
+                    </Box>
+                    <TableContainer component={Paper} style={{ height: '75vh', overflowX: 'auto' }}>
                         <Table>
                             <TableHead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 2 }}>
                                 <TableRow>
@@ -354,7 +577,7 @@ const Calendar = () => {
                                         <Typography variant="body2">Ngày</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
-                                        <TableCell colSpan={4} style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 150}}>
+                                        <TableCell key={day.date + '_' + dayIndex} colSpan={4} style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 150}}>
                                             <Box display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
                                                 <Typography variant="body2">{day.name}</Typography>
                                                 <Typography variant="body2" fontWeight={'bold'}>{day.date}</Typography>
@@ -368,7 +591,7 @@ const Calendar = () => {
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
                                         yards.map((yard, yardIndex) => (
-                                            <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#4682B4', color: 'white', minWidth: 70}}>
+                                            <TableCell key={day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} style={{ borderRight: "1px solid #ccc", backgroundColor: '#4682B4', color: 'white', minWidth: 70}}>
                                                 <Typography variant="caption" fontWeight={'bold'}>{yard.name}</Typography>                                                
                                             </TableCell>
                                         ))
@@ -376,125 +599,7 @@ const Calendar = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {timeSlots.map((timeSlot, timeSlotIndex) => (
-                                    <TableRow>
-                                        <TableCell style={{ borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, backgroundColor: '#4682B4', color: 'white' }}>
-                                            <Typography variant="caption" fontWeight={'bold'}>{timeSlot.name}</Typography>                                            
-                                        </TableCell>
-                                        {daysOfWeek.map((day, dayIndex) => (
-                                            yards.map((yard, yardIndex) => {
-                                                const time = timeBooked.filter(item => {                                                    
-                                                    return (item.details.some(detail => formatDateDot(detail.date) === day.date && detail.yard === yard._id && detail.periodTime.includes(timeSlot.id)));
-                                                });
-                                                if(time.length > 0) {
-                                                    const timeSlotsDetail = timeSlots.filter(timeSlot => {
-                                                        return (time[0].details.some(detail => detail.periodTime.includes(timeSlot.id)));
-                                                    });
-
-                                                    const tooltipDetail = time[0].details.map(detail => {                                                        
-                                                        const date = new Date(detail.date);
-                                                        const dayOfWeekIndex = date.getDay();
-                                                        const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + formatDateDot(detail.date);
-                                                        const timeCell = timeSlotsDetail.filter(timeSlotDetail => detail.periodTime.includes(timeSlotDetail.id));
-                                                        const yardTemp = yards.filter(yard => yard._id === detail.yard);
-                                                        const yardCell = yardTemp[0].name;
-                                                        return {dateCell, timeCell, yardCell};
-                                                    });
-
-                                                    tooltipDetail.sort((a, b) => {
-                                                        const dateA = new Date(formatDate(a.dateCell.split(' - ')[1]));
-                                                        const dateB = new Date(formatDate(b.dateCell.split(' - ')[1]));
-                                                        return dateA - dateB;
-                                                    });
-                                                    
-                                                    return (
-                                                        <HtmlTooltip
-                                                            title={
-                                                                <React.Fragment>
-                                                                    <Box display={'flex'} justifyContent={'space-between'} alignItems={'flex-start'} borderBottom={'1px solid #ccc'} mb={1} pb={1}>
-                                                                        <Box>
-                                                                            <Typography color="inherit" fontWeight={'bold'}>Anh/Chị: {time[0].customerName}</Typography>
-                                                                            <Typography color="inherit">SĐT: {time[0].customerPhone}</Typography>
-                                                                        </Box>                                                                        
-                                                                        <Box ml={3}>
-                                                                            <Tooltip title="Chi tiết">
-                                                                                <IconButton size="small" onClick={() => console.log(123)}>
-                                                                                    <AspectRatioIcon />
-                                                                                </IconButton>
-                                                                            </Tooltip>
-                                                                            <Tooltip title="Hủy">
-                                                                                <IconButton size="small" onClick={() => console.log(123)}>
-                                                                                    <DeleteIcon />
-                                                                                </IconButton>
-                                                                            </Tooltip>
-                                                                        </Box>
-                                                                    </Box>                                                                    
-                                                                    {time[0].isCustomer ? 
-                                                                        <>
-                                                                            <Typography variant="body1" fontWeight={"bold"}>Thời gian</Typography>
-                                                                            <Table>
-                                                                                <TableHead>
-                                                                                    <TableRow>
-                                                                                        <TableCell>Ngày</TableCell>
-                                                                                        <TableCell>Thời gian</TableCell>
-                                                                                        <TableCell>Sân</TableCell>
-                                                                                    </TableRow>
-                                                                                </TableHead>
-                                                                                <TableBody>
-                                                                                    {tooltipDetail.map((timeSlotDetail, timeSlotDetailIndex) => (
-                                                                                        <TableRow>
-                                                                                            <TableCell>{timeSlotDetail.dateCell}</TableCell>
-                                                                                            <TableCell>
-                                                                                                {timeSlotDetail.timeCell.map((item, index) => (
-                                                                                                    <React.Fragment>
-                                                                                                        {item.name}
-                                                                                                        {index < timeSlotDetail.timeCell.length - 1 && <br />}
-                                                                                                    </React.Fragment>
-                                                                                                ))}
-                                                                                            </TableCell>
-                                                                                            <TableCell>{timeSlotDetail.yardCell}</TableCell>
-                                                                                        </TableRow>
-                                                                                    ))}
-                                                                                </TableBody>
-                                                                            </Table>
-                                                                        </>
-                                                                        :
-                                                                        <Box>
-                                                                            <Typography color="inherit" fontWeight={'bold'}>{day.name + ' - ' + day.date}</Typography>
-                                                                            <Typography color="inherit">Thời gian: {timeSlot.name}</Typography>
-                                                                            <Typography color="inherit">Sân: {yard.name}</Typography>
-                                                                        </Box>
-                                                                    }                                                                    
-                                                                </React.Fragment>
-                                                            }
-                                                            placement="right-start"
-                                                        >
-                                                            <TableCellCustom                                                                
-                                                                style={yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}}
-                                                                sx={
-                                                                    time[0].isPay === 0 && {backgroundColor: '#d5d5d5'} || 
-                                                                    time[0].isPay === 1 && {backgroundColor: 'yellow'} ||
-                                                                    time[0].isPay === 2 && {backgroundColor: '#00A36C'}                                                                
-                                                                }
-                                                            >
-                                                                <Typography variant="caption" fontWeight={'bold'} color={'white'}>{getLastName(time[0].customerName)}</Typography>
-                                                            </TableCellCustom>
-                                                        </HtmlTooltip>
-                                                    )
-                                                }
-                                                else {
-                                                    return (
-                                                        <TableCellCustom
-                                                            style={yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}}
-                                                            sx={isSelected(timeSlot.id, day.date, yard._id) ? {backgroundColor: theme.palette.primary.main} : {}}
-                                                            onClick={() => onSelectCell(timeSlot.id, day.date, yard._id)}
-                                                        />
-                                                    )
-                                                }                                                
-                                            })
-                                        ))}
-                                    </TableRow>
-                                ))}
+                                {timeSlotComponents}
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -514,19 +619,21 @@ const Calendar = () => {
                                 value={calData.isCustomer ? "customer" : "passenger"}
                                 onChange={onChangeSelect}
                                 defaultValue={calData.isCustomer && "customer"}
-                                sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                                sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}                                
                             >
                                 <FormControlLabel
                                     value="customer"
                                     control={<Radio />}
                                     label="Khách cố định"
                                     labelPlacement="top"
+                                    disabled={calData.id && true}
                                 />
                                 <FormControlLabel
                                     value="passenger"
                                     control={<Radio />}
                                     label="Khách vãng lai"
                                     labelPlacement="top"
+                                    disabled={calData.id && true}
                                 />
                             </RadioGroup>
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin cá nhân</Typography>                            
@@ -535,6 +642,12 @@ const Calendar = () => {
                                     <Autocomplete
                                         disablePortal
                                         options={convertCusData()}
+                                        value={calData.idCustomer}                                        
+                                        getOptionLabel={(option) => {
+                                            const selectedCustomer = convertCusData().find((item) => item.value === option);
+                                            return selectedCustomer ? selectedCustomer.label : option.label;
+                                        }}
+                                        disabled={calData.id && true}
                                         onChange={(e, selectedOption) => onChangeCalData('idCustomer', selectedOption.value)}
                                         renderInput={(params) => <TextField {...params} label="Khách hàng" />}
                                         fullWidth
@@ -549,6 +662,7 @@ const Calendar = () => {
                                         error={calError && calErrorData.key === 'nameCustomer' && true}
                                         helperText={calError && calErrorData.key === 'nameCustomer' && calErrorData.message}
                                         sx={{mr: 1}}
+                                        disabled={calData.id && true}
                                         fullWidth
                                     />
                                     <TextField
@@ -558,23 +672,26 @@ const Calendar = () => {
                                         error={calError && calErrorData.key === 'phoneCustomer' && true}
                                         helperText={calError && calErrorData.key === 'phoneCustomer' && calErrorData.message}
                                         sx={{ml: 1}}
+                                        disabled={calData.id && true}
                                         fullWidth
                                     />
                                 </Box>
-                            }                                                                                    
+                            }
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin thời gian và sân</Typography>
                             <Box display={'flex'}>
                                 <DatePicker
                                     label="Thời gian bắt đầu" 
                                     defaultValue={calData.startDate ? dayjs(calData.startDate) : dayjs()}
                                     disabled={true}
-                                    sx={{mr: 1}} 
+                                    sx={{mr: 1}}                                    
                                 />
-                                <DatePicker
-                                    label="Thời gian kết thúc" 
-                                    defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs()}
-                                    sx={{ml: 1}} 
-                                />
+                                {calData.isCustomer === 1 &&
+                                    <DatePicker
+                                        label="Thời gian kết thúc" 
+                                        defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs()}
+                                        sx={{ml: 1}}
+                                    />
+                                }
                             </Box>
                             <Box mb={2}>
                                 <Table>
@@ -586,35 +703,56 @@ const Calendar = () => {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {covertCalDetail().map(selectedCell => {                                        
-                                            const date = new Date(formatDate(selectedCell.date));
-                                            const dayOfWeekIndex = date.getDay();
-                                            const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + selectedCell.date;
-                                            const times = selectedCell.time.map(timeId => {                                                                                        
-                                                const time = timeSlots.filter(timeSlot => timeSlot.id === timeId);                                            
-                                                return time[0];
-                                            });
-                                            let timeCell = [];
-                                            times.map((time, index) => {
-                                                timeCell.push(
-                                                    <React.Fragment>
-                                                        {time.name}
-                                                        {index < times.length - 1 && <br />}
-                                                    </React.Fragment>
-                                                );
-                                            });
-                                                                                                                                
-                                            const yard = yards.filter(yard => yard._id === selectedCell.yard)[0];
-                                            const yardCell = yard.name;
+                                        {!calData.id 
+                                            ?
+                                            covertCalDetail().map((selectedCell, selectedCellIndex) => {                                        
+                                                const date = new Date(formatDate(selectedCell.date));
+                                                const dayOfWeekIndex = date.getDay();
+                                                const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + selectedCell.date;
+                                                const times = selectedCell.time.map(timeId => {                                                                                        
+                                                    const time = timeSlots.filter(timeSlot => timeSlot.id === timeId);                                            
+                                                    return time[0];
+                                                });
+                                                let timeCell = [];
+                                                times.map((time, index) => {
+                                                    timeCell.push(
+                                                        <React.Fragment key={selectedCell.date + '_' + time.id + '_' + index}>
+                                                            {time.name}
+                                                            {index < times.length - 1 && <br />}
+                                                        </React.Fragment>
+                                                    );
+                                                });
+                                                                                                                                    
+                                                const yard = yards.filter(yard => yard._id === selectedCell.yard)[0];
+                                                const yardCell = yard.name;
 
-                                            return (
-                                                <TableRow>
-                                                    <TableCell>{dateCell}</TableCell>
-                                                    <TableCell>{timeCell}</TableCell>
-                                                    <TableCell>{yardCell}</TableCell>
-                                                </TableRow>
-                                            )
-                                        })}                                    
+                                                return (
+                                                    <TableRow key={selectedCell.date + '_' + selectedCellIndex}>
+                                                        <TableCell>{dateCell}</TableCell>
+                                                        <TableCell>{timeCell}</TableCell>
+                                                        <TableCell>{yardCell}</TableCell>
+                                                    </TableRow>
+                                                )
+                                            })
+                                            :
+                                            timeDetailUpdate.map((timeDetail, timeDetailIndex) => {
+                                                console.log(timeDetail);
+                                                return (
+                                                    <TableRow key={timeDetailIndex}>
+                                                        <TableCell>{timeDetail.dateCell}</TableCell>
+                                                        <TableCell>
+                                                            {timeDetail.timeCell.map((cell, index) =>
+                                                                <React.Fragment>
+                                                                    {cell.name}
+                                                                    {index < timeDetail.timeCell.length - 1 && <br />}
+                                                                </React.Fragment>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>{timeDetail.yardCell}</TableCell>
+                                                    </TableRow>
+                                                )
+                                            })
+                                        }
                                     </TableBody>
                                 </Table>
                             </Box>
@@ -669,6 +807,9 @@ const Calendar = () => {
                             </Box>
                         </Box>
                     </Modal>
+                    <Loading visible={loading} />
+                    <AlertComponent visible={alert} message={alertMess} type={alertType} onClick={() => onCloseAlert()} />
+                    <AlertComponent visible={confirmAlert} message={"Bạn có chắc chắn không?"} type={"success"} onClick={() => onSubmitConfirmAlert()} showCancel={true} onClickCancel={() => onCloseConfirmAlert()} />
                 </Box>
             } 
         route={CALENDER_PATH} />
