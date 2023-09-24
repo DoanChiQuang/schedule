@@ -5,10 +5,16 @@ import { phoneRegExp } from '../../utils/RegexValidate.js';
 
 export const create = async (req, res, next) => {
     try {
-        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details} = req.body;
+        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note} = req.body;
         //update status
         let dateOfDayWeek = [];
         if(id) {
+            if(!await BookingCal.findOne({_id: id})) {
+                const error = new Error("Không có lịch đặt để chỉnh sửa.");
+                error.statusCode = 400;
+                next(error);
+                return;
+            }
             if (isPay == 2 && isCustomer) {
                 // let dateOfDateWeekN = [];
                 const bookCal = await BookingCal.findOne({_id: id});
@@ -55,7 +61,7 @@ export const create = async (req, res, next) => {
                     isPay: 0
                 });
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note});
 
             return res.json({
                 status: 200,
@@ -108,7 +114,8 @@ export const create = async (req, res, next) => {
                     customerName: customer.name,
                     customerPhone: customer.phonenum,
                     isCustomer: isCustomer,
-                    isPay: isPay
+                    isPay: isPay,
+                    note: note
                 });
 
                 if(isPay == 2){
@@ -183,7 +190,8 @@ export const create = async (req, res, next) => {
                             customerName: nameCustomer,
                             customerPhone: phoneCustomer,
                             isCustomer: isCustomer,
-                            isPay: isPay
+                            isPay: isPay,
+                            note: note
                         });
                   
                       

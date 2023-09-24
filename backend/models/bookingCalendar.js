@@ -25,6 +25,9 @@ const bookingCalendarSchema = new mongoose.Schema({
     isPay: {
         type: Number,
         default: 0
+    },
+    note: {
+        type: String,
     }
 });
 
