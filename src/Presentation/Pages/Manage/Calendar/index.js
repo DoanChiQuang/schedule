@@ -156,9 +156,23 @@ const Calendar = () => {
         setSelectedCells([]);
     }
 
+    const convertCalData = () => {
+        
+    }
+
     const onCreateCalendar = () => {
-        console.log(calData);
-        // requestCreate(calData);
+        const calDetails = calData.details.map(detail => {
+            return {                
+                date: formatDate(detail.date),
+                periodTime: detail.time,
+                yard: detail.yard
+            };
+        });        
+        const params = {
+            ...calData,
+            details: calDetails
+        };
+        requestCreate(params);
     }
 
     const getNextMondayAndSunday = (date) => {
@@ -307,6 +321,10 @@ const Calendar = () => {
             setCalData({...calData, startDate: startDate, endDate: endDate, details: selectedCal});
         }
     }, [selectedCells])
+
+    useEffect(() => {
+
+    }, [calData])
         
     // console.log(calData);
     // console.log(timeSlots);
