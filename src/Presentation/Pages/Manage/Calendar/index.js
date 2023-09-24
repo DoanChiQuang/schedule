@@ -5,11 +5,11 @@ import { CALENDER_PATH } from "../../../../Main/Route/path";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import useApi from "../../../Hooks/useApi";
-import { getAll } from "../../../Api/bookingCalendar";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 import ReplayIcon from '@mui/icons-material/Replay';
+import * as apiCalendar from "../../../Api/bookingCalendar";
 import * as apiTime from "../../../Api/time";
 import * as apiYard from "../../../Api/yard";
 import * as apiCustomer from "../../../Api/customer";
@@ -19,13 +19,14 @@ import { phoneRegExp } from "../../../Utils/regexValidation";
 
 const Calendar = () => {
 
-    const { data: dataGetAll, loading: loadingGetAll, error: errorGetAll, message: messageGetAll, request: requestGetAll, setData: setDataGetAll } = useApi(getAll);    
+    const { data: dataGetAll, loading: loadingGetAll, error: errorGetAll, message: messageGetAll, request: requestGetAll, setData: setDataGetAll } = useApi(apiCalendar.getAll);
+    const { data: dataCreate, loading: loadingCreate, error: errorCreate, message: messageCreate, request: requestCreate, setData: setDataCreate } = useApi(apiCalendar.create);
     const { data: dataGetAllTimeDetail, loading: loadingGetAllTimeDetail, error: errorGetAllTimeDetail, message: messageGetAllTimeDetail, request: requestGetAllTimeDetail, setData: setDataGetAllTimeDetail } = useApi(apiTime.getAllTimeDetail);
     const { data: dataYard, loading: loadingYard, error: errorYard, message: messageYard, request: requestYard, setData: setDataYard } = useApi(apiYard.getAll);
     const { data: dataCustomer, loading: loadingCustomer, error: errorCustomer, message: messageCustomer, request: requestCustomer, setData: setDataCustomer } = useApi(apiCustomer.getAll);
     
     const daysNameOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const loading = loadingGetAll || loadingGetAllTimeDetail || loadingYard || loadingCustomer;
+    const loading = loadingGetAll || loadingGetAllTimeDetail || loadingYard || loadingCustomer || loadingCreate;
     const theme = useTheme();
     const styles = style(theme);
     const [selectedCells, setSelectedCells] = useState([]);
@@ -44,7 +45,7 @@ const Calendar = () => {
         phoneCustomer: "",
         isPay: 0,
         note: "",
-        detail: []
+        details: []
     });
     const [calError, setCalError] = useState(false);
     const [calErrorData, setCalErrorData] = useState({
@@ -155,6 +156,11 @@ const Calendar = () => {
         setSelectedCells([]);
     }
 
+    const onCreateCalendar = () => {
+        console.log(calData);
+        // requestCreate(calData);
+    }
+
     const getNextMondayAndSunday = (date) => {
         const currentDate = date;
         const daysUntilMonday = 1 - currentDate.day();
@@ -212,17 +218,7 @@ const Calendar = () => {
         const year = date.getUTCFullYear();
       
         return `${day}.${month}.${year}`;
-    }
-    
-    const formatPriceWithDots = (inputPrice) => {
-        let numberStr = inputPrice.toString();        
-        numberStr = numberStr.replace(/\B(?=(\d{3})+(?!\d))/g, ".");      
-        return numberStr;
-    }
-
-    const formatPriceWithoutDots = (inputPrice) => {
-        return inputPrice.replace(/\./g, "");
-    }
+    }    
 
     const isSelected = (idTime, date, idYard) => {
         let flag = false;
@@ -308,7 +304,7 @@ const Calendar = () => {
             });
             const startDate = formatDate(selectedCal[0].date);
             const endDate = formatDate(selectedCal[selectedCal.length-1].date);
-            setCalData({...calData, startDate: startDate, endDate: endDate, detail: selectedCal});
+            setCalData({...calData, startDate: startDate, endDate: endDate, details: selectedCal});
         }
     }, [selectedCells])
         
@@ -647,8 +643,8 @@ const Calendar = () => {
                                 <Button 
                                     variant='contained' 
                                     disabled={!!loading || calError && true || canSaveData()}
-                                    onSubmit={() => console.log(calData)}
-                                    onClick={() => console.log(calData)}
+                                    onSubmit={() => onCreateCalendar()}
+                                    onClick={() => onCreateCalendar()}
                                 >
                                     Lưu
                                 </Button>

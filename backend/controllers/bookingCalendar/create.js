@@ -5,7 +5,7 @@ import { phoneRegExp } from '../../utils/RegexValidate.js';
 
 export const create = async (req, res, next) => {
     try {
-        const {id, startDate, endDate, idCus, isCustomer, cusName, sdt, isPay, details} = req.body;
+        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details} = req.body;
         //update status
         let dateOfDayWeek = [];
         if(id) {
@@ -98,13 +98,13 @@ export const create = async (req, res, next) => {
                         details_sch.push(obj);
                     }
                 });
-                const customer = await Customer.findById({_id: idCus});
+                const customer = await Customer.findById({_id: idCustomer});
 
                 const bookingCalIns = await BookingCal.create({
                     startDate: new Date(startDate),
                     endDate: new Date(endDate),
                     details: details_sch,
-                    customerId: idCus,
+                    customerId: idCustomer,
                     customerName: customer.name,
                     customerPhone: customer.phonenum,
                     isCustomer: isCustomer,
@@ -145,7 +145,7 @@ export const create = async (req, res, next) => {
                         startDate: new Date(Date.UTC(year, month, 1, 0, 0, 0)),
                         endDate: new Date(Date.UTC(year, month+1, 0, 0, 0, 0)),
                         details: details_sch,
-                        customerId: idCus,
+                        customerId: idCustomer,
                         customerName: customer.name,
                         customerPhone: customer.phonenum,
                         isCustomer: isCustomer,
@@ -155,13 +155,13 @@ export const create = async (req, res, next) => {
             }
             else {
                 // validation 
-                if(!cusName) {
+                if(!nameCustomer) {
                     const error = new Error("Tên không hợp lệ.");
                     error.statusCode = 400;
                     next(error);
                     return;
                 }
-                if(!sdt || !phoneRegExp.test(sdt)) {
+                if(!phoneCustomer || !phoneRegExp.test(phoneCustomer)) {
                     const error = new Error('Số điện thoại không hợp lệ.');
                     error.statusCode = 400;
                     next(error);
@@ -179,9 +179,9 @@ export const create = async (req, res, next) => {
                                 yard: d.yard,
                                 periodTime: d.periodTime,
                             },
-                            // customerId: idCus,
-                            customerName: cusName,
-                            customerPhone: sdt,
+                            // customerId: idCustomer,
+                            customerName: nameCustomer,
+                            customerPhone: phoneCustomer,
                             isCustomer: isCustomer,
                             isPay: isPay
                         });
