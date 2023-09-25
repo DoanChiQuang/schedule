@@ -686,7 +686,8 @@ const Calendar = () => {
                                 />
                                 {calData.isCustomer === 1 &&
                                     <DatePicker
-                                        label="Thời gian kết thúc" 
+                                        label="Thời gian kết thúc"
+                                        disabled={calData.id && true}
                                         defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs().endOf('month')}
                                         disabled={calData.id && true}
                                         onChange={(date) => onChangeCalData('endDate', date)}
