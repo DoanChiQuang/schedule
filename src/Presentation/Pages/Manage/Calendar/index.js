@@ -689,7 +689,6 @@ const Calendar = () => {
                                         label="Thời gian kết thúc"
                                         disabled={calData.id && true}
                                         defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs().endOf('month')}
-                                        disabled={calData.id && true}
                                         onChange={(date) => onChangeCalData('endDate', date)}
                                         sx={{ml: 1}}
                                     />
