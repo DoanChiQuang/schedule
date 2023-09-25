@@ -17,7 +17,6 @@ import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers";
 import { phoneRegExp } from "../../../Utils/regexValidation";
 import { AlertComponent, Loading } from "../../../Components/UI";
-import { type } from "@testing-library/user-event/dist/type";
 
 const Calendar = () => {
 
@@ -42,7 +41,7 @@ const Calendar = () => {
     const [calData, setCalData] = useState({
         id: "",
         startDate: "",
-        endDate: "",
+        endDate: dayjs().endOf('month'),
         isCustomer: 1,
         idCustomer: "",
         nameCustomer: "",
@@ -210,9 +209,10 @@ const Calendar = () => {
         });        
         const params = {
             ...calData,
+            endDate: formatDate(formatDateDot(calData.endDate)),
             details: calDetails
         };
-        console.log(params);
+        // console.log(params);
         requestCreate(params);
     }
 
@@ -530,8 +530,7 @@ const Calendar = () => {
                 return dateA - dateB;
             });
             const startDate = formatDate(selectedCal[0].date);
-            const endDate = formatDate(selectedCal[selectedCal.length-1].date);
-            setCalData({...calData, startDate: startDate, endDate: endDate, details: selectedCal});
+            setCalData({...calData, startDate: startDate, details: selectedCal});
         }
     }, [selectedCells])
 
@@ -645,7 +644,7 @@ const Calendar = () => {
                                         value={calData.idCustomer}                                        
                                         getOptionLabel={(option) => {
                                             const selectedCustomer = convertCusData().find((item) => item.value === option);
-                                            return selectedCustomer ? selectedCustomer.label : option.label;
+                                            return selectedCustomer ? selectedCustomer.label : option.label ? option.label : '';
                                         }}
                                         disabled={calData.id && true}
                                         onChange={(e, selectedOption) => onChangeCalData('idCustomer', selectedOption.value)}
@@ -688,7 +687,8 @@ const Calendar = () => {
                                 {calData.isCustomer === 1 &&
                                     <DatePicker
                                         label="Thời gian kết thúc" 
-                                        defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs()}
+                                        defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs().endOf('month')}
+                                        onChange={(date) => onChangeCalData('endDate', date)}
                                         sx={{ml: 1}}
                                     />
                                 }
