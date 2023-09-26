@@ -195,15 +195,7 @@ const Layout = (props) => {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Box 
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            width: '100%'
-                        }}>
-                        <Typography variant="h6" noWrap component="div">HỆ THỐNG QUẢN LÝ ĐẶT SÂN</Typography>
-                        <Typography variant="h6">{JSON.parse(localStorage.getItem("user"))?.name}</Typography>
-                    </Box>
+                    <Typography variant="h6" noWrap component="div">HỆ THỐNG QUẢN LÝ ĐẶT SÂN</Typography>
                 </Toolbar>
             </AppBar>
             <Drawer

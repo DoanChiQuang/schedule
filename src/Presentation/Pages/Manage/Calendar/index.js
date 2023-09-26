@@ -18,6 +18,7 @@ import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers";
 import { phoneRegExp } from "../../../Utils/regexValidation";
 import { AlertComponent, Loading } from "../../../Components/UI";
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 const Calendar = () => {
 
@@ -36,6 +37,7 @@ const Calendar = () => {
     const [daysOfWeek, setDaysOfWeek] = useState([]);
     const [timeSlots, setTimeSlots] = useState([]);
     const [timeBooked, setTimeBooked] = useState([]);
+    const [timeBookedInitial, setTimeBookedInitial] = useState([]);
     const [yards, setYards] = useState([]);
     const [customers, setCustomers] = useState([]);
     const [toggleModal, setToggleModal] = useState(false);
@@ -59,11 +61,15 @@ const Calendar = () => {
     const [alert, setAlert] = useState(false);
     const [alertMess, setAlertMess] = useState('');
     const [alertType, setAlertType] = useState('');
-    const [submitType, setSubmitType] = useState('create');
     const [confirmAlert, setConfirmAlert] = useState(false);
     const [timeBookedId, setTimeBookedId] = useState('');
     const [timeDetailUpdate, setTimeDetailUpdate] = useState([]);
-    const [filterSDate, setFilterSDate] = useState(dayjs());    
+    const [filterSDate, setFilterSDate] = useState(dayjs());
+    const [openFilter, setOpenFilter] = useState(false);
+    const [filterOption, setFilterOption] = useState({
+        isCustomer: 1,
+        name: ""
+    });
 
     const fetchInitial = () => {
         requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(7, 'day')))});
@@ -244,10 +250,39 @@ const Calendar = () => {
         setTimeBookedId('');
     }
 
+    const onChangeFilterSelect = (event) => {
+        const isCustomer = event.target.value === 'customer' ? 1 : 0;
+        setFilterOption({
+            ...filterOption,
+            isCustomer: isCustomer,
+        });
+    }
+
+    const onChangeFilterTextField = debounce((value) => {
+        setFilterOption({
+            ...filterOption,
+            name: value
+        })
+    }, 300)
+
     const onSubmitConfirmAlert = () => {
         setConfirmAlert(false);
         requestRemove({id: timeBookedId});
-    }    
+    }
+
+    const onFilterSubmit = (reset) => {
+        if(reset) {
+            setTimeBooked(timeBookedInitial);
+            return;
+        }
+        let filteredTimeBooked = timeBookedInitial.filter(element => element.isCustomer === filterOption.isCustomer);
+
+        if (filterOption.name !== "") {
+            filteredTimeBooked = filteredTimeBooked.filter(element => element.customerName.includes(filterOption.name));
+        }
+
+        setTimeBooked(filteredTimeBooked);
+    }
 
     const getCurrentWeekDates = () => {
         const weekDates = [];
@@ -291,7 +326,10 @@ const Calendar = () => {
 
     const isDue = (date) => {
         const curentDate = dayjs();
-
+        if(curentDate.diff(dayjs(date), 'day') >= -1 && curentDate.diff(dayjs(date), 'day') <= 0) {
+            return true;
+        }
+        return false;
     }
 
     const isLunchTime = (time) => {
@@ -306,8 +344,6 @@ const Calendar = () => {
         
         return isNoonSlot;
     }
-
-    console.log(dayjs("2023-09-23").diff(dayjs("2023-09-25"), 'day'));
 
     const convertCusData = () => customers.map((item, index) => ({ label: index+1 + ' - ' + item.name, value: item._id })) || [];
 
@@ -357,6 +393,10 @@ const Calendar = () => {
                 note: "",
                 details: []
             });
+            setFilterOption({
+                isCustomer: 1,
+                name: ""
+            })
         }
         if(dataRemove) {
             setAlert(true);
@@ -493,9 +533,10 @@ const Calendar = () => {
                                     >
                                         <TableCellCustom
                                             sx={[
-                                                time[0].isPay === 0 && {backgroundColor: '#d5d5d5'} || 
+                                                time[0].isPay === 0 && {backgroundColor: '#d5d5d5'} ||
                                                 time[0].isPay === 1 && {backgroundColor: '#FFBF00'} ||
                                                 time[0].isPay === 2 && {backgroundColor: '#00A36C'},
+                                                (time[0].isPay === 0 && isDue(time[0].startDate)) && {backgroundColor: 'red'},
                                                 {position: 'relative'},
                                                 yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}                                                
                                             ]}
@@ -542,6 +583,7 @@ const Calendar = () => {
     useEffect(() => {
         if(dataGetAll) {
             setTimeBooked(dataGetAll.data);
+            setTimeBookedInitial(dataGetAll.data);
         }
     }, [dataGetAll])
 
@@ -587,22 +629,81 @@ const Calendar = () => {
     return (
         <Layout
             children={
-                <Box>
-                    <Box display={'flex'} mb={1}>                        
+                <Box sx={{
+                    '@media (max-width: 400px)': {
+                        width: '85vw',
+                    },
+                }}>
+                    <Box 
+                        display={'flex'}
+                        sx={{
+                            '@media (max-width: 400px)': {
+                                flexDirection: 'column'
+                            },
+                        }}
+                    >
                         <DatePicker
                             label="Ngày bắt đầu"
                             value={filterSDate}
                             onChange={handleStartDateChange}
                             renderInput={(props) => <TextField {...props} />}
-                            sx={{mr: 1}}
+                            sx={{mr: 1, mb: 1}}
                         />
                         <DatePicker
                             label="Ngày kết thúc"
                             value={filterSDate.add(6,'day')}
                             disabled={true}                            
                             renderInput={(props) => <TextField {...props} />}
-                            sx={{mr: 1}}
-                        />
+                            sx={{mr: 1, mb: 1}}
+                        />                        
+                        <HtmlTooltip                                                        
+                            PopperProps={{
+                                disablePortal: true,
+                            }}                            
+                            open={openFilter}
+                            disableFocusListener
+                            disableHoverListener
+                            disableTouchListener
+                            title={
+                                <Box>
+                                    <RadioGroup
+                                        row
+                                        name="position"
+                                        value={filterOption.isCustomer ? "customer" : "passenger"}
+                                        onChange={onChangeFilterSelect}
+                                        defaultValue={filterOption.isCustomer && "customer"}
+                                        sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1}}                                
+                                    >
+                                        <FormControlLabel
+                                            value="customer"
+                                            control={<Radio />}
+                                            label="Khách cố định"
+                                            labelPlacement="top"                                            
+                                        />
+                                        <FormControlLabel
+                                            value="passenger"
+                                            control={<Radio />}
+                                            label="Khách vãng lai"
+                                            labelPlacement="top"
+                                        />
+                                    </RadioGroup>
+                                    <TextField
+                                        label="Lọc theo tên khách hàng"
+                                        defaultValue={calData.nameCustomer}
+                                        onChange={(e) => onChangeFilterTextField(e.target.value)}
+                                        sx={{mr: 1, mb: 1}}
+                                        fullWidth
+                                    />
+                                    <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
+                                        <Button variant="outlined" onClick={() => onFilterSubmit(true)} sx={{mr: 1}}>Đặt lại</Button>
+                                        <Button variant="contained" onClick={() => onFilterSubmit(false)}>Xác nhận</Button>
+                                    </Box>
+                                </Box>
+                            }
+                            placement="bottom-start"
+                        >
+                            <Button variant="contained" startIcon={<FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 1, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>
+                        </HtmlTooltip>
                     </Box>
                     <TableContainer 
                         component={Paper} 
@@ -621,7 +722,7 @@ const Calendar = () => {
                                 '&:hover': {
                                     background: '#A9A9A9',
                                 },
-                            },
+                            }                            
                         }}
                     >
                         <Table>
@@ -657,7 +758,7 @@ const Calendar = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    <Box sx={{position: 'fixed', bottom: theme.spacing(2), right: theme.spacing(2), zIndex: 1000}}>
+                    <Box sx={{position: 'fixed', bottom: theme.spacing(4), right: theme.spacing(4), zIndex: 1000}}>
                         <Button onClick={() => onOpenModal()} variant="contained" sx={{mr: 1}} startIcon={<AddIcon />} disabled={selectedCells.length > 0 ? false : true}>
                             Tạo lịch
                         </Button>
