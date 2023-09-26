@@ -17,6 +17,12 @@ export const create = async (req, res, next) => {
             next(error)
             return
         }
+        if(await Customer.findOne({phonenum: phonenum, del: 0})) {
+            const error = new Error('Số điện thoại người dùng đã tồn tại.')
+            error.statusCode = 400
+            next(error)
+            return
+        }
 		const customer = await Customer.create({
             name,
             phonenum,
