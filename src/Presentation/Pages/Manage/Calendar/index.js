@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import Layout from "../../Layout/Layout";
+import Layout from "../../Layout/Layout-v2";
 import { Autocomplete, Box, Button, FormControlLabel, IconButton, Modal, Paper, Radio, RadioGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, debounce, styled, tooltipClasses, useTheme } from "@mui/material";
 import { CALENDER_PATH } from "../../../../Main/Route/path";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import useApi from "../../../Hooks/useApi";
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -142,7 +143,7 @@ const Calendar = () => {
                     message: ''
                 });
                 setCalError(false);
-                break;
+                break;            
         }
     }
 
@@ -151,7 +152,7 @@ const Calendar = () => {
             setCalData({
                 id: "",
                 startDate: "",
-                endDate: "",
+                endDate: dayjs().endOf('month'),
                 isCustomer: 1,
                 idCustomer: "",
                 nameCustomer: "",
@@ -159,6 +160,12 @@ const Calendar = () => {
                 isPay: 0,
                 note: "",
                 details: []
+            });
+        }
+        else {
+            setCalData({
+                ...calData,
+                endDate: dayjs().endOf('month')                
             });
         }
         setCalErrorData({
@@ -212,7 +219,6 @@ const Calendar = () => {
             endDate: formatDate(formatDateDot(calData.endDate)),
             details: calDetails
         };
-        // console.log(params);
         requestCreate(params);
     }
 
@@ -282,6 +288,26 @@ const Calendar = () => {
     const isSelected = (idTime, date, idYard) => {
         return selectedCells.some((item) => item.date === date && item.time === idTime && item.yard === idYard);
     };
+
+    const isDue = (date) => {
+        const curentDate = dayjs();
+
+    }
+
+    const isLunchTime = (time) => {
+        const [startTime, endTime] = time.split(' - ');
+        const startDateTime = dayjs(startTime, 'HH:mm');
+        const endDateTime = dayjs(endTime, 'HH:mm');
+        
+        const noonStartTime = dayjs('12:00', 'HH:mm');
+        const noonEndTime = dayjs('13:00', 'HH:mm');
+        
+        const isNoonSlot = (startDateTime.isAfter(noonStartTime) || startDateTime.isSame(noonStartTime)) && (endDateTime.isBefore(noonEndTime) || endDateTime.isSame(noonEndTime));
+        
+        return isNoonSlot;
+    }
+
+    console.log(dayjs("2023-09-23").diff(dayjs("2023-09-25"), 'day'));
 
     const convertCusData = () => customers.map((item, index) => ({ label: index+1 + ' - ' + item.name, value: item._id })) || [];
 
@@ -371,126 +397,136 @@ const Calendar = () => {
     };
 
     const timeSlotComponents = useMemo(() => {
-        return timeSlots.map((timeSlot, timeSlotIndex) => (
-            <TableRow key={timeSlot.id + '_' + timeSlotIndex}>
-                <TableCell style={{ borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, backgroundColor: '#4682B4', color: 'white' }}>
-                    <Typography variant="caption" fontWeight={'bold'}>{timeSlot.name}</Typography>                                            
-                </TableCell>
-                {daysOfWeek.map((day, dayIndex) => (
-                    yards.map((yard, yardIndex) => {
-                        const time = timeBooked.filter(item => {                                                    
-                            return (item.details.some(detail => formatDateDot(detail.date) === day.date && detail.yard === yard._id && detail.periodTime.includes(timeSlot.id)));
-                        });
-                        if(time.length > 0) {
-                            const timeSlotsDetail = timeSlots.filter(timeSlot => {
-                                return (time[0].details.some(detail => detail.periodTime.includes(timeSlot.id)));
+        return timeSlots.map((timeSlot, timeSlotIndex) => {
+            return (
+                <TableRow key={timeSlot.id + '_' + timeSlotIndex}>
+                    <TableCell sx={[isLunchTime(timeSlot.name) ? {backgroundColor: '#E97451'} : {backgroundColor: '#4682B4'}, { borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, color: 'white' }]}>
+                        <Typography variant="caption" fontWeight={'bold'}>{timeSlot.name}</Typography>                                            
+                    </TableCell>
+                    {daysOfWeek.map((day, dayIndex) => (
+                        yards.map((yard, yardIndex) => {
+                            const time = timeBooked.filter(item => {                                                    
+                                return (item.details.some(detail => formatDateDot(detail.date) === day.date && detail.yard === yard._id && detail.periodTime.includes(timeSlot.id)));
                             });
+                            if(time.length > 0) {
+                                const timeSlotsDetail = timeSlots.filter(timeSlot => {
+                                    return (time[0].details.some(detail => detail.periodTime.includes(timeSlot.id)));
+                                });
 
-                            const tooltipDetail = time[0].details.map(detail => {                                                        
-                                const date = new Date(detail.date);
-                                const dayOfWeekIndex = date.getDay();
-                                const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + formatDateDot(detail.date);
-                                const timeCell = timeSlotsDetail.filter(timeSlotDetail => detail.periodTime.includes(timeSlotDetail.id));
-                                const yardTemp = yards.filter(yard => yard._id === detail.yard);
-                                const yardCell = yardTemp[0].name;
-                                return {dateCell, timeCell, yardCell};
-                            });
+                                const tooltipDetail = time[0].details.map(detail => {                                                        
+                                    const date = new Date(detail.date);
+                                    const dayOfWeekIndex = date.getDay();
+                                    const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + formatDateDot(detail.date);
+                                    const timeCell = timeSlotsDetail.filter(timeSlotDetail => detail.periodTime.includes(timeSlotDetail.id));
+                                    const yardTemp = yards.filter(yard => yard._id === detail.yard);
+                                    const yardCell = yardTemp[0].name;
+                                    return {dateCell, timeCell, yardCell};
+                                });
 
-                            tooltipDetail.sort((a, b) => {
-                                const dateA = new Date(formatDate(a.dateCell.split(' - ')[1]));
-                                const dateB = new Date(formatDate(b.dateCell.split(' - ')[1]));
-                                return dateA - dateB;
-                            });
-                            
-                            return (
-                                <HtmlTooltip                                                            
-                                    title={
-                                        <React.Fragment key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex}>
-                                            <Box display={'flex'} justifyContent={'space-between'} alignItems={'flex-start'} borderBottom={'1px solid #ccc'} mb={1} pb={1}>
-                                                <Box>
-                                                    <Typography color="inherit" fontWeight={'bold'}>Anh/Chị: {time[0].customerName}</Typography>
-                                                    <Typography color="inherit">SĐT: {time[0].customerPhone}</Typography>
-                                                </Box>                                                                        
-                                                <Box ml={3}>
-                                                    <Tooltip title="Chi tiết">
-                                                        <IconButton size="small" onClick={() => onOpenModal(time[0], tooltipDetail)}>
-                                                            <AspectRatioIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    <Tooltip title="Hủy">
-                                                        <IconButton size="small" onClick={() => onOpenConfirmAlert(time[0].id)}>
-                                                            <DeleteIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </Box>
-                                            </Box>                                                                    
-                                            {time[0].isCustomer ? 
-                                                <>
-                                                    <Typography variant="body1" fontWeight={"bold"}>Thời gian</Typography>
-                                                    <Table>
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell>Ngày</TableCell>
-                                                                <TableCell>Thời gian</TableCell>
-                                                                <TableCell>Sân</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>                                                            
-                                                            {tooltipDetail.map((timeSlotDetail, timeSlotDetailIndex) => (
-                                                                <TableRow key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex + '_' + timeSlotDetail.id + '_' + timeSlotDetailIndex}>
-                                                                    <TableCell>{timeSlotDetail.dateCell}</TableCell>
-                                                                    <TableCell>
-                                                                        {timeSlotDetail.timeCell.map((item, index) => (
-                                                                            <React.Fragment key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex + '_' + timeSlotDetail.id + '_' + timeSlotDetailIndex + '_' + item.id + '_' + index}>
-                                                                                {item.name}
-                                                                                {index < timeSlotDetail.timeCell.length - 1 && <br />}
-                                                                            </React.Fragment>
-                                                                        ))}
-                                                                    </TableCell>
-                                                                    <TableCell>{timeSlotDetail.yardCell}</TableCell>
+                                tooltipDetail.sort((a, b) => {
+                                    const dateA = new Date(formatDate(a.dateCell.split(' - ')[1]));
+                                    const dateB = new Date(formatDate(b.dateCell.split(' - ')[1]));
+                                    return dateA - dateB;
+                                });
+                                
+                                return (
+                                    <HtmlTooltip                                                            
+                                        title={
+                                            <React.Fragment key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex}>
+                                                <Box display={'flex'} justifyContent={'space-between'} alignItems={'flex-start'} borderBottom={'1px solid #ccc'} mb={1} pb={1}>
+                                                    <Box>
+                                                        <Typography color="inherit" fontWeight={'bold'}>Anh/Chị: {time[0].customerName}</Typography>
+                                                        <Typography color="inherit">SĐT: {time[0].customerPhone}</Typography>
+                                                    </Box>                                                                        
+                                                    <Box ml={3}>
+                                                        <Tooltip title="Chi tiết">
+                                                            <IconButton size="small" onClick={() => onOpenModal(time[0], tooltipDetail)}>
+                                                                <AspectRatioIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Hủy">
+                                                            <IconButton size="small" onClick={() => onOpenConfirmAlert(time[0].id)}>
+                                                                <DeleteIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Box>
+                                                </Box>                                                                    
+                                                {time[0].isCustomer ? 
+                                                    <>
+                                                        <Typography variant="body1" fontWeight={"bold"}>Thời gian</Typography>
+                                                        <Table>
+                                                            <TableHead>
+                                                                <TableRow>
+                                                                    <TableCell>Ngày</TableCell>
+                                                                    <TableCell>Thời gian</TableCell>
+                                                                    <TableCell>Sân</TableCell>
                                                                 </TableRow>
-                                                            ))}
-                                                        </TableBody>
-                                                    </Table>
-                                                </>
-                                                :
-                                                <Box>
-                                                    <Typography color="inherit" fontWeight={'bold'}>{day.name + ' - ' + day.date}</Typography>
-                                                    <Typography color="inherit">Thời gian: {timeSlot.name}</Typography>
-                                                    <Typography color="inherit">Sân: {yard.name}</Typography>
-                                                </Box>
-                                            }                                                                    
-                                        </React.Fragment>
-                                    }
-                                    placement="right-start"
-                                >
-                                    <TableCellCustom                                                                
-                                        style={yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}}
-                                        sx={
-                                            time[0].isPay === 0 && {backgroundColor: '#d5d5d5'} || 
-                                            time[0].isPay === 1 && {backgroundColor: '#FFBF00'} ||
-                                            time[0].isPay === 2 && {backgroundColor: '#00A36C'}
+                                                            </TableHead>
+                                                            <TableBody>                                                            
+                                                                {tooltipDetail.map((timeSlotDetail, timeSlotDetailIndex) => (
+                                                                    <TableRow key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex + '_' + timeSlotDetail.id + '_' + timeSlotDetailIndex}>
+                                                                        <TableCell>{timeSlotDetail.dateCell}</TableCell>
+                                                                        <TableCell>
+                                                                            {timeSlotDetail.timeCell.map((item, index) => (
+                                                                                <React.Fragment key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex + '_' + timeSlotDetail.id + '_' + timeSlotDetailIndex + '_' + item.id + '_' + index}>
+                                                                                    {item.name}
+                                                                                    {index < timeSlotDetail.timeCell.length - 1 && <br />}
+                                                                                </React.Fragment>
+                                                                            ))}
+                                                                        </TableCell>
+                                                                        <TableCell>{timeSlotDetail.yardCell}</TableCell>
+                                                                    </TableRow>
+                                                                ))}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </>
+                                                    :
+                                                    <Box>
+                                                        <Typography color="inherit" fontWeight={'bold'}>{day.name + ' - ' + day.date}</Typography>
+                                                        <Typography color="inherit">Thời gian: {timeSlot.name}</Typography>
+                                                        <Typography color="inherit">Sân: {yard.name}</Typography>
+                                                    </Box>
+                                                }                                                                    
+                                            </React.Fragment>
                                         }
+                                        placement="right-start"
                                     >
-                                        <Typography variant="caption" fontWeight={'bold'} color={'white'}>{getLastName(time[0].customerName)}</Typography>
-                                    </TableCellCustom>
-                                </HtmlTooltip>
-                            )
-                        }
-                        else {
-                            return (
-                                <TableCellCustom
-                                    key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex}
-                                    style={yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}}
-                                    sx={isSelected(timeSlot.id, day.date, yard._id) ? {backgroundColor: theme.palette.primary.main} : {}}
-                                    onClick={() => onSelectCell(timeSlot.id, day.date, yard._id)}
-                                />
-                            )
-                        }
-                    })
-                ))}
-            </TableRow>
-        ))
+                                        <TableCellCustom
+                                            sx={[
+                                                time[0].isPay === 0 && {backgroundColor: '#d5d5d5'} || 
+                                                time[0].isPay === 1 && {backgroundColor: '#FFBF00'} ||
+                                                time[0].isPay === 2 && {backgroundColor: '#00A36C'},
+                                                {position: 'relative'},
+                                                yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}                                                
+                                            ]}
+                                        >
+                                            {time[0].isCustomer && 
+                                                <Box sx={{position: 'absolute', top: 0, right: 0, mt: 0.1}}>
+                                                    <WorkspacePremiumIcon sx={{color: 'yellow'}} />
+                                                </Box>
+                                                || 
+                                                <></>
+                                            }
+                                            <Typography variant="caption" fontWeight={'bold'} color={'white'}>{getLastName(time[0].customerName)}</Typography>
+                                        </TableCellCustom>
+                                    </HtmlTooltip>
+                                )
+                            }
+                            else {
+                                return (
+                                    <TableCellCustom
+                                        key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex}
+                                        style={yard.length-1!==yardIndex ? { borderRight: "1px solid #ccc" } : {}}
+                                        sx={[isLunchTime(timeSlot.name) ? {backgroundColor: '#E97451'} : {}, isSelected(timeSlot.id, day.date, yard._id) ? {backgroundColor: theme.palette.primary.main} : {}]}
+                                        onClick={() => onSelectCell(timeSlot.id, day.date, yard._id)}
+                                    />
+                                )
+                            }
+                        })
+                    ))}
+                </TableRow>
+            )
+        })
     }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells, onSelectCell])
 
     useEffect(() => {                
@@ -549,7 +585,7 @@ const Calendar = () => {
     }, [filterSDate])
 
     return (
-        <Layout 
+        <Layout
             children={
                 <Box>
                     <Box display={'flex'} mb={1}>                        
@@ -563,20 +599,39 @@ const Calendar = () => {
                         <DatePicker
                             label="Ngày kết thúc"
                             value={filterSDate.add(6,'day')}
-                            disabled={true}
+                            disabled={true}                            
                             renderInput={(props) => <TextField {...props} />}
                             sx={{mr: 1}}
                         />
                     </Box>
-                    <TableContainer component={Paper} style={{ height: '75vh', overflowX: 'auto' }}>
+                    <TableContainer 
+                        component={Paper} 
+                        style={{ height: '75vh', overflowX: 'auto' }} 
+                        sx={{
+                            '&::-webkit-scrollbar': {
+                                width: '0.4rem',
+                                height: '0.4rem'
+                            },
+                            '&::-webkit-scrollbar-track': {
+                                background: '#f1f1f1',
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                                background: '#d5d5d5',
+                                borderRadius: 4,
+                                '&:hover': {
+                                    background: '#A9A9A9',
+                                },
+                            },
+                        }}
+                    >
                         <Table>
                             <TableHead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 2 }}>
                                 <TableRow>
-                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 150}}>
+                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 110}}>
                                         <Typography variant="body2">Ngày</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
-                                        <TableCell key={day.date + '_' + dayIndex} colSpan={4} style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 150}}>
+                                        <TableCell key={day.date + '_' + dayIndex} colSpan={yards.length} sx={[["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, { borderRight: "1px solid #ccc", color: 'white', minWidth: 150}]}>
                                             <Box display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
                                                 <Typography variant="body2">{day.name}</Typography>
                                                 <Typography variant="body2" fontWeight={'bold'}>{day.date}</Typography>
@@ -585,12 +640,12 @@ const Calendar = () => {
                                     ))}
                                 </TableRow>
                                 <TableRow>
-                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#4682B4', color: 'white', minWidth: 150}}>
-                                        <Typography variant="caption" fontWeight={'bold'}>Thời gian | Sân</Typography>
+                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 110}}>
+                                        <Typography variant="caption" fontWeight={'bold'}>Sân</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
                                         yards.map((yard, yardIndex) => (
-                                            <TableCell key={day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} style={{ borderRight: "1px solid #ccc", backgroundColor: '#4682B4', color: 'white', minWidth: 70}}>
+                                            <TableCell key={day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} sx={[["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, { borderRight: "1px solid #ccc", color: 'white', minWidth: 70}]}>
                                                 <Typography variant="caption" fontWeight={'bold'}>{yard.name}</Typography>                                                
                                             </TableCell>
                                         ))
@@ -625,14 +680,14 @@ const Calendar = () => {
                                     control={<Radio />}
                                     label="Khách cố định"
                                     labelPlacement="top"
-                                    disabled={calData.id && true}
+                                    disabled={calData.id && true || false}
                                 />
                                 <FormControlLabel
                                     value="passenger"
                                     control={<Radio />}
                                     label="Khách vãng lai"
                                     labelPlacement="top"
-                                    disabled={calData.id && true}
+                                    disabled={calData.id && true || false}
                                 />
                             </RadioGroup>
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin cá nhân</Typography>                            
@@ -640,14 +695,14 @@ const Calendar = () => {
                                 <Box mb={2}>
                                     <Autocomplete
                                         disablePortal
-                                        options={convertCusData()}
-                                        value={calData.idCustomer}                                        
+                                        options={convertCusData() || []}
+                                        value={calData && calData.idCustomer ? calData.idCustomer : ''}
                                         getOptionLabel={(option) => {
                                             const selectedCustomer = convertCusData().find((item) => item.value === option);
                                             return selectedCustomer ? selectedCustomer.label : option.label ? option.label : '';
                                         }}
-                                        disabled={calData.id && true}
-                                        onChange={(e, selectedOption) => onChangeCalData('idCustomer', selectedOption.value)}
+                                        disabled={calData && calData.id ? true : false}
+                                        onChange={(e, selectedOption) => onChangeCalData('idCustomer', selectedOption ? selectedOption.value : null)}
                                         renderInput={(params) => <TextField {...params} label="Khách hàng" />}
                                         fullWidth
                                     />
@@ -682,14 +737,15 @@ const Calendar = () => {
                                     label="Thời gian bắt đầu" 
                                     defaultValue={calData.startDate ? dayjs(calData.startDate) : dayjs()}
                                     disabled={true}
-                                    sx={{mr: 1}}                                    
+                                    sx={{mr: 1}}
                                 />
                                 {calData.isCustomer === 1 &&
                                     <DatePicker
                                         label="Thời gian kết thúc"
-                                        disabled={calData.id && true}
+                                        disabled={calData.id && true || false}
                                         defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs().endOf('month')}
                                         onChange={(date) => onChangeCalData('endDate', date)}
+                                        minDate={calData.startDate ? dayjs(calData.startDate) : dayjs()}
                                         sx={{ml: 1}}
                                     />
                                 }
@@ -737,7 +793,6 @@ const Calendar = () => {
                                             })
                                             :
                                             timeDetailUpdate.map((timeDetail, timeDetailIndex) => {
-                                                console.log(timeDetail);
                                                 return (
                                                     <TableRow key={timeDetailIndex}>
                                                         <TableCell>{timeDetail.dateCell}</TableCell>

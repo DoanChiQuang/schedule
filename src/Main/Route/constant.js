@@ -53,18 +53,18 @@ const Routes = [
                 path: path.YARD_PATH,
                 element: <Yard />
             },
-            {
-                path: path.TIME_PATH,
-                element: <Time />
-            },
-            {
-                path: path.USER_PATH,
-                element: <User />
-            },
-            {
-                path: path.FORGOTPASSWORD_PATH,
-                element: <ChangePass />
-            },
+            // {
+            //     path: path.TIME_PATH,
+            //     element: <Time />
+            // },
+            // {
+            //     path: path.USER_PATH,
+            //     element: <User />
+            // },
+            // {
+            //     path: path.FORGOTPASSWORD_PATH,
+            //     element: <ChangePass />
+            // },
             {
                 path: path.LOGOUT_PATH,
                 element: <Logout />

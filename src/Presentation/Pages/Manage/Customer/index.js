@@ -403,7 +403,7 @@ const Customer = () => {
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin khác</Typography>
                             <Box mb={2}>
                                 <TextField
-                                    label="Chiết khấu"
+                                    label="Chiết khấu (%)"
                                     defaultValue={cusData.discount}
                                     onChange={(e) => onChangeTextField('discount', e.target.value)}
                                     error={cusError && cusErrorData.key === 'discount' && true}

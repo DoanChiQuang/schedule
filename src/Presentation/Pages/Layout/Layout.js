@@ -38,19 +38,19 @@ const Layout = (props) => {
             route: path.YARD_PATH,
             iconElement: <YardIcon />
         },
-        {
-            name: "Thời gian",
-            route: path.TIME_PATH,
-            iconElement: <AccessTimeIcon />
-        }
+        // {
+        //     name: "Thời gian",
+        //     route: path.TIME_PATH,
+        //     iconElement: <AccessTimeIcon />
+        // }
     ];
 
     const MenuUser = [        
-        {
-            name: "Nhân viên",
-            route: path.USER_PATH,
-            iconElement: <ManageAccountsIcon />
-        },
+        // {
+        //     name: "Nhân viên",
+        //     route: path.USER_PATH,
+        //     iconElement: <ManageAccountsIcon />
+        // },
         {
             name: "Khách hàng",
             route: path.CUSTOMER_PATH,
@@ -59,11 +59,11 @@ const Layout = (props) => {
     ];
 
     const MenuSetting = [
-        {
-            name: "Đổi mật khẩu",
-            route: path.FORGOTPASSWORD_PATH,
-            iconElement: <LockResetIcon />
-        },
+        // {
+        //     name: "Đổi mật khẩu",
+        //     route: path.FORGOTPASSWORD_PATH,
+        //     iconElement: <LockResetIcon />
+        // },
         {
             name: "Đăng xuất",
             route: path.LOGOUT_PATH,
