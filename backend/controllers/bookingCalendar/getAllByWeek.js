@@ -84,6 +84,7 @@ export const getAll = async (req, res, next) => {
                     customerName: cal.customerName,
                     customerPhone: cal.customerPhone,
                     isPay: cal.isPay,
+                    note: cal.note
                 });
             }
         })
