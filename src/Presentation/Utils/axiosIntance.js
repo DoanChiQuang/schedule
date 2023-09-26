@@ -28,15 +28,14 @@ axiosInstance.interceptors.response.use(
     },
     
     async (error) => {
-        console.log(error)
         if (error?.response?.status === 401) {
             localStorage.removeItem('access_token');
             localStorage.removeItem('user');
-            <Navigate to={DASH_PATH + SIGNIN_PATH} replace />
+            return Promise.reject({status: 401, message: error.response?.data?.message})
         }
         // NOT FOUND RESPONSE
         if(error?.response) {
-            return Promise.reject({message: error.response?.data?.message})
+            return Promise.reject({status: 400, message: error.response?.data?.message})
         }
 
         return Promise.reject(error)
