@@ -620,12 +620,10 @@ const Calendar = () => {
         handleReceiveErrorData();
     }, [errorCreate, errorRemove]);
 
-    useEffect(() => {
-        if(formatDateDot(filterSDate) !== formatDateDot(dayjs())) {
-            requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
-            const daysOfWeekNow = getCurrentWeekDates();
-            setDaysOfWeek(daysOfWeekNow);
-        }
+    useEffect(() => {        
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
+        const daysOfWeekNow = getCurrentWeekDates();
+        setDaysOfWeek(daysOfWeekNow);        
     }, [filterSDate])
 
     return (
