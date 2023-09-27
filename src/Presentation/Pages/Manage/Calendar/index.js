@@ -599,7 +599,7 @@ const Calendar = () => {
         }
     }, [dataCustomer])
 
-    useEffect(() => {
+    useEffect(() => {        
         if(selectedCells.length > 0) {
             const selectedCal = covertCalDetail();
             selectedCal.sort((a, b) => {
@@ -616,14 +616,16 @@ const Calendar = () => {
         handleReceiveSuccessData();
     }, [dataCreate, dataRemove]);
 
-    useEffect(() => {
+    useEffect(() => {        
         handleReceiveErrorData();
     }, [errorCreate, errorRemove]);
 
     useEffect(() => {
-        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
-        const daysOfWeekNow = getCurrentWeekDates();
-        setDaysOfWeek(daysOfWeekNow);
+        if(formatDateDot(filterSDate) !== formatDateDot(dayjs())) {
+            requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
+            const daysOfWeekNow = getCurrentWeekDates();
+            setDaysOfWeek(daysOfWeekNow);
+        }
     }, [filterSDate])
 
     return (
@@ -844,7 +846,7 @@ const Calendar = () => {
                                     <DatePicker
                                         label="Thời gian kết thúc"
                                         disabled={calData.id && true || false}
-                                        defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs().endOf('month')}
+                                        defaultValue={calData.endDate ? dayjs(calData.startDate).endOf('month') : dayjs().endOf('month')}
                                         onChange={(date) => onChangeCalData('endDate', date)}
                                         minDate={calData.startDate ? dayjs(calData.startDate) : dayjs()}
                                         sx={{ml: 1}}
