@@ -72,7 +72,7 @@ const Calendar = () => {
     });
 
     const fetchInitial = () => {
-        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(7, 'day')))});
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
         requestGetAllTimeDetail();
         requestYard();
         requestCustomer();
@@ -230,7 +230,7 @@ const Calendar = () => {
 
     const onCloseAlert = () => {
         if(alertType === 'success') {            
-            requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(7, 'day')))});
+            requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
             const daysOfWeekNow = getCurrentWeekDates();
             setDaysOfWeek(daysOfWeekNow);
         }
@@ -621,7 +621,7 @@ const Calendar = () => {
     }, [errorCreate, errorRemove]);
 
     useEffect(() => {
-        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(7, 'day')))});
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
         const daysOfWeekNow = getCurrentWeekDates();
         setDaysOfWeek(daysOfWeekNow);
     }, [filterSDate])
