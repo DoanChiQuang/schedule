@@ -73,6 +73,7 @@ export const create = async (req, res, next) => {
             //create
             let month = new Date(startDate).getMonth();
             let year = new Date(startDate).getFullYear();
+            let currentDate = new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(),0,0,0))
 
             let dupl = false;
             for(let i = 0; i < details.length; i++){
@@ -83,6 +84,13 @@ export const create = async (req, res, next) => {
                 
                 if(fetchAllCalen.length > 0){
                     dupl = true;
+                }
+
+                if(new Date(details[i].date).getTime() < currentDate.getTime()){
+                    const error = new Error("Lịch không được đặt ngày quá khứ.");
+                    error.statusCode = 400;
+                    next(error);
+                    return;
                 }
             }
             if(dupl){
@@ -96,10 +104,15 @@ export const create = async (req, res, next) => {
                 let details_sch = [];
                 let day_check = [];
                 let date_check = [];
+                let future_check = false;
                 details.forEach(d => {
                     if(d) {
                         date_check.push(d.date);
                         day_check.push(new Date(d.date).getDay());
+
+                        if(new Date(d.date).getMonth() > currentDate.getMonth()){
+                            future_check = true;
+                        }
     
                         let obj = {
                             day: new Date(d.date).getDay(),
@@ -109,12 +122,14 @@ export const create = async (req, res, next) => {
                         details_sch.push(obj);
                     }
                 });
-
+                if(future_check){
+                    const error = new Error("Lịch khách cố định chỉ được đặt trong tháng.");
+                    error.statusCode = 400;
+                    next(error);
+                    return;
+                }
                 if([...new Set(day_check)].length != [...new Set(date_check)].length) {
-                    console.log(day_check);
-                    console.log(date_check);
-
-                    const error = new Error("Lịch khách cố định chỉ được đặt trong một tuần.");
+                    const error = new Error("Lịch khách cố định không đặt cùng thứ trên nhiều tuần.");
                     error.statusCode = 400;
                     next(error);
                     return;
