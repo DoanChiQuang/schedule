@@ -94,8 +94,13 @@ export const create = async (req, res, next) => {
             
             if(isCustomer) {
                 let details_sch = [];
+                let day_check = [];
+                let date_check = [];
                 details.forEach(d => {
                     if(d) {
+                        date_check.push(d.date);
+                        day_check.push(new Date(d.date).getDay());
+    
                         let obj = {
                             day: new Date(d.date).getDay(),
                             yard: d.yard,
@@ -104,6 +109,17 @@ export const create = async (req, res, next) => {
                         details_sch.push(obj);
                     }
                 });
+
+                if([...new Set(day_check)].length != [...new Set(date_check)].length) {
+                    console.log(day_check);
+                    console.log(date_check);
+
+                    const error = new Error("Lịch khách cố định chỉ được đặt trong một tuần.");
+                    error.statusCode = 400;
+                    next(error);
+                    return;
+                }
+
                 const customer = await Customer.findById({_id: idCustomer});
 
                 const bookingCalIns = await BookingCal.create({

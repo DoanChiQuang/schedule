@@ -46,7 +46,7 @@ export const getAll = async (req, res, next) => {
                 cal.details.forEach(da => {
                     let detailsDate = '';
                     for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
-                        if(da.day == new Date(year, month, dateNum).getDay()) {
+                        if(da.day == new Date(Date.UTC(year, month, dateNum, 0, 0, 0)).getDay()) {
                             detailsDate = new Date(Date.UTC(year, month, dateNum, 0, 0, 0));
                         }
                     }
