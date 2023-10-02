@@ -35,30 +35,35 @@ export const getAll = async (req, res, next) => {
             let detailsCal = [];
 
             if(cal.isCustomer){
-                if(dateStart > dateEnd && month == monthEnd) {
-                    endNum = new Date(endDate).getDate();
-                    startNum = 1;
-                }
-                if(dateStart < dateEnd) {
-                    endNum = new Date(endDate).getDate();
-                }
-
-                cal.details.forEach(da => {
-                    let detailsDate = '';
-                    for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
-                        if(da.day == new Date(Date.UTC(year, month, dateNum, 0, 0, 0)).getDay()) {
-                            detailsDate = new Date(Date.UTC(year, month, dateNum, 0, 0, 0));
+                if(new Date(startDate).getTime() < new Date(cal.endDate).getTime()){
+                    if(dateStart > dateEnd && month == monthEnd) {
+                        endNum = new Date(endDate).getDate();
+                        startNum = 1;
+                    }
+                    if(dateStart < dateEnd) {
+                        endNum = new Date(endDate).getDate();
+                        if(dateEnd > new Date(cal.endDate).getDate()){
+                            endNum = new Date(cal.endDate).getDate();
                         }
                     }
 
-                    if (detailsDate){
-                        detailsCal.push({
-                            date: detailsDate,
-                            yard: da.yard,
-                            periodTime: da.periodTime
-                        });
-                    }
-                });
+                    cal.details.forEach(da => {
+                        let detailsDate = '';
+                        for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
+                            if(da.day == new Date(Date.UTC(year, month, dateNum, 0, 0, 0)).getDay()) {
+                                detailsDate = new Date(Date.UTC(year, month, dateNum, 0, 0, 0));
+                            }
+                        }
+
+                        if (detailsDate){
+                            detailsCal.push({
+                                date: detailsDate,
+                                yard: da.yard,
+                                periodTime: da.periodTime
+                            });
+                        }
+                    });
+                }
             }else{
                 detailsCal.push({
                     date: new Date(cal.startDate),
