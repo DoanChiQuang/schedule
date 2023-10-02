@@ -24,6 +24,14 @@ export const create = async (req, res, next) => {
                 return ;
             }
 
+            const yardCheck = await Yard.findOne({name: name, del: 0});
+            if(yardCheck) {
+                const error = new Error('Tên đã tồn tại.');
+                error.statusCode = 400;
+                next(error);
+                return;
+            }
+
             const result = await Yard.updateOne({_id: id}, {
                 name: name,
                 // branch: branch

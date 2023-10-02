@@ -44,7 +44,7 @@ const Calendar = () => {
     const [calData, setCalData] = useState({
         id: "",
         startDate: "",
-        endDate: dayjs().endOf('month'),
+        endDate: "",
         isCustomer: 1,
         idCustomer: "",
         nameCustomer: "",
@@ -158,7 +158,7 @@ const Calendar = () => {
             setCalData({
                 id: "",
                 startDate: "",
-                endDate: dayjs().endOf('month'),
+                endDate: "",
                 isCustomer: 1,
                 idCustomer: "",
                 nameCustomer: "",
@@ -169,10 +169,7 @@ const Calendar = () => {
             });
         }
         else {
-            setCalData({
-                ...calData,
-                endDate: dayjs().endOf('month')                
-            });
+            setCalData({...calData, idCustomer: ""});
         }
         setCalErrorData({
             key: '',
@@ -182,7 +179,7 @@ const Calendar = () => {
         setToggleModal(false);
     }
 
-    const onOpenModal = (calData, timeDetail) => {
+    const onOpenModal = (calData, timeDetail) => {        
         if(calData && timeDetail) {
             const calDetails = calData.details.map(detail => {
                 return {                
@@ -203,7 +200,7 @@ const Calendar = () => {
                 isPay: calData.isPay,
                 note: calData.note,
                 details: calDetails
-            });
+            });            
         }        
         setToggleModal(true);
     }
@@ -222,9 +219,10 @@ const Calendar = () => {
         });        
         const params = {
             ...calData,
-            endDate: formatDate(formatDateDot(calData.endDate)),
+            endDate: formatDate(formatDateDot(calData.endDate ? calData.endDate : dayjs(calData.startDate).endOf('month'))),
             details: calDetails
         };
+        // console.log(params);
         requestCreate(params);
     }
 
@@ -459,7 +457,7 @@ const Calendar = () => {
                                     const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + formatDateDot(detail.date);
                                     const timeCell = timeSlotsDetail.filter(timeSlotDetail => detail.periodTime.includes(timeSlotDetail.id));
                                     const yardTemp = yards.filter(yard => yard._id === detail.yard);
-                                    const yardCell = yardTemp[0].name;
+                                    const yardCell = yardTemp[0]?.name;
                                     return {dateCell, timeCell, yardCell};
                                 });
 
@@ -844,7 +842,7 @@ const Calendar = () => {
                                     <DatePicker
                                         label="Thời gian kết thúc"
                                         disabled={calData.id && true || false}
-                                        defaultValue={calData.endDate ? dayjs(calData.startDate).endOf('month') : dayjs().endOf('month')}
+                                        defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs(calData.startDate).endOf('month')}
                                         onChange={(date) => onChangeCalData('endDate', date)}
                                         minDate={calData.startDate ? dayjs(calData.startDate) : dayjs()}
                                         sx={{ml: 1}}
