@@ -9,7 +9,6 @@ import BookingCRoute from "./routes/bookingCalendar.js";
 import Yard from "./routes/yard.js";
 import User from "./routes/user.js";
 import { isAuth } from './middleware/index.js';
-import ip from 'ip';
 
 dotenv.config();
 const app = express();
@@ -25,8 +24,6 @@ app.use("/api/booking-calendar", isAuth, BookingCRoute);
 app.use("/api/yard", isAuth, Yard);
 app.use("/api/user", isAuth, User);
 
-const ipAddress = ip.address();
-
 app.use((err, req, res, next) => {
     res.status(err.statusCode || 500).json({
       success: false,
@@ -35,4 +32,4 @@ app.use((err, req, res, next) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, console.log(`Listening on port: ${ipAddress}:${port}`));
+app.listen(port, console.log(`Listening on port: ${port}`));
