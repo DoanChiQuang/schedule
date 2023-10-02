@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Navigate } from 'react-router-dom'
 import { DASH_PATH, SIGNIN_PATH } from '../../Main/Route/path'
-const API_URL = 'http://14.225.201.18:5001'
+const API_URL = 'http://14.225.201.18:5000'
 
 const axiosInstance = axios.create({
     baseURL: API_URL,
@@ -28,7 +28,6 @@ axiosInstance.interceptors.response.use(
     },
     
     async (error) => {
-        console.log(error)
         if (error?.response?.status === 401) {
             localStorage.removeItem('access_token');
             localStorage.removeItem('user');
