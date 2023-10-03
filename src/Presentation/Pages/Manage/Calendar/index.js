@@ -70,6 +70,7 @@ const Calendar = () => {
     const [timeDetailUpdate, setTimeDetailUpdate] = useState([]);
     const [filterSDate, setFilterSDate] = useState(dayjs());
     const [filterEDate, setFilterEDate] = useState(dayjs().add(6, 'day'));
+    const [endDateCreate, setEndDateCreate] = useState('');
     const [openFilter, setOpenFilter] = useState(false);
     const [filterOption, setFilterOption] = useState({
         isCustomer: 1,
@@ -178,6 +179,7 @@ const Calendar = () => {
                 phoneCustomer: "",
                 isPay: 0,
                 note: "",
+                type: 0,
                 details: []
             });
         }
@@ -212,6 +214,7 @@ const Calendar = () => {
                 phoneCustomer: calData.customerPhone,
                 isPay: calData.isPay,
                 note: calData.note,
+                type: calData.type,
                 details: calDetails
             });            
         }        
@@ -232,11 +235,10 @@ const Calendar = () => {
         });        
         const params = {
             ...calData,
-            endDate: calData.endDate ? formatDate(formatDateDot(calData.endDate)) : "",
+            endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
             details: calDetails
-        };
-        console.log(params);
-        // requestCreate(params);
+        };        
+        requestCreate(params);
     }
 
     const onCloseAlert = () => {
@@ -332,11 +334,10 @@ const Calendar = () => {
     }
 
     const formatDateDot = (inputDate) => {
-        const date = new Date(inputDate);
-        const day = date.getUTCDate().toString().padStart(2, '0');
-        const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-        const year = date.getUTCFullYear();
-      
+        const date = dayjs(inputDate);
+        const day = date.format('DD');
+        const month = date.format('MM');
+        const year = date.format('YYYY');
         return `${day}.${month}.${year}`;
     }
 
@@ -433,6 +434,7 @@ const Calendar = () => {
                 phoneCustomer: "",
                 isPay: 0,
                 note: "",
+                type: 0,
                 details: []
             });
         }
@@ -902,9 +904,9 @@ const Calendar = () => {
                                 {(calData.isCustomer === 1 && calData.type) &&
                                     <DatePicker
                                         label="Thời gian kết thúc"
-                                        disabled={calData.id && true || false}
-                                        defaultValue={calData.endDate}
-                                        onChange={(date) => onChangeCalData('endDate', date)}
+                                        disabled={calData.endDate === null ? false : true}
+                                        defaultValue={calData.endDate ? dayjs(calData.endDate) : ""}
+                                        onChange={(date) => setEndDateCreate(date)}
                                         minDate={calData.startDate ? dayjs(calData.startDate) : dayjs()}
                                         sx={{ml: 1}}
                                     />
