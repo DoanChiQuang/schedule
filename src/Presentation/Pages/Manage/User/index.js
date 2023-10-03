@@ -1,6 +1,6 @@
 import { Box, Button, Chip, Modal, TextField, Tooltip, Typography, debounce } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import Layout from "../../Layout/Layout";
+import Layout from "../../Layout/Layout-v2";
 import { DataGrid } from '@mui/x-data-grid';
 import { USER_PATH } from "../../../../Main/Route/path";
 import AddIcon from '@mui/icons-material/Add';

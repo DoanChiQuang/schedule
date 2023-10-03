@@ -2,7 +2,7 @@ import { Box, Button, Typography, Modal, TextField, debounce } from "@mui/materi
 import React, { useEffect, useState } from "react";
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
-import Layout from "../../Layout/Layout";
+import Layout from "../../Layout/Layout-v2";
 import { DataGrid } from '@mui/x-data-grid';
 import { YARD_PATH } from "../../../../Main/Route/path";
 import AddIcon from '@mui/icons-material/Add';
