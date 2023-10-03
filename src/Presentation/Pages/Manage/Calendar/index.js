@@ -465,7 +465,7 @@ const Calendar = () => {
         }
     };
 
-    const handleEndDateChange = (date) => {                
+    const handleEndDateChange = (date) => {
         setFilterEDate(date);        
     };
 
@@ -682,7 +682,6 @@ const Calendar = () => {
                             onChange={handleStartDateChange}
                             renderInput={(props) => <TextField {...props} />}
                             sx={{mr: 1, mb: 1}}
-                            minDate={filterSDate}
                         />
                         <DatePicker
                             label="Ngày kết thúc"
