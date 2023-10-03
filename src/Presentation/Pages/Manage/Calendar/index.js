@@ -19,6 +19,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { phoneRegExp } from "../../../Utils/regexValidation";
 import { AlertComponent, Loading } from "../../../Components/UI";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import { deburr } from "lodash";
 
 const Calendar = () => {
 
@@ -49,6 +50,7 @@ const Calendar = () => {
         idCustomer: "",
         nameCustomer: "",
         phoneCustomer: "",
+        type: 0, // 0 is day , 1 is month
         isPay: 0,
         note: "",
         details: []
@@ -62,9 +64,12 @@ const Calendar = () => {
     const [alertMess, setAlertMess] = useState('');
     const [alertType, setAlertType] = useState('');
     const [confirmAlert, setConfirmAlert] = useState(false);
+    const [filterAlert, setFilterAlert] = useState(false);
+    const [filterAlertMess, setFilterAlertMess] = useState('');
     const [timeBookedId, setTimeBookedId] = useState('');
     const [timeDetailUpdate, setTimeDetailUpdate] = useState([]);
     const [filterSDate, setFilterSDate] = useState(dayjs());
+    const [filterEDate, setFilterEDate] = useState(dayjs().add(6, 'day'));
     const [openFilter, setOpenFilter] = useState(false);
     const [filterOption, setFilterOption] = useState({
         isCustomer: 1,
@@ -72,7 +77,7 @@ const Calendar = () => {
     });
 
     const fetchInitial = () => {
-        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
         requestGetAllTimeDetail();
         requestYard();
         requestCustomer();
@@ -97,6 +102,14 @@ const Calendar = () => {
             ...calData,
             idCustomer: isCustomer === 0 ? "" : calData.idCustomer,
             isCustomer: isCustomer,
+        });
+    };
+
+    const onChangeSelectType = (event) => {
+        const type = event.target.value === 'day' ? 0 : 1;
+        setCalData({
+            ...calData,
+            type: type
         });
     };
 
@@ -219,16 +232,16 @@ const Calendar = () => {
         });        
         const params = {
             ...calData,
-            endDate: formatDate(formatDateDot(calData.endDate ? calData.endDate : dayjs(calData.startDate).endOf('month'))),
+            endDate: calData.endDate ? formatDate(formatDateDot(calData.endDate)) : "",
             details: calDetails
         };
-        // console.log(params);
-        requestCreate(params);
+        console.log(params);
+        // requestCreate(params);
     }
 
     const onCloseAlert = () => {
         if(alertType === 'success') {            
-            requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
+            requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
             const daysOfWeekNow = getCurrentWeekDates();
             setDaysOfWeek(daysOfWeekNow);
         }
@@ -236,6 +249,11 @@ const Calendar = () => {
         setAlert(false);
         setAlertType('');
         setAlertMess('');
+    }
+
+    const onCloseFilterAlert = () => {
+        setFilterAlert(false);
+        setFilterAlertMess('');        
     }
 
     const onOpenConfirmAlert = (id) => {
@@ -266,7 +284,7 @@ const Calendar = () => {
     const onSubmitConfirmAlert = () => {
         setConfirmAlert(false);
         requestRemove({id: timeBookedId});
-    }
+    }    
 
     const onFilterSubmit = (reset) => {
         if(reset) {
@@ -276,7 +294,12 @@ const Calendar = () => {
         let filteredTimeBooked = timeBookedInitial.filter(element => element.isCustomer === filterOption.isCustomer);
 
         if (filterOption.name !== "") {
-            filteredTimeBooked = filteredTimeBooked.filter(element => element.customerName.includes(filterOption.name));
+            const normalizedSearchTerm = deburr(filterOption.name.toLowerCase());
+          
+            filteredTimeBooked = filteredTimeBooked.filter(element => {
+                const normalizedItem = deburr(element.customerName.toLowerCase());
+                return normalizedItem.includes(normalizedSearchTerm);
+            });
         }
 
         setTimeBooked(filteredTimeBooked);
@@ -284,8 +307,7 @@ const Calendar = () => {
 
     const getCurrentWeekDates = () => {
         const weekDates = [];
-      
-        for (let day = filterSDate; day.isBefore(filterSDate.add(7, 'day')); day = day.add(1, 'day')) {
+        for (let day = filterSDate; day.isBefore(filterEDate.add(1, 'day'), 'day'); day = day.add(1, 'day')) {
             const dayName = daysNameOfWeek[day.day()];
             const formattedDate = day.format('DD.MM.YYYY');
       
@@ -430,8 +452,19 @@ const Calendar = () => {
         }
     }
 
-    const handleStartDateChange = (date) => {
-        setFilterSDate(date);
+    const handleStartDateChange = (date) => {        
+        const diffInDays = date.diff(filterEDate, 'day');
+        if(diffInDays >= -30 && diffInDays <= 1 && !date.isAfter(filterEDate)) {
+            setFilterSDate(date);
+        }
+        else {
+            setFilterAlertMess('Khoảng thời gian từ 1 đến 31 ngày.');
+            setFilterAlert(true);
+        }
+    };
+
+    const handleEndDateChange = (date) => {                
+        setFilterEDate(date);        
     };
 
     const timeSlotComponents = useMemo(() => {
@@ -619,10 +652,10 @@ const Calendar = () => {
     }, [errorCreate, errorRemove]);
 
     useEffect(() => {        
-        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterSDate.add(6, 'day')))});
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
         const daysOfWeekNow = getCurrentWeekDates();
-        setDaysOfWeek(daysOfWeekNow);        
-    }, [filterSDate])
+        setDaysOfWeek(daysOfWeekNow);
+    }, [filterSDate, filterEDate])
 
     return (
         <Layout
@@ -643,17 +676,22 @@ const Calendar = () => {
                         <DatePicker
                             label="Ngày bắt đầu"
                             value={filterSDate}
+                            format="DD/MM/YYYY"
                             onChange={handleStartDateChange}
                             renderInput={(props) => <TextField {...props} />}
                             sx={{mr: 1, mb: 1}}
+                            minDate={filterSDate}
                         />
                         <DatePicker
                             label="Ngày kết thúc"
-                            value={filterSDate.add(6,'day')}
-                            disabled={true}                            
+                            value={filterEDate}
+                            format="DD/MM/YYYY"
+                            onChange={handleEndDateChange}
                             renderInput={(props) => <TextField {...props} />}
                             sx={{mr: 1, mb: 1}}
-                        />                        
+                            minDate={filterSDate}
+                            maxDate={filterSDate.add(30, 'day')}
+                        />
                         <HtmlTooltip                                                        
                             PopperProps={{
                                 disablePortal: true,
@@ -790,8 +828,31 @@ const Calendar = () => {
                                 />
                             </RadioGroup>
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin cá nhân</Typography>                            
-                            {calData.isCustomer ? 
+                            {calData.isCustomer ?                                 
                                 <Box mb={2}>
+                                    <RadioGroup
+                                        row
+                                        name="position"
+                                        value={calData.type ? "month" : "day"}
+                                        onChange={onChangeSelectType}
+                                        defaultValue={calData.type ? "month" : "day"}
+                                        sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}                                
+                                    >
+                                        <FormControlLabel
+                                            value="day"
+                                            control={<Radio />}
+                                            label="Theo ngày"
+                                            labelPlacement="top"
+                                            disabled={calData.id && true || false}
+                                        />
+                                        <FormControlLabel
+                                            value="month"
+                                            control={<Radio />}
+                                            label="Theo tháng"
+                                            labelPlacement="top"
+                                            disabled={calData.id && true || false}
+                                        />
+                                    </RadioGroup>
                                     <Autocomplete
                                         disablePortal
                                         options={convertCusData() || []}
@@ -838,15 +899,17 @@ const Calendar = () => {
                                     disabled={true}
                                     sx={{mr: 1}}
                                 />
-                                {calData.isCustomer === 1 &&
+                                {(calData.isCustomer === 1 && calData.type) &&
                                     <DatePicker
                                         label="Thời gian kết thúc"
                                         disabled={calData.id && true || false}
-                                        defaultValue={calData.endDate ? dayjs(calData.endDate) : dayjs(calData.startDate).endOf('month')}
+                                        defaultValue={calData.endDate}
                                         onChange={(date) => onChangeCalData('endDate', date)}
                                         minDate={calData.startDate ? dayjs(calData.startDate) : dayjs()}
                                         sx={{ml: 1}}
                                     />
+                                    || 
+                                    <></>
                                 }
                             </Box>
                             <Box mb={2}>
@@ -964,6 +1027,7 @@ const Calendar = () => {
                     </Modal>
                     <Loading visible={loading} />
                     <AlertComponent visible={alert} message={alertMess} type={alertType} onClick={() => onCloseAlert()} />
+                    <AlertComponent visible={filterAlert} message={filterAlertMess} type={'error'} onClick={() => onCloseFilterAlert()} />
                     <AlertComponent visible={confirmAlert} message={"Bạn có chắc chắn không?"} type={"success"} onClick={() => onSubmitConfirmAlert()} showCancel={true} onClickCancel={() => onCloseConfirmAlert()} />
                 </Box>
             } 
