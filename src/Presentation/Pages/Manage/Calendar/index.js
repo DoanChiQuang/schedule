@@ -730,11 +730,13 @@ const Calendar = () => {
                                             yard.length - 1 !== yardIndex ? { borderRight: "1px solid #ccc" } : {}
                                         ]}
                                     >
-                                        {time[0].isCustomer && (
+                                        {time[0].isCustomer && 
                                             <Box sx={{ position: 'absolute', top: 0, right: 0, mt: 0.1 }}>
-                                            <WorkspacePremiumIcon sx={{ color: 'yellow' }} />
+                                                <WorkspacePremiumIcon sx={{ color: 'yellow' }} />
                                             </Box>
-                                        )}
+                                            ||
+                                            <></>
+                                        }
                                         <Typography variant="caption" fontWeight={'bold'} color={'white'}>
                                             {getLastName(time[0].customerName)}
                                         </Typography>
