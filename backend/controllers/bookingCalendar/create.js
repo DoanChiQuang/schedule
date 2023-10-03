@@ -102,7 +102,7 @@ export const create = async (req, res, next) => {
                     });
                 }
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):''});
 
             return res.json({
                 status: 200,
