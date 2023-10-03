@@ -34,7 +34,7 @@ export const getAll = async (req, res, next) => {
             let endNum = new Date(Date.UTC(year, month+1, 0, 0, 0, 0)).getDate();
             let detailsCal = [];
 
-            if(cal.isCustomer){
+            if(cal.isCustomer && cal.type){
                 if(new Date(startDate).getTime() < new Date(cal.endDate).getTime()){
                     if(dateStart > dateEnd && month == monthEnd) {
                         endNum = new Date(endDate).getDate();
@@ -48,20 +48,25 @@ export const getAll = async (req, res, next) => {
                     }
 
                     cal.details.forEach(da => {
-                        let detailsDate = '';
+                        let detailsDate = [];
                         for(let dateNum = startNum; dateNum <= endNum; dateNum++) {
                             if(da.day == new Date(Date.UTC(year, month, dateNum, 0, 0, 0)).getDay()) {
-                                detailsDate = new Date(Date.UTC(year, month, dateNum, 0, 0, 0));
+                                // detailsDate.push(new Date(Date.UTC(year, month, dateNum, 0, 0, 0)));
+                                detailsCal.push({
+                                    date: new Date(Date.UTC(year, month, dateNum, 0, 0, 0)),
+                                    yard: da.yard,
+                                    periodTime: da.periodTime
+                                });
                             }
                         }
 
-                        if (detailsDate){
-                            detailsCal.push({
-                                date: detailsDate,
-                                yard: da.yard,
-                                periodTime: da.periodTime
-                            });
-                        }
+                        // if (detailsDate){
+                        //     detailsCal.push({
+                        //         date: detailsDate,
+                        //         yard: da.yard,
+                        //         periodTime: da.periodTime
+                        //     });
+                        // }
                     });
                 }
             }else{

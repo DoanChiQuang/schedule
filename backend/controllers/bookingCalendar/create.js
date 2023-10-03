@@ -7,6 +7,7 @@ export const create = async (req, res, next) => {
     try {
         const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note} = req.body;
         //update status
+        const type = 0;
         let dateOfDayWeek = [];
         if(id) {
             if(!await BookingCal.findOne({_id: id})) {
@@ -24,44 +25,48 @@ export const create = async (req, res, next) => {
                 let endNum = new Date(endDate).getDate();
                 let totalDate = 0;
                 
-                bookCal.details.forEach(e => {
-                    let day = [];
-                    for(let i = startNum; i <= endNum; i++) {
-                        if(new Date(Date.UTC(year, month, i, 0, 0 ,0)).getDay() === e.day){
-                            day.push(new Date(Date.UTC(year, month, i, 0, 0, 0)));
-                            totalDate++;
+                if(!endDate){
+                    bookCal.details.forEach(e => {
+                        let day = [];
+                        for(let i = startNum; i <= endNum; i++) {
+                            if(new Date(Date.UTC(year, month, i, 0, 0 ,0)).getDay() === e.day){
+                                day.push(new Date(Date.UTC(year, month, i, 0, 0, 0)));
+                                totalDate++;
+                            }
                         }
-                    }
-                    dateOfDayWeek.push({date: day, yard: e.yard, periodTime: e.periodTime});
-                })
+                        dateOfDayWeek.push({date: day, yard: e.yard, periodTime: e.periodTime});
+                    })
 
-                const payIns = await Pay.create({
-                    idBookingCal: bookCal._id,
-                    month: month,
-                    year: year,
-                    totalDate: totalDate,
-                    details: dateOfDayWeek
-                })
+                    const payIns = await Pay.create({
+                        idBookingCal: bookCal._id,
+                        month: month,
+                        year: year,
+                        totalDate: totalDate,
+                        details: dateOfDayWeek
+                    })
+                    
+                    if(month === 11) {
+                        year = year+1;
+                        month = 0;
+                    }else{
+                        month = month+1;
+                    }
                 
-                if(month === 11) {
-                    year = year+1;
-                    month = 0;
-                }else{
-                    month = month+1;
+                    const createB = await BookingCal.create({
+                        startDate: new Date(Date.UTC(year, month, 1, 0, 0, 0)),
+                        // endDate: new Date(Date.UTC(year, month+1, 0, 0, 0, 0)),
+                        endDate: '',
+                        details: bookCal.details,
+                        customerId: bookCal.customerId,
+                        customerName: bookCal.customerName,
+                        customerPhone: bookCal.customerPhone,
+                        isCustomer: 1,
+                        isPay: 0,
+                        type: 1
+                    });
                 }
-              
-                const createB = await BookingCal.create({
-                    startDate: new Date(Date.UTC(year, month, 1, 0, 0, 0)),
-                    endDate: new Date(Date.UTC(year, month+1, 0, 0, 0, 0)),
-                    details: bookCal.details,
-                    customerId: bookCal.customerId,
-                    customerName: bookCal.customerName,
-                    customerPhone: bookCal.customerPhone,
-                    isCustomer: 1,
-                    isPay: 0
-                });
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate});
 
             return res.json({
                 status: 200,
@@ -93,14 +98,14 @@ export const create = async (req, res, next) => {
                     return;
                 }
             }
-            if(dupl){
+            if(dupl && !endDate){
                 const error = new Error('Không tạo được lịch do trùng lịch với khách cố định.');
                 error.statusCode = 400;
                 next(error);
                 return;
             }
             
-            if(isCustomer) {
+            if(isCustomer && type) { //0 is day, 1 is month
                 let details_sch = [];
                 let day_check = [];
                 let date_check = [];
@@ -139,17 +144,18 @@ export const create = async (req, res, next) => {
 
                 const bookingCalIns = await BookingCal.create({
                     startDate: new Date(startDate),
-                    endDate: new Date(endDate),
+                    endDate: endDate?new Date(endDate):'',
                     details: details_sch,
                     customerId: idCustomer,
                     customerName: customer.name,
                     customerPhone: customer.phonenum,
                     isCustomer: isCustomer,
                     isPay: isPay,
-                    note: note
+                    note: note,
+                    type: 1
                 });
 
-                if(isPay == 2){
+                if(isPay == 2 && !endDate){
                     let startNum = new Date(startDate).getDate();
                     let endNum = new Date(endDate).getDate();
                     let totalDate = 0;
@@ -181,31 +187,37 @@ export const create = async (req, res, next) => {
 
                     const bookingCalInsNextMonth = await BookingCal.create({
                         startDate: new Date(Date.UTC(year, month, 1, 0, 0, 0)),
-                        endDate: new Date(Date.UTC(year, month+1, 0, 0, 0, 0)),
+                        endDate: '',
                         details: details_sch,
                         customerId: idCustomer,
                         customerName: customer.name,
                         customerPhone: customer.phonenum,
                         isCustomer: isCustomer,
-                        isPay: 0
+                        isPay: 0,
+                        type: 1
                     });
                 }
             }
             else {
                 // validation 
-                if(!nameCustomer) {
-                    const error = new Error("Tên không hợp lệ.");
-                    error.statusCode = 400;
-                    next(error);
-                    return;
+                if(!isCustomer){
+                    if(!nameCustomer) {
+                        const error = new Error("Tên không hợp lệ.");
+                        error.statusCode = 400;
+                        next(error);
+                        return;
+                    }
+                    if(!phoneCustomer || !phoneRegExp.test(phoneCustomer)) {
+                        const error = new Error('Số điện thoại không hợp lệ.');
+                        error.statusCode = 400;
+                        next(error);
+                        return;
+                    }  
                 }
-                if(!phoneCustomer || !phoneRegExp.test(phoneCustomer)) {
-                    const error = new Error('Số điện thoại không hợp lệ.');
-                    error.statusCode = 400;
-                    next(error);
-                    return;
-                }  
-
+                let customer = ''
+                if(isCustomer){
+                    customer = await Customer.findById({_id: idCustomer});
+                }
                 let details_sch = [];
                 details.forEach(d => {
                     if(d) {
@@ -217,12 +229,12 @@ export const create = async (req, res, next) => {
                                 yard: d.yard,
                                 periodTime: d.periodTime,
                             },
-                            // customerId: idCustomer,
-                            customerName: nameCustomer,
-                            customerPhone: phoneCustomer,
+                            customerId: isCustomer?idCustomer:'',
+                            customerName: isCustomer?customer.name:nameCustomer,
+                            customerPhone: isCustomer?customer.phonenum:phoneCustomer,
                             isCustomer: isCustomer,
                             isPay: isPay,
-                            note: note
+                            note: note,
                         });
                   
                       
