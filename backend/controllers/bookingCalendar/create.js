@@ -84,7 +84,7 @@ export const create = async (req, res, next) => {
                 const month = new Date(details[i].date).getMonth();
                 const year = new Date(details[i].date).getFullYear();
                 const day = new Date(details[i].date).getDay();
-                const fetchAllCalen = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month-1, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(year, month, 0, 0, 0, 0))}, "details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}})
+                const fetchAllCalen = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month-1, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(year, month, 0, 0, 0, 0))}, "details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}, endDate: ''})
                 
                 if(fetchAllCalen.length > 0){
                     dupl = true;
@@ -97,7 +97,7 @@ export const create = async (req, res, next) => {
                     return;
                 }
             }
-            if(dupl && !endDate){
+            if(dupl){
                 const error = new Error('Không tạo được lịch do trùng lịch với khách cố định.');
                 error.statusCode = 400;
                 next(error);
