@@ -8,13 +8,50 @@ export const create = async (req, res, next) => {
         const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note, type} = req.body;
         //update status
         let dateOfDayWeek = [];
+        //Validate
+        if(type == 1 && endDate){
+            const yearEndCheck = new Date(endDate).getFullYear();
+            const monthEndCheck = new Date(endDate).getMonth();
+
+            if(new Date(startDate).getTime() > new Date(endDate).getTime()){
+                const error = new Error("Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+                error.statusCode = 400;
+                next(error);
+                return;
+            }
+            if(new Date(startDate).getMonth() != monthEndCheck || new Date(startDate).getFullYear() != yearEndCheck){
+                const error = new Error("Ngày bắt đầu và kết thúc phải trong cùng tháng.");
+                error.statusCode = 400;
+                next(error);
+                return;
+            }
+
+            let check_full_booking = 0;
+
+            details.forEach(e => {
+                for(let i = new Date(startDate).getDate();i<=new Date(endDate).getDate();i++){
+                    if(new Date(Date.UTC(yearEndCheck, monthEndCheck, i,0,0,0)).getTime() == new Date(e.date).getTime()) {
+                        check_full_booking++;
+                    }
+                }
+            })
+
+            if(check_full_booking < details.length) {
+                const error = new Error("Khoảng thời gian không đầy đủ lịch.");
+                error.statusCode = 400;
+                next(error);
+                return; 
+            }
+        }
         if(id) {
-            if(!await BookingCal.findOne({_id: id})) {
+            const bookCalCheck = await BookingCal.findOne({_id: id});
+            if(!bookCalCheck) {
                 const error = new Error("Không có lịch đặt để chỉnh sửa.");
                 error.statusCode = 400;
                 next(error);
                 return;
             }
+
             if (isPay == 2 && isCustomer) {
                 // let dateOfDateWeekN = [];
                 const bookCal = await BookingCal.findOne({_id: id});
