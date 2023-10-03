@@ -5,9 +5,8 @@ import { phoneRegExp } from '../../utils/RegexValidate.js';
 
 export const create = async (req, res, next) => {
     try {
-        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note} = req.body;
+        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note, type} = req.body;
         //update status
-        const type = 0;
         let dateOfDayWeek = [];
         if(id) {
             if(!await BookingCal.findOne({_id: id})) {
