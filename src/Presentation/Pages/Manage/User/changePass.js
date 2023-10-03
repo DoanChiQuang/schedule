@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Chip, Modal, TextField, Tooltip, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import Layout from "../../Layout/Layout";
+import Layout from "../../Layout/Layout-v2";
 import { FORGOTPASSWORD_PATH } from "../../../../Main/Route/path";
 import useApi from "../../../Hooks/useApi";
 import { changePass } from "../../../Api/user";
