@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Navigate } from 'react-router-dom'
 import { DASH_PATH, SIGNIN_PATH } from '../../Main/Route/path'
-const API_URL = 'http://localhost:5000'
+const API_URL = 'http://14.225.201.18:3000'
 
 const axiosInstance = axios.create({
     baseURL: API_URL,
