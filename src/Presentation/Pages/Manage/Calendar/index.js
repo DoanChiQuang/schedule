@@ -291,6 +291,11 @@ const Calendar = () => {
     const onFilterSubmit = (reset) => {
         if(reset) {
             setTimeBooked(timeBookedInitial);
+            setFilterOption({
+                isCustomer: 1,
+                name: ""
+            });
+            setOpenFilter(false);
             return;
         }
         let filteredTimeBooked = timeBookedInitial.filter(element => element.isCustomer === filterOption.isCustomer);
@@ -903,7 +908,7 @@ const Calendar = () => {
                                 {(calData.isCustomer === 1 && calData.type) &&
                                     <DatePicker
                                         label="Thời gian kết thúc"
-                                        disabled={calData.endDate === null ? false : true}
+                                        disabled={(calData.isPay == 1 || calData.isPay == 2) ? true : calData.endDate === null ? false : true}
                                         defaultValue={calData.endDate ? dayjs(calData.endDate) : ""}
                                         onChange={(date) => setEndDateCreate(date)}
                                         minDate={calData.startDate ? dayjs(calData.startDate) : dayjs()}
