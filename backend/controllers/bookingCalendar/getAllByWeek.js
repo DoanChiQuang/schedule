@@ -35,15 +35,19 @@ export const getAll = async (req, res, next) => {
             let detailsCal = [];
 
             if(cal.isCustomer && cal.type){
-                if(new Date(startDate).getTime() < new Date(cal.endDate).getTime()){
+                let eDateCheck = cal.endDate
+                if(!cal.endDate) {
+                    eDateCheck = new Date(Date.UTC(year, month+1, 0, 0, 0, 0));
+                }
+                if(new Date(startDate).getTime() < new Date(eDateCheck).getTime()){
                     if(dateStart > dateEnd && month == monthEnd) {
                         endNum = new Date(endDate).getDate();
                         startNum = 1;
                     }
                     if(dateStart < dateEnd) {
                         endNum = new Date(endDate).getDate();
-                        if(dateEnd > new Date(cal.endDate).getDate()){
-                            endNum = new Date(cal.endDate).getDate();
+                        if(dateEnd > new Date(eDateCheck).getDate()){
+                            endNum = new Date(eDateCheck).getDate();
                         }
                     }
 
