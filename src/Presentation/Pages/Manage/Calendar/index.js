@@ -675,7 +675,7 @@ const Calendar = () => {
                             return (
                                 <HtmlTooltip 
                                     title={
-                                        <React.Fragment key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex}>
+                                        <Box key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} sx={{overflowY: 'auto', height: '300px',}}>
                                             <Box display={'flex'} justifyContent={'space-between'} alignItems={'flex-start'} borderBottom={'1px solid #ccc'} mb={1} pb={1}>
                                                 <Box>
                                                     <Typography color="inherit" fontWeight={'bold'}>Anh/Chị: {time[0].customerName}</Typography>
@@ -730,8 +730,8 @@ const Calendar = () => {
                                                     <Typography color="inherit">Sân: {yard.name}</Typography>
                                                 </Box>
                                             }                                                                    
-                                        </React.Fragment>
-                                    }
+                                        </Box>
+                                    }                                    
                                 >
                                     <TableCellCustom
                                         sx={[
@@ -740,7 +740,7 @@ const Calendar = () => {
                                             time[0].isPay === 2 && { backgroundColor: '#00A36C' },
                                             (time[0].isPay === 0 && isDue(time[0].startDate)) && { backgroundColor: 'red' },
                                             { position: 'relative' },
-                                            yard.length - 1 !== yardIndex ? { borderRight: "1px solid #ccc" } : {}
+                                            yard.length - 1 !== yardIndex ? { borderRight: "1px solid #ccc" } : {},                                            
                                         ]}
                                     >
                                         {time[0].isCustomer && 
