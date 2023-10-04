@@ -334,7 +334,8 @@ const Calendar = () => {
             return;
         }
 
-        if(filterSDate.isAfter(filterEDate)) {
+        // console.log(filterSDate.diff(filterEDate, 'day'))
+        if(filterSDate.diff(filterEDate, 'day') >= 1) {
             setFilterAlertMess('Thời gian kết thúc không nằm trước thời gian bắt đầu.');
             setFilterAlert(true);
             return;
