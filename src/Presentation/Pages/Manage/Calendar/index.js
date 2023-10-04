@@ -852,7 +852,7 @@ const Calendar = () => {
             children={
                 <Box sx={{
                     '@media (max-width: 400px)': {
-                        width: '85vw',
+                        width: '95vw',
                     },
                 }}>       
                     <Button variant="contained" startIcon={openFilter ? <FilterAltOffIcon /> : <FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 2, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>                    
