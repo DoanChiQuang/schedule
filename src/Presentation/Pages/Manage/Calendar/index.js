@@ -76,6 +76,7 @@ const Calendar = () => {
         isCustomer: 1,
         name: ""
     });
+    const [hasFilter, setHasFilter] = useState(false);
 
     // const fetchInitial = () => {
     //     requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
@@ -306,26 +307,36 @@ const Calendar = () => {
 
     const onFilterSubmit = (reset) => {
         if(reset) {
+            requestGetAll({startDate: formatDate(formatDateDot(dayjs())), endDate: formatDate(formatDateDot(dayjs().add(6, 'day')))});
+            const daysOfWeekNow = getCurrentWeekDates();
+            setDaysOfWeek(daysOfWeekNow);
             setTimeBooked(timeBookedInitial);
             setFilterOption({
                 isCustomer: 1,
                 name: ""
             });
             setOpenFilter(false);
+            setHasFilter(false);
             return;
         }
-        let filteredTimeBooked = timeBookedInitial.filter(element => element.isCustomer === filterOption.isCustomer);
-
-        if (filterOption.name !== "") {
-            const normalizedSearchTerm = deburr(filterOption.name.toLowerCase());
-          
-            filteredTimeBooked = filteredTimeBooked.filter(element => {
-                const normalizedItem = deburr(element.customerName.toLowerCase());
-                return normalizedItem.includes(normalizedSearchTerm);
-            });
+        
+        const diffInDays = filterSDate.diff(filterEDate, 'day');
+        if(!(diffInDays >= -30 && diffInDays <= 1)) {
+            setFilterAlertMess('Khoảng thời gian từ 1 đến 31 ngày.');
+            setFilterAlert(true);
+            return;
         }
 
-        setTimeBooked(filteredTimeBooked);
+        if(filterSDate.isAfter(filterEDate)) {
+            setFilterAlertMess('Thời gian kết thúc không nằm trước thời gian bắt đầu.');
+            setFilterAlert(true);
+            return;
+        }
+
+        setHasFilter(true);
+        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
+        const daysOfWeekNow = getCurrentWeekDates();
+        setDaysOfWeek(daysOfWeekNow);
     }
 
     const getCurrentWeekDates = () => {
@@ -341,7 +352,8 @@ const Calendar = () => {
     };
 
     const getLastName = (fullname) => {
-        const names = fullname.split(" ");
+        let names = fullname.split(" ");
+        names = names.filter(item => item !== "");
         return names[names.length-1];
     }
 
@@ -475,15 +487,8 @@ const Calendar = () => {
         }
     }
 
-    const handleStartDateChange = (date) => {        
-        const diffInDays = date.diff(filterEDate, 'day');
-        if(diffInDays >= -30 && diffInDays <= 1 && !date.isAfter(filterEDate)) {
-            setFilterSDate(date);
-        }
-        else {
-            setFilterAlertMess('Khoảng thời gian từ 1 đến 31 ngày.');
-            setFilterAlert(true);
-        }
+    const handleStartDateChange = (date) => {
+        setFilterSDate(date);
     };
 
     const handleEndDateChange = (date) => {
@@ -775,7 +780,7 @@ const Calendar = () => {
     useEffect(() => {
         if(dataGetAll) {
             setTimeBooked(dataGetAll.data);
-            setTimeBookedInitial(dataGetAll.data);
+            setTimeBookedInitial(dataGetAll.data);            
         }
     }, [dataGetAll])
 
@@ -812,11 +817,23 @@ const Calendar = () => {
         handleReceiveErrorData();
     }, [errorCreate, errorRemove]);
 
-    useEffect(() => {        
-        requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
-        const daysOfWeekNow = getCurrentWeekDates();
-        setDaysOfWeek(daysOfWeekNow);
-    }, [filterSDate, filterEDate])
+    useEffect(() => {
+        if(hasFilter) {
+            let filteredTimeBooked = timeBookedInitial.filter(element => element.isCustomer === filterOption.isCustomer);
+
+            if (filterOption.name !== "") {
+                const normalizedSearchTerm = deburr(filterOption.name.toLowerCase());
+            
+                filteredTimeBooked = filteredTimeBooked.filter(element => {
+                    const normalizedItem = deburr(element.customerName.toLowerCase());
+                    return normalizedItem.includes(normalizedSearchTerm);
+                });
+            }
+
+            setTimeBooked(filteredTimeBooked);
+            setHasFilter(false);
+        }
+    }, [timeBooked, timeBookedInitial])
     
     return (
         <Layout
@@ -825,82 +842,81 @@ const Calendar = () => {
                     '@media (max-width: 400px)': {
                         width: '85vw',
                     },
-                }}>
-                    <Box 
-                        display={'flex'}
-                        sx={{
-                            '@media (max-width: 400px)': {
-                                flexDirection: 'column'
-                            },
-                        }}
-                    >
-                        <DatePicker
-                            label="Ngày bắt đầu"
-                            value={filterSDate}
-                            format="DD/MM/YYYY"
-                            onChange={handleStartDateChange}
-                            renderInput={(props) => <TextField {...props} />}
-                            sx={{mr: 1, mb: 1}}
-                        />
-                        <DatePicker
-                            label="Ngày kết thúc"
-                            value={filterEDate}
-                            format="DD/MM/YYYY"
-                            onChange={handleEndDateChange}
-                            renderInput={(props) => <TextField {...props} />}
-                            sx={{mr: 1, mb: 1}}
-                            minDate={filterSDate}
-                            maxDate={filterSDate.add(30, 'day')}
-                        />
-                        <HtmlTooltip                                                        
-                            PopperProps={{
-                                disablePortal: true,
-                            }}                            
-                            open={openFilter}
-                            disableFocusListener
-                            disableHoverListener
-                            disableTouchListener
-                            title={
-                                <Box>
-                                    <RadioGroup
-                                        row
-                                        name="position"
-                                        value={filterOption.isCustomer ? "customer" : "passenger"}
-                                        onChange={onChangeFilterSelect}
-                                        defaultValue={filterOption.isCustomer && "customer"}
-                                        sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1}}                                
-                                    >
-                                        <FormControlLabel
-                                            value="customer"
-                                            control={<Radio />}
-                                            label="Khách cố định"
-                                            labelPlacement="top"                                            
-                                        />
-                                        <FormControlLabel
-                                            value="passenger"
-                                            control={<Radio />}
-                                            label="Khách vãng lai"
-                                            labelPlacement="top"
-                                        />
-                                    </RadioGroup>
-                                    <TextField
-                                        label="Lọc theo tên khách hàng"
-                                        defaultValue={calData.nameCustomer}
-                                        onChange={(e) => onChangeFilterTextField(e.target.value)}
-                                        sx={{mr: 1, mb: 1}}
-                                        fullWidth
-                                    />
-                                    <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
-                                        <Button variant="outlined" onClick={() => onFilterSubmit(true)} sx={{mr: 1}}>Đặt lại</Button>
-                                        <Button variant="contained" onClick={() => onFilterSubmit(false)}>Xác nhận</Button>
-                                    </Box>
-                                </Box>
-                            }
-                            placement="bottom-start"
-                        >
-                            <Button variant="contained" startIcon={<FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 1, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>
-                        </HtmlTooltip>
-                    </Box>
+                }}>       
+                    <Button variant="contained" startIcon={<FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 1, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>    
+                    {openFilter 
+                        && 
+                            <Box 
+                            sx={{
+                                p: 2,
+                                mb: 1,
+                                backgroundColor: 'white',
+                                color: 'rgba(0, 0, 0, 0.87)',
+                                maxWidth: 500,
+                                fontSize: theme.typography.pxToRem(12),
+                                border: '1px solid #dadde9',
+                                borderRadius: 1
+                            }}>
+                            <Box
+                                display={'flex'}
+                                sx={{
+                                    '@media (max-width: 400px)': {
+                                        flexDirection: 'column'
+                                    },
+                                }}
+                            >
+                                <DatePicker
+                                    label="Ngày bắt đầu"
+                                    value={filterSDate}
+                                    format="DD/MM/YYYY"
+                                    onChange={handleStartDateChange}
+                                    renderInput={(props) => <TextField {...props} />}
+                                    sx={{mr: 1, mb: 1}}
+                                />
+                                <DatePicker
+                                    label="Ngày kết thúc"
+                                    value={filterEDate}
+                                    format="DD/MM/YYYY"
+                                    onChange={handleEndDateChange}
+                                    renderInput={(props) => <TextField {...props} />}
+                                    sx={{mr: 1, mb: 1}}
+                                />
+                            </Box>                                
+                            <RadioGroup
+                                row
+                                name="position"
+                                value={filterOption.isCustomer ? "customer" : "passenger"}
+                                onChange={onChangeFilterSelect}
+                                defaultValue={filterOption.isCustomer && "customer"}
+                                sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1}}                                
+                            >
+                                <FormControlLabel
+                                    value="customer"
+                                    control={<Radio />}
+                                    label="Khách cố định"
+                                    labelPlacement="top"                                            
+                                />
+                                <FormControlLabel
+                                    value="passenger"
+                                    control={<Radio />}
+                                    label="Khách vãng lai"
+                                    labelPlacement="top"
+                                />
+                            </RadioGroup>
+                            <TextField
+                                label="Lọc theo tên khách hàng"
+                                defaultValue={calData.nameCustomer}
+                                onChange={(e) => onChangeFilterTextField(e.target.value)}
+                                sx={{mr: 1, mb: 1}}
+                                fullWidth
+                            />
+                            <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
+                                <Button variant="outlined" onClick={() => onFilterSubmit(true)} sx={{mr: 1}}>Đặt lại</Button>
+                                <Button variant="contained" onClick={() => onFilterSubmit(false)}>Xác nhận</Button>
+                            </Box>
+                            </Box>
+                        || <></>
+                    }
                     <TableContainer 
                         component={Paper} 
                         style={{ height: '75vh', overflowX: 'auto' }} 
@@ -1062,7 +1078,7 @@ const Calendar = () => {
                                 {(calData.isCustomer === 1 && calData.type) &&
                                     <DatePicker
                                         label="Thời gian kết thúc"
-                                        disabled={calData.isPay === 0 ? (calData.endDate === null || calData.endDate === "") ? false : true : true}
+                                        disabled={(calData.isPay === 0 || calData.isPay === 1) ? (calData.endDate === null || calData.endDate === "") ? false : true : true}
                                         defaultValue={calData.endDate ? dayjs(calData.endDate) : ""}
                                         onChange={(date) => setEndDateCreate(date)}
                                         minDate={calData.startDate ? dayjs(calData.startDate) : dayjs()}
