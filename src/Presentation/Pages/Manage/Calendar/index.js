@@ -1092,6 +1092,9 @@ const Calendar = () => {
                                                     const time = timeSlots.filter(timeSlot => timeSlot.id === timeId);                                            
                                                     return time[0];
                                                 });
+                                                times.sort((a, b) =>
+                                                    a.name.localeCompare(b.name)
+                                                );
                                                 let timeCell = [];
                                                 times.map((time, index) => {
                                                     timeCell.push(
