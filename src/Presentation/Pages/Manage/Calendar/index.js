@@ -277,6 +277,7 @@ const Calendar = () => {
     }
 
     const onOpenConfirmAlert = (id) => {
+        console.log(id)
         setConfirmAlert(true);
         setTimeBookedId(id);
     }
@@ -673,7 +674,8 @@ const Calendar = () => {
                             );
                 
                             return (
-                                <HtmlTooltip 
+                                <HtmlTooltip
+                                    open={false}
                                     title={
                                         <Box key={timeSlot.id + '_' + timeSlotIndex + '_' + day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} sx={{overflowY: 'auto', height: '300px',}}>
                                             <Box display={'flex'} justifyContent={'space-between'} alignItems={'flex-start'} borderBottom={'1px solid #ccc'} mb={1} pb={1}>
@@ -731,17 +733,18 @@ const Calendar = () => {
                                                 </Box>
                                             }                                                                    
                                         </Box>
-                                    }                                    
+                                    }
+                                    onClick={() => onOpenModal(time[0], tooltipDetail)}
                                 >
                                     <TableCellCustom
                                         sx={[
-                                            time[0].isPay === 0 && { backgroundColor: '#d5d5d5' },
+                                            time[0].isPay === 0 && { backgroundColor: 'gray' },
                                             time[0].isPay === 1 && { backgroundColor: '#FFBF00' },
                                             time[0].isPay === 2 && { backgroundColor: '#00A36C' },
                                             (time[0].isPay === 0 && isDue(time[0].startDate)) && { backgroundColor: 'red' },
                                             { position: 'relative' },
                                             yard.length - 1 !== yardIndex ? { borderRight: "1px solid #ccc" } : {},                                            
-                                        ]}
+                                        ]}                                        
                                     >
                                         {time[0].isCustomer && 
                                             <Box sx={{ position: 'absolute', top: 0, right: 0, mt: 0.1 }}>
@@ -854,7 +857,9 @@ const Calendar = () => {
                         width: '85vw',
                     },
                 }}>       
-                    <Button variant="contained" startIcon={openFilter ? <FilterAltOffIcon /> : <FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 2, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>    
+                    <Button variant="contained" startIcon={openFilter ? <FilterAltOffIcon /> : <FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 2, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>                    
+                    <Button onClick={() => onOpenModal()} variant="contained" startIcon={<AddIcon />} disabled={selectedCells.length > 0 ? false : true} sx={{mr: 1, mb: 1}}>Tạo lịch</Button>
+                    <Button onClick={() => onResetCalData()} variant="contained" startIcon={<ReplayIcon />} disabled={selectedCells.length > 0 ? false : true} sx={{mr: 1, mb: 1}}>Bỏ chọn</Button>
                     {openFilter 
                         && 
                             <Box 
@@ -952,7 +957,10 @@ const Calendar = () => {
                                 '&:hover': {
                                     background: '#A9A9A9',
                                 },
-                            }                            
+                            },
+                            '& .MuiTableCell-root': {
+                                padding: '5px'
+                            }
                         }}
                     >
                         <Table>
@@ -987,15 +995,7 @@ const Calendar = () => {
                                 {timeSlotComponents}
                             </TableBody>
                         </Table>
-                    </TableContainer>
-                    <Box sx={{position: 'fixed', bottom: theme.spacing(4), right: theme.spacing(4), zIndex: 1000}}>
-                        <Button onClick={() => onOpenModal()} variant="contained" sx={{mr: 1}} startIcon={<AddIcon />} disabled={selectedCells.length > 0 ? false : true}>
-                            Tạo lịch
-                        </Button>
-                        <Button onClick={() => onResetCalData()} variant="contained" sx={{ml: 1}} startIcon={<ReplayIcon />} disabled={selectedCells.length > 0 ? false : true}>
-                            Đặt lại
-                        </Button>
-                    </Box>
+                    </TableContainer>                    
                     <Modal open={toggleModal} onClose={() => onCloseModal()}>
                         <Box sx={styles.modal}>
                             <RadioGroup
@@ -1211,6 +1211,18 @@ const Calendar = () => {
                                 />
                             </Box>                            
                             <Box display={'flex'} justifyContent={'flex-end'}>
+                                {(calData.id && calData.isPay === 0) &&
+                                    <Button 
+                                        variant='contained' 
+                                        color="error"
+                                        disabled={!!loading || calError && true || canSaveData()}
+                                        onClick={() => onOpenConfirmAlert(calData.id)}
+                                        sx={{mr: 1}}
+                                    >
+                                        Xóa đơn
+                                    </Button>
+                                    || <></>
+                                }
                                 <Button 
                                     variant='contained' 
                                     disabled={!!loading || calError && true || canSaveData()}
