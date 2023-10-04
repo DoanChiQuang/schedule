@@ -964,7 +964,7 @@ const Calendar = () => {
                         <Table>
                             <TableHead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 2 }}>
                                 <TableRow>
-                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 110}}>
+                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 90}}>
                                         <Typography variant="body2">Ngày</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
@@ -977,7 +977,7 @@ const Calendar = () => {
                                     ))}
                                 </TableRow>
                                 <TableRow>
-                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 110}}>
+                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 90}}>
                                         <Typography variant="caption" fontWeight={'bold'}>Sân</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
