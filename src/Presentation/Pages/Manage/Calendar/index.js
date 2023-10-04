@@ -19,6 +19,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { phoneRegExp } from "../../../Utils/regexValidation";
 import { AlertComponent, Loading } from "../../../Components/UI";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import { deburr } from "lodash";
 
 const Calendar = () => {
@@ -73,7 +74,7 @@ const Calendar = () => {
     const [endDateCreate, setEndDateCreate] = useState('');
     const [openFilter, setOpenFilter] = useState(false);
     const [filterOption, setFilterOption] = useState({
-        isCustomer: 1,
+        isCustomer: 2,
         name: ""
     });
     const [hasFilter, setHasFilter] = useState(false);
@@ -286,7 +287,13 @@ const Calendar = () => {
     }
 
     const onChangeFilterSelect = (event) => {
-        const isCustomer = event.target.value === 'customer' ? 1 : 0;
+        let isCustomer = 2;
+        if(event.target.value === "customer") {
+            isCustomer = 1
+        }
+        if(event.target.value === "passenger") {
+            isCustomer = 0
+        }
         setFilterOption({
             ...filterOption,
             isCustomer: isCustomer,
@@ -312,7 +319,7 @@ const Calendar = () => {
             setDaysOfWeek(daysOfWeekNow);
             setTimeBooked(timeBookedInitial);
             setFilterOption({
-                isCustomer: 1,
+                isCustomer: 2,
                 name: ""
             });
             setOpenFilter(false);
@@ -448,7 +455,7 @@ const Calendar = () => {
                 details: []
             });
             setFilterOption({
-                isCustomer: 1,
+                isCustomer: 2,
                 name: ""
             })
         }
@@ -819,7 +826,10 @@ const Calendar = () => {
 
     useEffect(() => {
         if(hasFilter) {
-            let filteredTimeBooked = timeBookedInitial.filter(element => element.isCustomer === filterOption.isCustomer);
+            let filteredTimeBooked = timeBookedInitial
+            if(filterOption.isCustomer != 2) {            
+                filteredTimeBooked = timeBookedInitial.filter(element => element.isCustomer === filterOption.isCustomer);
+            }
 
             if (filterOption.name !== "") {
                 const normalizedSearchTerm = deburr(filterOption.name.toLowerCase());
@@ -843,20 +853,21 @@ const Calendar = () => {
                         width: '85vw',
                     },
                 }}>       
-                    <Button variant="contained" startIcon={<FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 1, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>    
+                    <Button variant="contained" startIcon={openFilter ? <FilterAltOffIcon /> : <FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 2, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>    
                     {openFilter 
                         && 
                             <Box 
-                            sx={{
-                                p: 2,
-                                mb: 1,
-                                backgroundColor: 'white',
-                                color: 'rgba(0, 0, 0, 0.87)',
-                                maxWidth: 500,
-                                fontSize: theme.typography.pxToRem(12),
-                                border: '1px solid #dadde9',
-                                borderRadius: 1
-                            }}>
+                                sx={{
+                                    p: 2,
+                                    mb: 1,
+                                    backgroundColor: 'white',
+                                    color: 'rgba(0, 0, 0, 0.87)',
+                                    maxWidth: 500,
+                                    fontSize: theme.typography.pxToRem(12),
+                                    border: '1px solid #dadde9',
+                                    borderRadius: 1
+                                }}
+                            >
                             <Box
                                 display={'flex'}
                                 sx={{
@@ -885,16 +896,22 @@ const Calendar = () => {
                             <RadioGroup
                                 row
                                 name="position"
-                                value={filterOption.isCustomer ? "customer" : "passenger"}
+                                value={filterOption.isCustomer === 0 && "passenger" || filterOption.isCustomer === 1 && "customer" || "all"}
                                 onChange={onChangeFilterSelect}
-                                defaultValue={filterOption.isCustomer && "customer"}
+                                defaultValue={filterOption.isCustomer === 2 && "all"}
                                 sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1}}                                
                             >
+                                <FormControlLabel
+                                    value="all"
+                                    control={<Radio />}
+                                    label="Tất cả"
+                                    labelPlacement="top"                                            
+                                />
                                 <FormControlLabel
                                     value="customer"
                                     control={<Radio />}
                                     label="Khách cố định"
-                                    labelPlacement="top"                                            
+                                    labelPlacement="top"
                                 />
                                 <FormControlLabel
                                     value="passenger"
