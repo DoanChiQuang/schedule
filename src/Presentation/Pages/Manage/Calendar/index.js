@@ -20,6 +20,8 @@ import { numberRegExp, phoneRegExp } from "../../../Utils/regexValidation";
 import { AlertComponent, Loading } from "../../../Components/UI";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileDownloadOffIcon from '@mui/icons-material/FileDownloadOff';
 import { deburr } from "lodash";
 
 const TIME = 30
@@ -33,6 +35,7 @@ const Calendar = () => {
     const { data: dataGetAllTimeDetail, loading: loadingGetAllTimeDetail, error: errorGetAllTimeDetail, message: messageGetAllTimeDetail, request: requestGetAllTimeDetail, setData: setDataGetAllTimeDetail } = useApi(apiTime.getAllTimeDetail);
     const { data: dataYard, loading: loadingYard, error: errorYard, message: messageYard, request: requestYard, setData: setDataYard } = useApi(apiYard.getAll);
     const { data: dataCustomer, loading: loadingCustomer, error: errorCustomer, message: messageCustomer, request: requestCustomer, setData: setDataCustomer } = useApi(apiCustomer.getAll);
+    const { data: dataExport, loading: loadingExport, error: errorExport, message: messageExport, request: requestExport, setData: setDataExport } = useApi(apiCalendar.exportData);
     
     const daysNameOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
     const loading = loadingGetAll || loadingGetAllTimeDetail || loadingYard || loadingCustomer || loadingCreate || loadingRemove;
@@ -78,9 +81,15 @@ const Calendar = () => {
     const [filterEDate, setFilterEDate] = useState(dayjs().add(6, 'day'));
     const [endDateCreate, setEndDateCreate] = useState('');
     const [openFilter, setOpenFilter] = useState(false);
+    const [openExport, setOpenExport] = useState(false);
     const [filterOption, setFilterOption] = useState({
         isCustomer: 2,
         name: ""
+    });
+    const [exportOption, setExportOption] = useState({
+        startDate: "",
+        endDate: "",
+        cashier: [],
     });
     const [hasFilter, setHasFilter] = useState(false);
     const [blockUpdate, setBlockUpdate] = useState(false);
@@ -349,6 +358,13 @@ const Calendar = () => {
         });
     }
 
+    const onChangeExportData = (key, value) => {
+        setExportOption({
+            ...exportOption,
+            [key]: value
+        })
+    }
+
     const onChangeFilterTextField = debounce((value) => {
         setFilterOption({
             ...filterOption,
@@ -393,6 +409,31 @@ const Calendar = () => {
         requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
         const daysOfWeekNow = getCurrentWeekDates();
         setDaysOfWeek(daysOfWeekNow);
+    }
+
+    const onExportSubmit = () => {
+        if(exportOption.startDate == '' || exportOption.endDate == '') {
+            setFilterAlertMess('Thời gian bắt đầu và kết thúc không được bỏ trống.');
+            setFilterAlert(true);
+            return;
+        }
+        if(dayjs(exportOption.startDate).diff(dayjs(exportOption.endDate), 'day') >= 1) {
+            setFilterAlertMess('Thời gian kết thúc không nằm trước thời gian bắt đầu.');
+            setFilterAlert(true);
+            return;
+        }
+        if(exportOption.cashier.length <= 0) {
+            setFilterAlertMess('Vui lòng chọn nhân viên thu.');
+            setFilterAlert(true);
+            return;
+        }
+        const cashier = exportOption.cashier.map(item => item.value);
+        const params = {
+            ...exportOption,
+            cashier: cashier
+        }
+
+        requestExport(params);
     }
 
     const getCurrentWeekDates = () => {
@@ -573,6 +614,21 @@ const Calendar = () => {
 
     const handleEndDateChange = (date) => {
         setFilterEDate(date);        
+    };
+
+    const handleExportDateChange = (type, date) => {
+        if(type == "start") {
+            setExportOption({
+                ...exportOption,
+                startDate: date
+            })
+        }
+        if(type == "end") {
+            setExportOption({
+                ...exportOption,
+                endDate: date
+            })
+        }
     };
 
     // const timeSlotComponents = useMemo(() => {
@@ -928,7 +984,34 @@ const Calendar = () => {
                         width: '95vw',
                     },
                 }}>       
-                    <Button variant="contained" startIcon={openFilter ? <FilterAltOffIcon /> : <FilterAltIcon />} onClick={() => {setOpenFilter(!openFilter); setFilterOption({isCustomer: 2, name: ""})}} sx={{mr: 1, mb: 1}}>Lọc</Button>                    
+                    <Button 
+                        variant="contained" 
+                        startIcon={openFilter ? <FilterAltOffIcon /> : <FilterAltIcon />} 
+                        onClick={() => {
+                            if(!openFilter && openExport) setOpenExport(false);
+                            setOpenFilter(!openFilter);
+                            setFilterOption({isCustomer: 2, name: ""})
+                        }}
+                        sx={{mr: 1, mb: 1}}
+                    >
+                            Lọc
+                    </Button>
+                    <Button 
+                        variant="contained" 
+                        startIcon={openExport ? <FileDownloadOffIcon /> : <FileDownloadIcon />} 
+                        onClick={() => {
+                            if(!openExport && openFilter) setOpenFilter(false);
+                            setOpenExport(!openExport); 
+                            setExportOption({
+                                startDate: "",
+                                endDate: "",
+                                cashier: [],
+                            })
+                        }}
+                        sx={{mr: 1, mb: 1}}
+                    >
+                        Xuất
+                    </Button>
                     <Button onClick={() => onOpenModal()} variant="contained" startIcon={<AddIcon />} disabled={selectedCells.length > 0 ? false : true} sx={{mr: 1, mb: 1}}>Tạo lịch</Button>
                     <Button onClick={() => onResetCalData()} variant="contained" startIcon={<ReplayIcon />} disabled={selectedCells.length > 0 ? false : true} sx={{mr: 1, mb: 1}}>Bỏ chọn</Button>
                     {openFilter 
@@ -1006,8 +1089,63 @@ const Calendar = () => {
                             />
                             <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
                                 <Button variant="outlined" onClick={() => onFilterSubmit(true)} sx={{mr: 1}}>Đặt lại</Button>
-                                <Button variant="contained" onClick={() => onFilterSubmit(false)}>Xác nhận</Button>
+                                <Button variant="contained" onClick={() => onFilterSubmit(false)}>Lọc</Button>
                             </Box>
+                            </Box>
+                        || <></>
+                    }
+                    {openExport
+                        && 
+                            <Box 
+                                sx={{
+                                    p: 2,
+                                    mb: 1,
+                                    backgroundColor: 'white',
+                                    color: 'rgba(0, 0, 0, 0.87)',
+                                    maxWidth: 500,
+                                    fontSize: theme.typography.pxToRem(12),
+                                    border: '1px solid #dadde9',
+                                    borderRadius: 1
+                                }}
+                            >
+                                <Box
+                                    display={'flex'}
+                                    sx={{
+                                        '@media (max-width: 400px)': {
+                                            flexDirection: 'column'
+                                        },
+                                    }}
+                                >
+                                    <DatePicker
+                                        label="Ngày bắt đầu"
+                                        value={dayjs(exportOption.startDate ? exportOption.startDate : "")}
+                                        format="DD/MM/YYYY"
+                                        onChange={(date) => handleExportDateChange("start", formatDate(formatDateDot(date)))}
+                                        renderInput={(props) => <TextField {...props} />}
+                                        sx={{ mr: 1, mb: 1 }}
+                                    />
+                                    <DatePicker
+                                        label="Ngày kết thúc"
+                                        value={dayjs(exportOption.endDate ? exportOption.endDate : "")}
+                                        format="DD/MM/YYYY"
+                                        onChange={(date) => handleExportDateChange("end", formatDate(formatDateDot(date)))}
+                                        renderInput={(props) => <TextField {...props} />}
+                                        sx={{ mr: 1, mb: 1}}
+                                    />
+                                </Box>                                
+                                <Autocomplete
+                                    disablePortal
+                                    options={cashier}
+                                    value={exportOption.cashier}
+                                    getOptionLabel={(option) => option.label}
+                                    onChange={(event, selectedOption) => onChangeExportData("cashier", selectedOption)}
+                                    renderInput={(params) => <TextField {...params} label="Nhân viên thu" />}
+                                    multiple
+                                    sx={{ mr: 1, mb: 1 }}
+                                />
+                                <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mr: 1}}>
+                                    <Button variant="contained" onClick={() => onExportSubmit()}>Xuất</Button>
+                                </Box>
                             </Box>
                         || <></>
                     }
