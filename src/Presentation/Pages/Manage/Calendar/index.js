@@ -360,10 +360,11 @@ const Calendar = () => {
         });
     }
 
-    const onChangeExportData = (key, value) => {
+    const onChangeExportData = (key, selectedOption) => {
+        const uniqueSelectedOption = Array.from(new Set(selectedOption.map(item => item.value))).map(value => selectedOption.find(item => item.value === value));        
         setExportOption({
             ...exportOption,
-            [key]: value
+            [key]: uniqueSelectedOption
         })
     }
 
@@ -1161,15 +1162,20 @@ const Calendar = () => {
                                         renderInput={(props) => <TextField {...props} />}
                                         sx={{ mr: 1, mb: 1}}
                                     />
-                                </Box>                                
+                                </Box>
                                 <Autocomplete
-                                    disablePortal
-                                    options={cashier}
-                                    value={exportOption.cashier}
-                                    getOptionLabel={(option) => option.label}
-                                    onChange={(event, selectedOption) => onChangeExportData("cashier", selectedOption)}
-                                    renderInput={(params) => <TextField {...params} label="Nhân viên thu" />}
                                     multiple
+                                    options={cashier}
+                                    getOptionLabel={(option) => option.label}
+                                    value={exportOption.cashier}
+                                    filterSelectedOptions
+                                    onChange={(event, selectedOption) => onChangeExportData("cashier", selectedOption)}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Nhân viên thu"
+                                        />
+                                    )}
                                     sx={{ mr: 1, mb: 1 }}
                                 />
                                 <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mr: 1}}>
