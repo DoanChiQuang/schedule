@@ -74,10 +74,12 @@ export const getAll = async (req, res, next) => {
                     });
                 }
             }else{
-                detailsCal.push({
-                    date: new Date(cal.startDate),
-                    yard: cal.details[0].yard,
-                    periodTime: cal.details[0].periodTime
+                cal.details.forEach(da => {
+                    detailsCal.push({
+                        date: new Date(cal.startDate),
+                        yard: da.yard,
+                        periodTime: da.periodTime
+                    });
                 });
             }
             // let payCheck = cal.isPay;
@@ -99,7 +101,10 @@ export const getAll = async (req, res, next) => {
                     customerPhone: cal.customerPhone,
                     isPay: cal.isPay,
                     note: cal.note,
-                    type: cal.type
+                    type: cal.type,
+                    bonus: cal.bonus,
+                    cashier: cal.cashier,
+                    total: cal.total,
                 });
             }
         })

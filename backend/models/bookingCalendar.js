@@ -32,6 +32,21 @@ const bookingCalendarSchema = new mongoose.Schema({
     },
     note: {
         type: String,
+    },
+    price: {
+        type: Number,
+        default: 80000
+    },
+    bonus: {
+        type: Number,
+        default: 0
+    },
+    total: {
+        type: Number,
+        default: 0
+    },
+    cashier: {
+        type: String
     }
 });
 
