@@ -16,11 +16,14 @@ import * as apiYard from "../../../Api/yard";
 import * as apiCustomer from "../../../Api/customer";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers";
-import { phoneRegExp } from "../../../Utils/regexValidation";
+import { numberRegExp, phoneRegExp } from "../../../Utils/regexValidation";
 import { AlertComponent, Loading } from "../../../Components/UI";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import { deburr } from "lodash";
+
+const TIME = 30
+const PRICE = 80000
 
 const Calendar = () => {
 
@@ -53,6 +56,8 @@ const Calendar = () => {
         phoneCustomer: "",
         type: 0, // 0 is day , 1 is month
         isPay: 0,
+        bonus: 0,
+        cashier: "1",
         note: "",
         details: []
     });
@@ -78,6 +83,21 @@ const Calendar = () => {
         name: ""
     });
     const [hasFilter, setHasFilter] = useState(false);
+    const [blockUpdate, setBlockUpdate] = useState(false);
+    const cashier = [
+        {
+            "label": "1 - Anh",
+            "value": "1"
+        },
+        {
+            "label": "2 - Khánh",
+            "value": "2"
+        },
+        {
+            "label": "3 - Quân",
+            "value": "3"
+        }
+    ];
 
     // const fetchInitial = () => {
     //     requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
@@ -181,38 +201,60 @@ const Calendar = () => {
                     message: ''
                 });
                 setCalError(false);
-                break;            
+                break;
+            case 'bonus':
+                if(!numberRegExp.test(formatNumberWithoutComma(value))) {
+                    setCalErrorData({
+                        key: key,
+                        message: 'Giá thêm không đúng định dạng.'
+                    });
+                    setCalError(true);
+                    return;
+                }
+                if(formatNumberWithoutComma(value) < 0) {
+                    setCalErrorData({
+                        key: key,
+                        message: 'Giá thêm không được âm.'
+                    });
+                    setCalError(true);
+                    return;
+                }
+                setCalErrorData({
+                    key: '',
+                    message: ''
+                });
+                setCalError(false);
+                break;
         }
     }
 
     const onCloseModal = () => {
-        if(calData.id) { 
-            setCalData({
-                id: "",
-                startDate: "",
-                endDate: "",
-                isCustomer: 1,
-                idCustomer: "",
-                nameCustomer: "",
-                phoneCustomer: "",
-                isPay: 0,
-                note: "",
-                type: 0,
-                details: []
-            });
-        }
-        else {
-            setCalData({...calData, idCustomer: ""});
-        }
+        setCalData({
+            id: "",
+            startDate: "",
+            endDate: "",
+            isCustomer: 1,
+            idCustomer: "",
+            nameCustomer: "",
+            phoneCustomer: "",
+            isPay: 0,
+            bonus: 0,
+            total: 0,
+            cashier: "",
+            note: "",
+            type: 0,
+            details: []
+        });
         setCalErrorData({
             key: '',
             message: ''
         });
         setCalError(false);
         setToggleModal(false);
+        setBlockUpdate(false);
     }
 
-    const onOpenModal = (calData, timeDetail) => {        
+    const onOpenModal = (calData, timeDetail) => {
         if(calData && timeDetail) {
             const calDetails = calData.details.map(detail => {
                 return {                
@@ -233,9 +275,12 @@ const Calendar = () => {
                 isPay: calData.isPay,
                 note: calData.note,
                 type: calData.type,
+                cashier: calData.cashier,
+                bonus: calData.bonus,
                 details: calDetails
-            });            
-        }        
+            });
+            if(calData.isPay == "2") setBlockUpdate(true);
+        }
         setToggleModal(true);
     }
 
@@ -245,17 +290,21 @@ const Calendar = () => {
 
     const onCreateCalendar = () => {
         const calDetails = calData.details.map(detail => {
-            return {                
+            let data = [];
+            data.push(detail);
+            const total = calculateTotalPrice(data);
+            return {
                 date: formatDate(detail.date),
                 periodTime: detail.time,
-                yard: detail.yard
+                yard: detail.yard,
+                total: total
             };
-        });        
+        });
         const params = {
             ...calData,
             endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
             details: calDetails
-        };        
+        };
         requestCreate(params);
     }
 
@@ -381,6 +430,18 @@ const Calendar = () => {
         return `${day}.${month}.${year}`;
     }
 
+    const formatNumberWithComma = (number = 0, option) => {
+        if(!number) {
+            return 0
+        }
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, option || ",");
+    };
+
+    const formatNumberWithoutComma = (number) => {
+        number = number.replace(/[^0-9]/g, '')
+        return number.split(",").join("");
+    }
+
     const isSelected = (idTime, date, idYard) => {
         return selectedCells.some((item) => item.date === date && item.time === idTime && item.yard === idYard);
     };
@@ -428,12 +489,24 @@ const Calendar = () => {
             else {
                 return true;
             }
-        }
-        
+        }        
+
         if(calData.nameCustomer && calData.phoneCustomer) {
-            return false;
+            if(calData.isPay == "0" || calData.isPay == "1") {
+                return false;
+            }            
+            if(calData.isPay == "2" && calData.cashier) {
+                return false;
+            }            
         }
         return true;
+    }
+    
+    const calculateTotalPrice = (data) => {
+        let totalPrice = 0;
+        const totalCount = data.reduce((count, item) => count + item.time.length, 0);
+        totalPrice = (((totalCount * TIME)/60)*PRICE) + parseInt(calData.bonus ? calData.bonus : 0);
+        return totalPrice;
     }
 
     const handleReceiveSuccessData = () => {
@@ -1181,33 +1254,83 @@ const Calendar = () => {
                                 <FormControlLabel
                                     value={0}
                                     control={<Radio />}
+                                    disabled={blockUpdate}
                                     label="Chưa thanh toán"
                                     labelPlacement="top"
                                 />
                                 <FormControlLabel
                                     value={1}
                                     control={<Radio />}
+                                    disabled={blockUpdate}
                                     label="Đã cọc trước"
                                     labelPlacement="top"
                                 />
                                 <FormControlLabel
                                     value={2}
                                     control={<Radio />}
+                                    disabled={blockUpdate}
                                     label="Đã thanh toán"
                                     labelPlacement="top"
                                 />                                
                             </RadioGroup>
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin khác</Typography>
                             <Box mb={2}>
+                                {(!calData.isCustomer && calData.isPay == "2") &&
+                                    <>
+                                        <Autocomplete
+                                            disablePortal
+                                            options={cashier}
+                                            value={calData.cashier}
+                                            getOptionLabel={(option) => {
+                                                const selectedCashier = cashier.find((item) => item.value === option);
+                                                return selectedCashier ? selectedCashier.label : option.label ? option.label : '';
+                                            }}
+                                            onChange={(e, selectedOption) => onChangeCalData('cashier', selectedOption ? selectedOption.value : null)}
+                                            disabled={blockUpdate}
+                                            renderInput={(params) => <TextField {...params} label="Nhân viên thu" />}
+                                            fullWidth
+                                            sx={{mb: 2}}
+                                        />
+                                        <Box display={'flex'} mb={2}>
+                                            <TextField
+                                                label="Số tiền cố định (VND/H)"                                    
+                                                value={formatNumberWithComma(80000)}
+                                                disabled={true}
+                                                fullWidth
+                                                sx={{mr: 1}}
+                                            />
+                                            <TextField
+                                                label="Số tiền chơi thêm (VND)"
+                                                defaultValue={calData.bonus}
+                                                onChange={(e) => onChangeCalData('bonus', e.target.value)}
+                                                error={calError && calErrorData.key === 'bonus' && true}
+                                                disabled={blockUpdate}
+                                                helperText={calError && calErrorData.key === 'bonus' && calErrorData.message}
+                                                fullWidth
+                                                sx={{ml: 1}}
+                                            />
+                                        </Box>
+                                        <TextField
+                                            label="Tổng tiền"
+                                            value={formatNumberWithComma(calculateTotalPrice(calData.details))}
+                                            disabled={true}
+                                            fullWidth
+                                            sx={{mb: 2}}
+                                        />                                        
+                                    </>
+                                    || 
+                                    <></>
+                                }
                                 <TextField
-                                    label="Ghi chú"                                    
+                                    label="Ghi chú"
                                     defaultValue={calData.note}
                                     onChange={(e) => onChangeCalData('note', e.target.value)}
                                     error={calError && calErrorData.key === 'note' && true}
+                                    disabled={blockUpdate}
                                     helperText={calError && calErrorData.key === 'note' && calErrorData.message}                                    
                                     fullWidth
                                 />
-                            </Box>                            
+                            </Box>
                             <Box display={'flex'} justifyContent={'flex-end'}>
                                 {(calData.id && calData.isPay === 0) &&
                                     <Button 

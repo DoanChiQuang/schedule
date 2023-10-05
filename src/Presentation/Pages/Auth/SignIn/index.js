@@ -48,7 +48,7 @@ export default function SignInPage() {
     }, [error])
 
     return (
-        <Container sx={styles.container} maxWidth={"xl"}>
+        <Container sx={styles.container} maxWidth={false}>
             <Grid container justifyContent={'center'} alignItems={'center'}>
                 <Grid item lg={4} md={5} sm={7} xs={10}>                    
                     <Stack my={1}>
