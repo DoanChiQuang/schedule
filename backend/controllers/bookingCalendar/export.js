@@ -22,10 +22,14 @@ export const exportB = async (req, res, next) => {
         }
         const price = 80000;
         const cashierArr = ["Anh", "Khánh", "Quân"];
+        let cashierId = [];
+        cashier.forEach(e => {
+            cashierId.push(cashierArr[e-1])
+        })
         // const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(startDate), '$lte': new Date(endDate)}, isCustomer: 0, cashier: {$in: cashier}});
 
         const allBookingCal = [];
-        for(let i = 0; i < cashierArr.length; i++){
+        for(let i = 0; i < cashierId.length; i++){
             let cashNum = i+1;
             let sumAll = 0;
             const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(startDate), '$lte': new Date(endDate)}, isCustomer: 0, cashier: cashNum});
@@ -33,7 +37,7 @@ export const exportB = async (req, res, next) => {
                 for(let j = 0; j < fetchAllCalendars.length; j++){
                     const bookingCal = [];
                     if(j == 0) {
-                        bookingCal.push(cashierArr[i]);
+                        bookingCal.push(cashierId[i]);
                     }else{
                         bookingCal.push('');
                     }
