@@ -24,7 +24,7 @@ export const exportB = async (req, res, next) => {
         const cashierArr = ["Anh", "Khánh", "Quân"];
         let cashierId = [];
         cashier.forEach(e => {
-            cashierId.push(cashierArr[e-1])
+            cashierId.push(cashierArr[Number(e)-1])
         })
         // const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(startDate), '$lte': new Date(endDate)}, isCustomer: 0, cashier: {$in: cashier}});
 
