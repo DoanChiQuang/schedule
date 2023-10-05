@@ -102,7 +102,7 @@ export const create = async (req, res, next) => {
                     });
                 }
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):''});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,});
 
             return res.json({
                 status: 200,
@@ -259,8 +259,10 @@ export const create = async (req, res, next) => {
                 let details_s = [];
                 details.forEach(d => {
                     let obj = [];
+                    let sumCash = 0;
                     details.forEach(ds => {
                         if(new Date(d.date).getTime() == new Date(ds.date).getTime()){
+                            sumCash +=d.total;
                             obj.push({
                                 day: new Date(d.date).getDay(),
                                 yard: ds.yard,
@@ -269,7 +271,7 @@ export const create = async (req, res, next) => {
                         }
                     })
 
-                    details_s.push({details: obj, date: new Date(d.date)});
+                    details_s.push({details: obj, date: new Date(d.date), total: sumCash});
                 });
                 details_s = [...new Map(details_s.map(item => [item['date'].getTime(), item])).values()];
                 // console.log(details_s);
@@ -286,7 +288,7 @@ export const create = async (req, res, next) => {
                         note: note,
                         bonus: isCustomer?0:bonus,
                         cashier: isCustomer?'':cashier,
-                        total: isCustomer?0:total,
+                        total: isCustomer?0:s.total,
                     });
                 })
                 // console.log(details_sch);
