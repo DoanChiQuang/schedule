@@ -90,7 +90,7 @@ export const exportB = async (req, res, next) => {
         
         var workbook = new Excel.Workbook();
         var worksheet = workbook.addWorksheet('Chi tiết lịch đặt');
-        worksheet.addRow(['Người thu', 'Tên khách', 'Chi tiết', 'Tổng giờ', 'Tiền sân', 'Tiền thu thêm', 'Tổng', 'Ghi chú', 'Tổng thu']);
+        worksheet.addRow(['Người thu', 'Tên khách', 'Chi tiết', 'Tổng giờ', 'Tiền sân', 'Tiền thu thêm', 'Tổng', 'Tổng thu']);
         worksheet.addRows(allBookingCal);
 
         // headerRow.getCell(1).value = 'Người thu';
