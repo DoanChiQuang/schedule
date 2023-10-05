@@ -103,19 +103,32 @@ export const exportB = async (req, res, next) => {
         // headerRow.getCell(8).value = 'Ghi chú';
         // headerRow.getCell(9).value = 'Tổng thu';
 
-        workbook.xlsx.writeBuffer().then((buffer) => {
-            const blob = new Blob([buffer], {
-                type:'application/vnd.openxmlformats-officedocument.spreads'
+        // workbook.xlsx.writeBuffer().then((buffer) => {
+        //     const blob = new Blob([buffer], {
+        //         type:'application/vnd.openxmlformats-officedocument.spreads'
+        //     })
+        //     saveAs(blob, 'Chi tiết lịch đặt sân.xlsx')
+        // })
+        
+        const fileName = 'chi_tiet_lich_dat_san.xlsx';
+        const filePath = 'backend/exports/' + fileName;
+        workbook.xlsx.writeFile(filePath)
+            .then(() => {
+                res.json({ 
+                    status: 200,
+                    message: "Thành công.",
+                    success: true,
+                    data: {
+                        fileName: fileName
+                    }
+                });
             })
-            saveAs(blob, 'Chi tiết lịch đặt sân.xlsx')
-        })
-
-        return res.json({ 
-            status: 200,
-            message: "Thành công.",
-            success: true,
-            data: ''
-        });
+            .catch(error => {            
+                const newError = new Error('Lỗi xuất dữ liệu.')
+                newError.statusCode = 400
+                next(newError)
+                return;
+            });
     }
     catch(error) {
         next(error);

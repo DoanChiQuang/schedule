@@ -23,6 +23,8 @@ import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileDownloadOffIcon from '@mui/icons-material/FileDownloadOff';
 import { deburr } from "lodash";
+import axiosInstance, { API_URL } from "../../../Utils/axiosIntance";
+import { saveAs } from 'file-saver';
 
 const TIME = 30
 const PRICE = 80000
@@ -38,7 +40,7 @@ const Calendar = () => {
     const { data: dataExport, loading: loadingExport, error: errorExport, message: messageExport, request: requestExport, setData: setDataExport } = useApi(apiCalendar.exportData);
     
     const daysNameOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const loading = loadingGetAll || loadingGetAllTimeDetail || loadingYard || loadingCustomer || loadingCreate || loadingRemove;
+    const loading = loadingGetAll || loadingGetAllTimeDetail || loadingYard || loadingCustomer || loadingCreate || loadingRemove || loadingExport;
     const theme = useTheme();
     const styles = style(theme);
     const [selectedCells, setSelectedCells] = useState([]);
@@ -606,6 +608,12 @@ const Calendar = () => {
             setAlertType('error');
             setAlertMess(messageRemove);
         }
+
+        if(errorExport) {
+            setAlert(true);
+            setAlertType('error');
+            setAlertMess(messageExport);
+        }
     }
 
     const handleStartDateChange = (date) => {
@@ -953,7 +961,7 @@ const Calendar = () => {
 
     useEffect(() => {        
         handleReceiveErrorData();
-    }, [errorCreate, errorRemove]);
+    }, [errorCreate, errorRemove, errorExport]);
 
     useEffect(() => {
         if(hasFilter) {
@@ -975,7 +983,28 @@ const Calendar = () => {
             setHasFilter(false);
         }
     }, [timeBooked, timeBookedInitial])
+
+    useEffect(() => {
+        if(dataExport) {
+            downloadFile(dataExport.data.fileName);
+        }
+    }, [dataExport])
     
+    const downloadFile = async (fileName) => {
+        try {
+            const url = API_URL + '/downloads/' + fileName;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error('File not found');
+            }
+
+            const blob = await response.blob();
+            saveAs(blob, 'chi_tiet_lich_dat_san.xlsx');
+        } catch (error) {
+            console.error('Error downloading file:', error);
+        }
+    }
     return (
         <Layout
             children={
