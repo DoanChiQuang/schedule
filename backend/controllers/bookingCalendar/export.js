@@ -75,7 +75,6 @@ export const exportB = async (req, res, next) => {
                         bookingCal.push(sumH*price)
                         bookingCal.push(fetchAllCalendars[j].bonus)
                         bookingCal.push(fetchAllCalendars[j].total)
-                        // bookingCal.push(obj);
                     }
                     if(j == 0) {
                         bookingCal.push(sumAll);
@@ -88,17 +87,12 @@ export const exportB = async (req, res, next) => {
             }
 
         };
-        console.log(allBookingCal);
         
         var workbook = new Excel.Workbook();
         var worksheet = workbook.addWorksheet('Chi tiết lịch đặt');
         worksheet.addRow(['Người thu', 'Tên khách', 'Chi tiết', 'Tổng giờ', 'Tiền sân', 'Tiền thu thêm', 'Tổng', 'Ghi chú', 'Tổng thu']);
         worksheet.addRows(allBookingCal);
-        // allBookingCal.forEach(e => {
-        //     let row = [e[0], e[1].name, e[1].details, e[1].sumH, e[1].pay, e[1].bonus, e[1].total, e[2]]
-        //     console.log(row);
-        //     worksheet.addRow(row);
-        // });
+
         // headerRow.getCell(1).value = 'Người thu';
         // headerRow.getCell(2).value = 'Tên khách';
         // headerRow.getCell(3).value = 'Chi tiết';
