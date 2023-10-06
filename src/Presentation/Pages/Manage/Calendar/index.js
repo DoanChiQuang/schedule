@@ -1477,7 +1477,7 @@ const Calendar = () => {
                                                 defaultValue={calData.bonus}
                                                 onChange={(e) => onChangeCalData('bonus', e.target.value)}
                                                 error={calError && calErrorData.key === 'bonus' && true}
-                                                disabled={blockUpdate}
+                                                disabled={blockUpdate || calData.id ? false : true}
                                                 helperText={calError && calErrorData.key === 'bonus' && calErrorData.message}
                                                 fullWidth
                                                 sx={{ml: 1}}
