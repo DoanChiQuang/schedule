@@ -44,6 +44,9 @@ export const getAll = async (req, res, next) => {
                         endNum = new Date(endDate).getDate();
                         startNum = 1;
                     }
+                    if(cal.endDate && new Date(cal.endDate).getDate() < endNum) {
+                        endNum = new Date(cal.endDate).getDate();
+                    }
                     if(dateStart < dateEnd) {
                         endNum = new Date(endDate).getDate();
                         if(dateEnd > new Date(eDateCheck).getDate()){
