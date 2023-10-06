@@ -161,6 +161,7 @@ export const create = async (req, res, next) => {
                 let day_check = [];
                 let date_check = [];
                 let future_check = false;
+                let curr_check = false;
                 details.forEach(d => {
                     if(d) {
                         date_check.push(d.date);
@@ -168,6 +169,10 @@ export const create = async (req, res, next) => {
 
                         if(new Date(d.date).getMonth() > currentDate.getMonth()){
                             future_check = true;
+                        }
+
+                        if(new Date(d.date).getMonth() == currentDate.getMonth()) {
+                            curr_check = true;
                         }
     
                         let obj = {
@@ -178,7 +183,7 @@ export const create = async (req, res, next) => {
                         details_sch.push(obj);
                     }
                 });
-                if(future_check){
+                if(future_check && curr_check){
                     const error = new Error("Lịch khách cố định chỉ được đặt trong tháng.");
                     error.statusCode = 400;
                     next(error);
