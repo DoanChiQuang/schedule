@@ -328,8 +328,7 @@ const Calendar = () => {
                 details: calDetails,
                 total: total+parseInt(calData.bonus ? calData.bonus : 0)
             };
-        }
-        console.log(params);
+        }        
         requestCreate(params);
     }
 
@@ -396,16 +395,17 @@ const Calendar = () => {
 
     const onFilterSubmit = (reset) => {
         if(reset) {
-            requestGetAll({startDate: formatDate(formatDateDot(dayjs())), endDate: formatDate(formatDateDot(dayjs().add(6, 'day')))});
-            const daysOfWeekNow = getCurrentWeekDates();
-            setDaysOfWeek(daysOfWeekNow);
-            setTimeBooked(timeBookedInitial);
-            setFilterOption({
-                isCustomer: 2,
-                name: ""
-            });
-            setOpenFilter(false);
-            setHasFilter(false);
+            // requestGetAll({startDate: formatDate(formatDateDot(dayjs())), endDate: formatDate(formatDateDot(dayjs().add(6, 'day')))});
+            // const daysOfWeekNow = getCurrentWeekDates();
+            // setDaysOfWeek(daysOfWeekNow);
+            // setTimeBooked(timeBookedInitial);
+            // setFilterOption({
+            //     isCustomer: 2,
+            //     name: ""
+            // });
+            // setOpenFilter(false);
+            // setHasFilter(false);
+            window.location.reload();            
             return;
         }
         
