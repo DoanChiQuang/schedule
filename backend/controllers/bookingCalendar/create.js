@@ -117,6 +117,7 @@ export const create = async (req, res, next) => {
             let currentDate = new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(),0,0,0))
 
             let dupl = false;
+            let duplwithnomalCus = false;
             for(let i = 0; i < details.length; i++){
                 const month = new Date(details[i].date).getMonth();
                 const year = new Date(details[i].date).getFullYear();
@@ -124,6 +125,12 @@ export const create = async (req, res, next) => {
                 // const fetchAllCalen = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month-1, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(year, month, 0, 0, 0, 0))}, "details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}, endDate: ''})
                 const fetchAllCalen = await BookingCal.find({startDate: {'$lte': new Date(Date.UTC(year, month+1, 0, 0, 0, 0))},"details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}, endDate: '', type: 1})
                 
+                const fetchAllNotLoyalCus = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month+1, 1, 0, 0, 0))},"details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}})
+                
+                if(fetchAllNotLoyalCus.length > 0){
+                    duplwithnomalCus = true;
+                }
+
                 if(fetchAllCalen.length > 0){
                     dupl = true;
                 }
@@ -137,6 +144,13 @@ export const create = async (req, res, next) => {
             }
             if(dupl){
                 const error = new Error('Không tạo được lịch do trùng lịch với khách cố định.');
+                error.statusCode = 400;
+                next(error);
+                return;
+            }
+
+            if(duplwithnomalCus && type == 1 && !endDate) {
+                const error = new Error('Không tạo được lịch do trùng với lịch tháng sau.');
                 error.statusCode = 400;
                 next(error);
                 return;
