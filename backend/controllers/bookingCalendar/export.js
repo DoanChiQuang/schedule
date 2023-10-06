@@ -49,7 +49,7 @@ export const exportB = async (req, res, next) => {
                     let startper = '';
                     let endper = '';
                     let sumH = 0;
-                    let details = [];
+                    let details = '';
                     for(let f=0; f<fetchAllCalendars[j].details.length; f++){
                         yard = yardAll.find((y) => y._id==fetchAllCalendars[j].details[f].yard)
                         startper = timeDAll.find((t) => t._id==fetchAllCalendars[j].details[f].periodTime[0]);
@@ -57,8 +57,8 @@ export const exportB = async (req, res, next) => {
 
                         day = daysNameOfWeek[fetchAllCalendars[j].details[f].day];
                         sumH+=(fetchAllCalendars[j].details[f].periodTime.length/2);
-                        let dat = fetchAllCalendars[j].startDate.getDate()+"/"+(fetchAllCalendars[j].startDate.getMonth()+1)+"/"+fetchAllCalendars[j].startDate.getFullYear();
-                        details.push(day+"-"+dat+": "+yard.name+" "+startper.startTime+":"+endper.endTime);
+                        let dat = fetchAllCalendars[j].details[f].date.getDate()+"/"+(fetchAllCalendars[j].details[f].date.getMonth()+1)+"/"+fetchAllCalendars[j].details[f].date.getFullYear();
+                        details+=day+"-"+dat+": "+yard.name+" "+startper.startTime+":"+endper.endTime+"\r\n";
                     }
                 
                     sumAll+=fetchAllCalendars[j].total+fetchAllCalendars[j].bonus;
@@ -73,7 +73,7 @@ export const exportB = async (req, res, next) => {
                     // };
                     bookingCal.push(formatDateToString(fetchAllCalendars[j].updatedAt));
                     bookingCal.push(fetchAllCalendars[j].customerName)
-                    bookingCal.push(details.toString())
+                    bookingCal.push(details.toString().trim())
                     bookingCal.push(fetchAllCalendars[j].note)
                     bookingCal.push(sumH)
                     bookingCal.push(fetchAllCalendars[j].total)
@@ -96,7 +96,9 @@ export const exportB = async (req, res, next) => {
         var worksheet = workbook.addWorksheet('Chi tiết lịch đặt');
         worksheet.addRow(['Người thu', 'Ngày thu','Tên khách', 'Chi tiết', 'Ghi chú', 'Tổng giờ', 'Tiền sân', 'Tiền thu thêm', 'Tổng', 'Tổng thu']);
         worksheet.addRows(allBookingCal);
-
+        
+        worksheet.getColumn(4).alignment = { wrapText: true };
+        worksheet.getColumn(4).width = 35;
         // headerRow.getCell(1).value = 'Người thu';
         // headerRow.getCell(2).value = 'Tên khách';
         // headerRow.getCell(3).value = 'Chi tiết';
