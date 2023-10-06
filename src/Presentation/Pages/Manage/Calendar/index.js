@@ -311,12 +311,23 @@ const Calendar = () => {
                 yard: detail.yard
             };
         });
-        const params = {
-            ...calData,
-            endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
-            details: calDetails,
-            total: total+parseInt(calData.bonus ? calData.bonus : 0)
-        };
+        let params = {}
+        if(calData.isPay == "2" && !calData.idCustomer) {
+            params = {
+                ...calData,
+                endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
+                details: calDetails,
+                total: total+parseInt(calData.bonus ? calData.bonus : 0),
+                payDate: formatDate(formatDateDot(dayjs()))
+            };
+        } else {
+            params = {
+                ...calData,
+                endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
+                details: calDetails,
+                total: total+parseInt(calData.bonus ? calData.bonus : 0)
+            };
+        }
         requestCreate(params);
     }
 
@@ -776,6 +787,7 @@ const Calendar = () => {
     // }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells, onSelectCell])
 
     const timeSlotComponents = useMemo(() => {
+        console.log(123)
         return timeSlots.map((timeSlot, timeSlotIndex) => (
             <TableRow key={timeSlot.id}>
                 <TableCell
@@ -913,7 +925,7 @@ const Calendar = () => {
                 ))}
             </TableRow>
           ))          
-    }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells, onSelectCell])
+    }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells])
 
     useEffect(() => {                
         fetchInitial();
@@ -1475,7 +1487,7 @@ const Calendar = () => {
                                             />
                                             <TextField
                                                 label="Số tiền chơi thêm (VND)"
-                                                defaultValue={calData.bonus}
+                                                value={calData.bonus}
                                                 onChange={(e) => onChangeCalData('bonus', e.target.value)}
                                                 error={calError && calErrorData.key === 'bonus' && true}
                                                 disabled={blockUpdate}
