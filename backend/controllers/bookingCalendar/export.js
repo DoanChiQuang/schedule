@@ -22,18 +22,21 @@ export const exportB = async (req, res, next) => {
         }
         const price = 80000;
         const cashierArr = ["Anh", "Khánh", "Quân"];
+        const daysNameOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
         let cashierId = [];
         cashier.forEach(e => {
             cashierId.push(cashierArr[Number(e)-1])
         })
-        // const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(startDate), '$lte': new Date(endDate)}, isCustomer: 0, cashier: {$in: cashier}});
+        const fetchCalendars = await BookingCal.find({startDate: {'$gte': new Date(startDate), '$lte': new Date(endDate)}, isCustomer: 0, cashier: {$in: cashier}, isPay: 2});
 
         const allBookingCal = [];
-        for(let i = 0; i < cashierId.length; i++){
-            let cashNum = i+1;
-            let sumAll = 0;
-            const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(startDate), '$lte': new Date(endDate)}, isCustomer: 0, cashier: cashNum});
-            if(fetchAllCalendars){
+        const yardAll = await Yard.find();
+        const timeDAll = await TimeD.find();
+        if(fetchCalendars){
+            for(let i = 0; i < cashierId.length; i++){
+                let cashNum = i+1;
+                let sumAll = 0;
+                const fetchAllCalendars = fetchCalendars.filter((cal) => cal.cashier==cashNum);
                 for(let j = 0; j < fetchAllCalendars.length; j++){
                     const bookingCal = [];
                     if(j == 0) {
@@ -41,42 +44,43 @@ export const exportB = async (req, res, next) => {
                     }else{
                         bookingCal.push('');
                     }
-                    if(fetchAllCalendars[j].cashier == cashNum){
-                        let yard = '';
-                        let day = -1;
-                        let startper = '';
-                        let endper = '';
-                        let sumH = 0;
-                        let details = [];
-                        for(let f=0; f<fetchAllCalendars[j].details.length; f++){
-                            yard = await Yard.findOne({_id: fetchAllCalendars[j].details[f].yard});
-                            startper = await TimeD.findOne({_id: fetchAllCalendars[j].details[f].periodTime[0]});
-                            endper = await TimeD.findOne({_id: fetchAllCalendars[j].details[f].periodTime[fetchAllCalendars[j].details[f].periodTime.length-1]});
-                            day = fetchAllCalendars[j].details[f].day+1;
-                            sumH+=(fetchAllCalendars[j].details[f].periodTime.length/2);
-                            let dat = fetchAllCalendars[j].startDate.getDate()+"/"+(fetchAllCalendars[j].startDate.getMonth()+1)+"/"+fetchAllCalendars[j].startDate.getFullYear();
-                            details.push("Thứ "+day+"-"+dat+": "+yard.name+" "+startper.startTime+":"+endper.endTime);
-                        }
-                    
-                        sumAll+=fetchAllCalendars[j].total;
 
-                        // let obj = {
-                        //     name: fetchAllCalendars[j].customerName,
-                        //     details: details.toString(),
-                        //     sumH: sumH,
-                        //     pay: sumH*price,
-                        //     bonus: fetchAllCalendars[j].bonus,
-                        //     total: fetchAllCalendars[j].total
-                        // };
+                    let yard = '';
+                    let day = -1;
+                    let startper = '';
+                    let endper = '';
+                    let sumH = 0;
+                    let details = [];
+                    for(let f=0; f<fetchAllCalendars[j].details.length; f++){
+                        yard = yardAll.find((y) => y._id==fetchAllCalendars[j].details[f].yard)
+                        startper = timeDAll.find((t) => t._id==fetchAllCalendars[j].details[f].periodTime[0]);
+                        endper = timeDAll.find((t) => t._id==fetchAllCalendars[j].details[f].periodTime[fetchAllCalendars[j].details[f].periodTime.length-1]);
 
-                        bookingCal.push(fetchAllCalendars[j].customerName)
-                        bookingCal.push(details.toString())
-                        bookingCal.push(sumH)
-                        bookingCal.push(sumH*price)
-                        bookingCal.push(fetchAllCalendars[j].bonus)
-                        bookingCal.push(fetchAllCalendars[j].total)
+                        day = daysNameOfWeek[fetchAllCalendars[j].details[f].day];
+                        sumH+=(fetchAllCalendars[j].details[f].periodTime.length/2);
+                        let dat = fetchAllCalendars[j].startDate.getDate()+"/"+(fetchAllCalendars[j].startDate.getMonth()+1)+"/"+fetchAllCalendars[j].startDate.getFullYear();
+                        details.push(day+"-"+dat+": "+yard.name+" "+startper.startTime+":"+endper.endTime);
                     }
-                    if(j == 0) {
+                
+                    sumAll+=fetchAllCalendars[j].total;
+
+                    // let obj = {
+                    //     name: fetchAllCalendars[j].customerName,
+                    //     details: details.toString(),
+                    //     sumH: sumH,
+                    //     pay: sumH*price,
+                    //     bonus: fetchAllCalendars[j].bonus,
+                    //     total: fetchAllCalendars[j].total
+                    // };
+
+                    bookingCal.push(fetchAllCalendars[j].customerName)
+                    bookingCal.push(details.toString())
+                    bookingCal.push(sumH)
+                    bookingCal.push(sumH*price)
+                    bookingCal.push(fetchAllCalendars[j].bonus)
+                    bookingCal.push(fetchAllCalendars[j].total)
+
+                    if(j == fetchAllCalendars.length-1) {
                         bookingCal.push(sumAll);
                     }else{
                         bookingCal.push('');
