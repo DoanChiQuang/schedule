@@ -1186,7 +1186,7 @@ const Calendar = () => {
                     }
                     <TableContainer 
                         component={Paper} 
-                        style={{ height: '75vh', overflowX: 'auto' }} 
+                        style={{ height: '80vh', overflowX: 'auto' }} 
                         sx={{
                             '&::-webkit-scrollbar': {
                                 width: '0.4rem',
