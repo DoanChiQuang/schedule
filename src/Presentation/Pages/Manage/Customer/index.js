@@ -331,7 +331,11 @@ const Customer = () => {
     return (
         <Layout 
             children={
-                <Box>
+                <Box sx={{
+                    '@media (max-width: 400px)': {
+                        width: '95vw',
+                    },
+                }}> 
                     <Box display={'flex'} flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
                         <Typography variant="h6" fontWeight={'bold'}>Quản lý khách hàng</Typography>
                         <Button variant="contained" onClick={() => onOpenModal()}><AddIcon /> Thêm mới</Button>
@@ -347,7 +351,12 @@ const Customer = () => {
                         />
                     </Box>
                     <Modal open={toggleModal} onClose={() => onCloseModal()}>
-                        <Box sx={styles.modal}>
+                        <Box sx={[
+                            styles.modal,
+                            {'@media (max-width: 400px)': {
+                                width: '90%',
+                            }}
+                        ]}>
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin cá nhân</Typography>
                             <Box display={'flex'} flexDirection={'row'} sx={{mb: 2}}>
                                 <TextField
@@ -443,6 +452,8 @@ const style = (theme) => ({
         bgcolor: 'white',
         boxShadow: 24,
         borderRadius: 1,
+        overflowY: 'auto',
+        maxHeight: '80vh',
         p: 4,
     }
 })

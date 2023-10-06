@@ -1268,7 +1268,12 @@ const Calendar = () => {
                         </Table>
                     </TableContainer>                    
                     <Modal open={toggleModal} onClose={() => onCloseModal()}>
-                        <Box sx={styles.modal}>
+                        <Box sx={[
+                            styles.modal,
+                            {'@media (max-width: 400px)': {
+                                width: '90%',
+                            }}
+                        ]}>
                             <RadioGroup
                                 row
                                 name="position"

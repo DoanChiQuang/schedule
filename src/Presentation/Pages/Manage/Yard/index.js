@@ -214,7 +214,11 @@ const Yard = () => {
     return (
         <Layout 
             children={
-                <Box>
+                <Box sx={{
+                    '@media (max-width: 400px)': {
+                        width: '95vw',
+                    },
+                }}> 
                     <Box display={'flex'} flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
                         <Typography variant="h6" fontWeight={'bold'}>Quản lý sân</Typography>
                         <Button variant="contained" onClick={() => onOpenModal()}>
@@ -232,7 +236,12 @@ const Yard = () => {
                         />
                     </Box>
                     <Modal open={toggleModal} onClose={() => onCloseModal()}>
-                        <Box sx={styles.modal}>
+                        <Box sx={[
+                            styles.modal,
+                            {'@media (max-width: 400px)': {
+                                width: '90%',
+                            }}
+                        ]}>
                             <Typography variant="body1" fontWeight={"bold"} mb={2}>Thông tin sân</Typography>
                             <Box mb={2}>
                                 <TextField
@@ -285,6 +294,8 @@ const style = (theme) => ({
         bgcolor: 'white',
         boxShadow: 24,
         borderRadius: 1,
+        overflowY: 'auto',
+        maxHeight: '80vh',
         p: 4,
     }
 })
