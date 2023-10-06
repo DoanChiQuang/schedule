@@ -292,6 +292,7 @@ const Calendar = () => {
                 bonus: calData.bonus,
                 details: calDetails
             });
+            setEndDateCreate(calData.endDate);
             if(calData.isPay == "2") setBlockUpdate(true);
         }
         setToggleModal(true);
@@ -339,6 +340,7 @@ const Calendar = () => {
                 total: total+parseInt(calData.bonus ? calData.bonus : 0)
             };
         }
+        console.log(params);
         requestCreate(params);
     }
 
