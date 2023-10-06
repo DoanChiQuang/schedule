@@ -264,6 +264,7 @@ const Calendar = () => {
         setCalError(false);
         setToggleModal(false);
         setBlockUpdate(false);
+        setEndDateCreate('');
     }
 
     const onOpenModal = (calData, timeDetail) => {
@@ -337,7 +338,7 @@ const Calendar = () => {
                 details: calDetails,
                 total: total+parseInt(calData.bonus ? calData.bonus : 0)
             };
-        }        
+        }
         requestCreate(params);
     }
 
@@ -974,7 +975,7 @@ const Calendar = () => {
             const startDate = formatDate(selectedCal[0].date);
             setCalData({...calData, startDate: startDate, details: selectedCal});
         }
-    }, [selectedCells])
+    }, [selectedCells, toggleModal])
 
     useEffect(() => {
         handleReceiveSuccessData();
