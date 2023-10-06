@@ -329,6 +329,7 @@ const Calendar = () => {
                 total: total+parseInt(calData.bonus ? calData.bonus : 0)
             };
         }
+        console.log(params);
         requestCreate(params);
     }
 
