@@ -5,7 +5,7 @@ import { phoneRegExp } from '../../utils/RegexValidate.js';
 
 export const create = async (req, res, next) => {
     try {
-        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note, type, bonus, cashier, total} = req.body;
+        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note, type, bonus, cashier, total, payDay} = req.body;
         //update status
         let dateOfDayWeek = [];
         //Validate
@@ -61,7 +61,7 @@ export const create = async (req, res, next) => {
                 let endNum = new Date(endDate).getDate();
                 let totalDate = 0;
                 
-                if(!endDate){
+                if(!endDate && type){
                     bookCal.details.forEach(e => {
                         let day = [];
                         for(let i = startNum; i <= endNum; i++) {
@@ -102,7 +102,7 @@ export const create = async (req, res, next) => {
                     });
                 }
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,updatedAt:isCustomer?'':payDay});
 
             return res.json({
                 status: 200,
@@ -122,7 +122,7 @@ export const create = async (req, res, next) => {
                 const year = new Date(details[i].date).getFullYear();
                 const day = new Date(details[i].date).getDay();
                 // const fetchAllCalen = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(year, month-1, 1, 0, 0, 0)), '$lte': new Date(Date.UTC(year, month, 0, 0, 0, 0))}, "details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}, endDate: ''})
-                const fetchAllCalen = await BookingCal.find({"details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}, endDate: ''})
+                const fetchAllCalen = await BookingCal.find({startDate: {'$lte': new Date(Date.UTC(year, month+1, 0, 0, 0, 0))},"details.day": day,"details.yard": details[i].yard, "details.periodTime": { $in:details[i].periodTime}, isCustomer: 1, isPay: {$ne: 2}, endDate: '', type: 1})
                 
                 if(fetchAllCalen.length > 0){
                     dupl = true;
@@ -256,43 +256,51 @@ export const create = async (req, res, next) => {
                     customer = await Customer.findById({_id: idCustomer});
                 }
                 let details_sch = [];
-                let details_s = [];
+                // let sumCash = 0;
+                // let details_s = [];
                 details.forEach(d => {
-                    let obj = [];
-                    let sumCash = 0;
-                    details.forEach(ds => {
-                        if(new Date(d.date).getTime() == new Date(ds.date).getTime()){
-                            sumCash +=d.total;
-                            obj.push({
-                                day: new Date(d.date).getDay(),
-                                yard: ds.yard,
-                                periodTime: ds.periodTime,
-                            });
-                        }
-                    })
-
-                    details_s.push({details: obj, date: new Date(d.date), total: sumCash});
-                });
-                details_s = [...new Map(details_s.map(item => [item['date'].getTime(), item])).values()];
-                // console.log(details_s);
-                details_s.forEach(s => {
                     details_sch.push({
-                        startDate: new Date(s.date),
-                        endDate: new Date(s.date),
-                        details: s.details,
-                        customerId: isCustomer?idCustomer:'',
-                        customerName: isCustomer?customer.name:nameCustomer,
-                        customerPhone: isCustomer?customer.phonenum:phoneCustomer,
-                        isCustomer: isCustomer,
-                        isPay: isPay,
-                        note: note,
-                        bonus: isCustomer?0:bonus,
-                        cashier: isCustomer?'':cashier,
-                        total: isCustomer?0:s.total,
+                        day: new Date(d.date).getDay(),
+                        date: new Date(d.date),
+                        yard: d.yard,
+                        periodTime: d.periodTime,
                     });
-                })
-                // console.log(details_sch);
-                const booking = await BookingCal.insertMany(details_sch);
+                });
+                // details_s = [...new Map(details_s.map(item => [item['date'].getTime(), item])).values()];
+                // console.log(details_s);
+                // details_s.forEach(s => {
+                //     details_sch.push({
+                //         startDate: new Date(s.date),
+                //         endDate: new Date(s.date),
+                //         details: s.details,
+                //         customerId: isCustomer?idCustomer:'',
+                //         customerName: isCustomer?customer.name:nameCustomer,
+                //         customerPhone: isCustomer?customer.phonenum:phoneCustomer,
+                //         isCustomer: isCustomer,
+                //         isPay: isPay,
+                //         note: note,
+                //         bonus: isCustomer?0:bonus,
+                //         cashier: isCustomer?'':cashier,
+                //         total: isCustomer?0:s.total,
+                //     });
+                // })
+                console.log(startDate);
+                console.log(endDate);
+                const booking = await BookingCal.create({
+                    startDate: new Date(startDate),
+                    endDate: endDate?new Date(endDate):'',
+                    details: details_sch,
+                    customerId: isCustomer?idCustomer:'',
+                    customerName: isCustomer?customer.name:nameCustomer,
+                    customerPhone: isCustomer?customer.phonenum:phoneCustomer,
+                    isCustomer: isCustomer,
+                    isPay: isPay,
+                    note: note,
+                    bonus: isCustomer?0:bonus,
+                    cashier: isCustomer?'':cashier,
+                    total: isCustomer?0:total,
+                    updatedAt: isCustomer?'':payDay
+                });
             }
             return res.json({
                 status: 200,

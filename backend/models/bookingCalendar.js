@@ -47,6 +47,9 @@ const bookingCalendarSchema = new mongoose.Schema({
     },
     cashier: {
         type: String
+    },
+    updatedAt: {
+        type: Date,
     }
 });
 

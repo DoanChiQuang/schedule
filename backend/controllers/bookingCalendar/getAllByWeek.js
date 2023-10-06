@@ -76,7 +76,7 @@ export const getAll = async (req, res, next) => {
             }else{
                 cal.details.forEach(da => {
                     detailsCal.push({
-                        date: new Date(cal.startDate),
+                        date: new Date(da.date),
                         yard: da.yard,
                         periodTime: da.periodTime
                     });

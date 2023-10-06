@@ -71,9 +71,10 @@ export const exportB = async (req, res, next) => {
                     //     bonus: fetchAllCalendars[j].bonus,
                     //     total: fetchAllCalendars[j].total
                     // };
-
+                    bookingCal.push(fetchAllCalendars[j].updatedAt);
                     bookingCal.push(fetchAllCalendars[j].customerName)
                     bookingCal.push(details.toString())
+                    bookingCal.push(fetchAllCalendars[j].note)
                     bookingCal.push(sumH)
                     bookingCal.push(fetchAllCalendars[j].total)
                     bookingCal.push(fetchAllCalendars[j].bonus)
@@ -93,7 +94,7 @@ export const exportB = async (req, res, next) => {
         
         var workbook = new Excel.Workbook();
         var worksheet = workbook.addWorksheet('Chi tiết lịch đặt');
-        worksheet.addRow(['Người thu', 'Tên khách', 'Chi tiết', 'Tổng giờ', 'Tiền sân', 'Tiền thu thêm', 'Tổng', 'Tổng thu']);
+        worksheet.addRow(['Người thu', 'Ngày thu','Tên khách', 'Chi tiết', 'Ghi chú', 'Tổng giờ', 'Tiền sân', 'Tiền thu thêm', 'Tổng', 'Tổng thu']);
         worksheet.addRows(allBookingCal);
 
         // headerRow.getCell(1).value = 'Người thu';
