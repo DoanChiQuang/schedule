@@ -71,7 +71,7 @@ export const exportB = async (req, res, next) => {
                     //     bonus: fetchAllCalendars[j].bonus,
                     //     total: fetchAllCalendars[j].total
                     // };
-                    bookingCal.push(fetchAllCalendars[j].updatedAt);
+                    bookingCal.push(formatDateToString(fetchAllCalendars[j].updatedAt));
                     bookingCal.push(fetchAllCalendars[j].customerName)
                     bookingCal.push(details.toString())
                     bookingCal.push(fetchAllCalendars[j].note)
@@ -138,3 +138,14 @@ export const exportB = async (req, res, next) => {
         next(error);
     }
 }
+
+function formatDateToString(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+  }
