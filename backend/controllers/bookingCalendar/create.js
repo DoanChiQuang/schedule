@@ -102,7 +102,7 @@ export const create = async (req, res, next) => {
                     });
                 }
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,updatedAt:isCustomer?'':new Date(payDate)});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,updatedAt:payDate?new Date(payDate):''});
 
             return res.json({
                 status: 200,
@@ -285,7 +285,7 @@ export const create = async (req, res, next) => {
                 //     });
                 // })
                 // console.log(startDate);
-                // console.log(endDate);
+                // console.log(payDate);
                 const booking = await BookingCal.create({
                     startDate: new Date(startDate),
                     endDate: endDate?new Date(endDate):'',
@@ -299,7 +299,7 @@ export const create = async (req, res, next) => {
                     bonus: isCustomer?0:bonus,
                     cashier: isCustomer?'':cashier,
                     total: isCustomer?0:total,
-                    updatedAt: isCustomer?'':new Date(payDate)
+                    updatedAt: payDate?new Date(payDate):''
                 });
             }
             return res.json({
