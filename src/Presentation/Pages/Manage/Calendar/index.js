@@ -319,7 +319,7 @@ const Calendar = () => {
                 endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
                 details: calDetails,
                 total: total+parseInt(calData.bonus ? calData.bonus : 0),
-                payDate: formatDate(formatDateDot(dayjs()))
+                payDate: dayjs()
             };
         } else {
             params = {
