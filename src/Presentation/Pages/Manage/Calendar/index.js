@@ -23,7 +23,7 @@ import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileDownloadOffIcon from '@mui/icons-material/FileDownloadOff';
 import { deburr } from "lodash";
-import axiosInstance, { API_URL } from "../../../Utils/axiosIntance";
+import { API_URL } from "../../../Utils/axiosIntance";
 import { saveAs } from 'file-saver';
 
 const TIME = 30
