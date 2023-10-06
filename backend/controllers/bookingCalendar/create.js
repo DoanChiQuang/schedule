@@ -256,8 +256,7 @@ export const create = async (req, res, next) => {
                     customer = await Customer.findById({_id: idCustomer});
                 }
                 let details_sch = [];
-                // let sumCash = 0;
-                // let details_s = [];
+                
                 details.forEach(d => {
                     details_sch.push({
                         day: new Date(d.date).getDay(),
@@ -266,26 +265,7 @@ export const create = async (req, res, next) => {
                         periodTime: d.periodTime,
                     });
                 });
-                // details_s = [...new Map(details_s.map(item => [item['date'].getTime(), item])).values()];
-                // console.log(details_s);
-                // details_s.forEach(s => {
-                //     details_sch.push({
-                //         startDate: new Date(s.date),
-                //         endDate: new Date(s.date),
-                //         details: s.details,
-                //         customerId: isCustomer?idCustomer:'',
-                //         customerName: isCustomer?customer.name:nameCustomer,
-                //         customerPhone: isCustomer?customer.phonenum:phoneCustomer,
-                //         isCustomer: isCustomer,
-                //         isPay: isPay,
-                //         note: note,
-                //         bonus: isCustomer?0:bonus,
-                //         cashier: isCustomer?'':cashier,
-                //         total: isCustomer?0:s.total,
-                //     });
-                // })
-                // console.log(startDate);
-                // console.log(payDate);
+
                 const booking = await BookingCal.create({
                     startDate: new Date(startDate),
                     endDate: endDate?new Date(endDate):'',
