@@ -302,13 +302,22 @@ const Calendar = () => {
 
     const onCreateCalendar = () => {
         let total = 0;
-        const calDetails = calData.details.map(detail => {
+        const calDetails = calData.details.map(detail => {            
             let data = [];
             data.push(detail);
             total += calculateTotalPrice(data);
+
+            const times = detail.time.map(timeId => {                                                                                        
+                const time = timeSlots.filter(timeSlot => timeSlot.id === timeId);                                            
+                return time[0];
+            });                                                
+            times.sort((a, b) =>
+                a.name.localeCompare(b.name)
+            );
+            const timeIds = times.map(time => time.id);
             return {
                 date: formatDate(detail.date),
-                periodTime: detail.time,
+                periodTime: timeIds,
                 yard: detail.yard
             };
         });
@@ -1383,11 +1392,11 @@ const Calendar = () => {
                                             covertCalDetail().map((selectedCell, selectedCellIndex) => {                                        
                                                 const date = new Date(formatDate(selectedCell.date));
                                                 const dayOfWeekIndex = date.getDay();
-                                                const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + selectedCell.date;
+                                                const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + selectedCell.date;                                                
                                                 const times = selectedCell.time.map(timeId => {                                                                                        
                                                     const time = timeSlots.filter(timeSlot => timeSlot.id === timeId);                                            
                                                     return time[0];
-                                                });
+                                                });                                                
                                                 times.sort((a, b) =>
                                                     a.name.localeCompare(b.name)
                                                 );
