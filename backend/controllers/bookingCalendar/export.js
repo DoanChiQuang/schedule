@@ -62,7 +62,7 @@ export const exportB = async (req, res, next) => {
                         details.push(day+"-"+dat+": "+yard.name+" "+startper.startTime+":"+endper.endTime);
                     }
                 
-                    sumAll+=fetchAllCalendars[j].total;
+                    sumAll+=fetchAllCalendars[j].total+fetchAllCalendars[j].bonus;
 
                     // let obj = {
                     //     name: fetchAllCalendars[j].customerName,
@@ -76,9 +76,9 @@ export const exportB = async (req, res, next) => {
                     bookingCal.push(fetchAllCalendars[j].customerName)
                     bookingCal.push(details.toString())
                     bookingCal.push(sumH)
-                    bookingCal.push(sumH*price)
-                    bookingCal.push(fetchAllCalendars[j].bonus)
                     bookingCal.push(fetchAllCalendars[j].total)
+                    bookingCal.push(fetchAllCalendars[j].bonus)
+                    bookingCal.push(fetchAllCalendars[j].total+fetchAllCalendars[j].bonus)
 
                     if(j == fetchAllCalendars.length-1) {
                         bookingCal.push(sumAll);
