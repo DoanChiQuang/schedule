@@ -5,7 +5,7 @@ import { phoneRegExp } from '../../utils/RegexValidate.js';
 
 export const create = async (req, res, next) => {
     try {
-        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note, type, bonus, cashier, total, payDay} = req.body;
+        const {id, startDate, endDate, idCustomer, isCustomer, nameCustomer, phoneCustomer, isPay, details, note, type, bonus, cashier, total, payDate} = req.body;
         //update status
         let dateOfDayWeek = [];
         //Validate
@@ -102,7 +102,7 @@ export const create = async (req, res, next) => {
                     });
                 }
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,updatedAt:isCustomer?'':payDay});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,updatedAt:isCustomer?'':new Date(payDate)});
 
             return res.json({
                 status: 200,
@@ -299,7 +299,7 @@ export const create = async (req, res, next) => {
                     bonus: isCustomer?0:bonus,
                     cashier: isCustomer?'':cashier,
                     total: isCustomer?0:total,
-                    updatedAt: isCustomer?'':payDay
+                    updatedAt: isCustomer?'':new Date(payDate)
                 });
             }
             return res.json({
