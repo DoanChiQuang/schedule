@@ -284,8 +284,8 @@ export const create = async (req, res, next) => {
                 //         total: isCustomer?0:s.total,
                 //     });
                 // })
-                console.log(startDate);
-                console.log(endDate);
+                // console.log(startDate);
+                // console.log(endDate);
                 const booking = await BookingCal.create({
                     startDate: new Date(startDate),
                     endDate: endDate?new Date(endDate):'',
