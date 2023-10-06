@@ -300,21 +300,22 @@ const Calendar = () => {
     }
 
     const onCreateCalendar = () => {
+        let total = 0;
         const calDetails = calData.details.map(detail => {
             let data = [];
             data.push(detail);
-            const total = calculateTotalPrice(data);
+            total += calculateTotalPrice(data);
             return {
                 date: formatDate(detail.date),
                 periodTime: detail.time,
-                yard: detail.yard,
-                total: total
+                yard: detail.yard
             };
         });
         const params = {
             ...calData,
             endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
-            details: calDetails
+            details: calDetails,
+            total: total+parseInt(calData.bonus ? calData.bonus : 0)
         };
         requestCreate(params);
     }
@@ -549,7 +550,7 @@ const Calendar = () => {
     const calculateTotalPrice = (data) => {
         let totalPrice = 0;
         const totalCount = data.reduce((count, item) => count + item.time.length, 0);
-        totalPrice = (((totalCount * TIME)/60)*PRICE) + parseInt(calData.bonus ? calData.bonus : 0);
+        totalPrice = (((totalCount * TIME)/60)*PRICE);
         return totalPrice;
     }
 
@@ -1477,7 +1478,7 @@ const Calendar = () => {
                                                 defaultValue={calData.bonus}
                                                 onChange={(e) => onChangeCalData('bonus', e.target.value)}
                                                 error={calError && calErrorData.key === 'bonus' && true}
-                                                disabled={blockUpdate ? blockUpdate : calData.id ? false : true}
+                                                disabled={blockUpdate}
                                                 helperText={calError && calErrorData.key === 'bonus' && calErrorData.message}
                                                 fullWidth
                                                 sx={{ml: 1}}
@@ -1485,7 +1486,7 @@ const Calendar = () => {
                                         </Box>
                                         <TextField
                                             label="Tổng tiền"
-                                            value={formatNumberWithComma(calculateTotalPrice(calData.details))}
+                                            value={formatNumberWithComma(calculateTotalPrice(calData.details)+parseInt(calData.bonus ? calData.bonus : 0))}
                                             disabled={true}
                                             fullWidth
                                             sx={{mb: 2}}
