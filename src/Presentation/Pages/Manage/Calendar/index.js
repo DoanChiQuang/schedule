@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Layout from "../../Layout/Layout-v2";
 import { Autocomplete, Box, Button, FormControlLabel, IconButton, Modal, Paper, Radio, RadioGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, debounce, styled, tooltipClasses, useTheme } from "@mui/material";
 import { CALENDER_PATH } from "../../../../Main/Route/path";
@@ -109,6 +109,7 @@ const Calendar = () => {
             "value": "3"
         }
     ];
+    const inputRef = useRef(null);
 
     // const fetchInitial = () => {
     //     requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
@@ -229,7 +230,7 @@ const Calendar = () => {
                     });
                     setCalError(true);
                     return;
-                }
+                }                
                 setCalErrorData({
                     key: '',
                     message: ''
@@ -487,9 +488,6 @@ const Calendar = () => {
     }
 
     const formatNumberWithComma = (number = 0, option) => {
-        if(!number) {
-            return 0
-        }
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, option || ",");
     };
 
@@ -787,7 +785,6 @@ const Calendar = () => {
     // }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells, onSelectCell])
 
     const timeSlotComponents = useMemo(() => {
-        console.log(123)
         return timeSlots.map((timeSlot, timeSlotIndex) => (
             <TableRow key={timeSlot.id}>
                 <TableCell
@@ -1003,6 +1000,13 @@ const Calendar = () => {
             downloadFile(dataExport.data.fileName);
         }
     }, [dataExport])
+
+    useEffect(() => {
+        const formattedValue = formatNumberWithComma(calData.bonus);
+        if (inputRef.current != null) {
+            inputRef.current.value = formattedValue;
+        }
+    }, [calData.bonus]);
     
     const downloadFile = async (fileName) => {
         try {
@@ -1487,12 +1491,13 @@ const Calendar = () => {
                                             />
                                             <TextField
                                                 label="Số tiền chơi thêm (VND)"
-                                                value={calData.bonus}
-                                                onChange={(e) => onChangeCalData('bonus', e.target.value)}
+                                                defaultValue={formatNumberWithComma(calData.bonus)}
+                                                onChange={(e) => onChangeCalData('bonus', formatNumberWithoutComma(e.target.value))}
                                                 error={calError && calErrorData.key === 'bonus' && true}
                                                 disabled={blockUpdate}
                                                 helperText={calError && calErrorData.key === 'bonus' && calErrorData.message}
                                                 fullWidth
+                                                inputRef={inputRef}
                                                 sx={{ml: 1}}
                                             />
                                         </Box>
