@@ -24,7 +24,7 @@ export const getAll = async (req, res, next) => {
         const dateEnd = new Date(endDate).getDate();
 
 
-        const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(yearStart, monthStart, 1, 0, 0, 0)), '$lte': new Date(endDate)}});
+        const fetchAllCalendars = await BookingCal.find({startDate: {'$gte': new Date(Date.UTC(yearStart, monthStart-1, 1, 0, 0, 0)), '$lte': new Date(endDate)}});
 
         const allBookingCal = [];
         fetchAllCalendars.forEach(async cal => {
