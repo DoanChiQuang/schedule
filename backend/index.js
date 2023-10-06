@@ -29,7 +29,7 @@ app.use(express.static(staticPath));
 app.use("/api/auth", AuthRoute);
 app.use("/api/customer", isAuth, CustomerRoute);
 app.use("/api/time", isAuth, TimeRoute);
-app.use("/api/booking-calendar", BookingCRoute);
+app.use("/api/booking-calendar", isAuth, BookingCRoute);
 app.use("/api/yard", isAuth, Yard);
 app.use("/api/user", isAuth, User);
 
