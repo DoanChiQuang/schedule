@@ -33,14 +33,13 @@ export const exportB = async (req, res, next) => {
         const yardAll = await Yard.find();
         const timeDAll = await TimeD.find();
         if(fetchCalendars){
-            for(let i = 0; i < cashierId.length; i++){
-                let cashNum = i+1;
+            cashier.forEach((e) => {
                 let sumAll = 0;
-                const fetchAllCalendars = fetchCalendars.filter((cal) => cal.cashier==cashNum);
+                const fetchAllCalendars = fetchCalendars.filter((cal) => cal.cashier==e);
                 for(let j = 0; j < fetchAllCalendars.length; j++){
                     const bookingCal = [];
                     if(j == 0) {
-                        bookingCal.push(cashierId[i]);
+                        bookingCal.push(cashierArr[Number(e)-1]);
                     }else{
                         bookingCal.push('');
                     }
@@ -88,9 +87,9 @@ export const exportB = async (req, res, next) => {
                     allBookingCal.push(bookingCal);
                 }
 
-            }
+            })
 
-        };
+        }
         
         var workbook = new Excel.Workbook();
         var worksheet = workbook.addWorksheet('Chi tiết lịch đặt');
