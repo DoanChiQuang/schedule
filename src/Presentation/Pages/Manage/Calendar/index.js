@@ -111,8 +111,9 @@ const Calendar = () => {
     ];
     const inputRef = useRef(null);
     const [identify, setIdentify] = useState({
-        date: {},
-        time: []        
+        date: '',
+        time: '',
+        yard: ''
     });
 
     // const fetchInitial = () => {
@@ -807,7 +808,7 @@ const Calendar = () => {
                     sx={[
                         isLunchTime(timeSlot.name) ? { backgroundColor: '#E97451' } : { backgroundColor: '#4682B4' },
                         { borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, color: 'white' },
-                        identify.time.includes(timeSlot.id) ? {backgroundColor: '#2AAA8A'} : {}
+                        (identify.time == timeSlot.id) ? {backgroundColor: '#2AAA8A'} : {}
                     ]}
                 >
                     <Typography variant="caption" fontWeight={'bold'}>
@@ -932,6 +933,16 @@ const Calendar = () => {
                                         isSelected(timeSlot.id, day.date, yard._id) ? { backgroundColor: theme.palette.primary.main } : {}
                                     ]}
                                     onClick={() => onSelectCell(timeSlot.id, day.date, yard._id)}
+                                    onMouseEnter={() => setIdentify({
+                                        date: day.date, 
+                                        time: timeSlot.id,
+                                        yard: yard._id
+                                    })}
+                                    onMouseLeave={() => setIdentify({
+                                        date: '', 
+                                        time: '',
+                                        yard: ''
+                                    })}
                                 />
                             );
                         }
@@ -979,32 +990,8 @@ const Calendar = () => {
                 return dateA - dateB;
             });
             const startDate = formatDate(selectedCal[0].date);
-            setCalData({...calData, startDate: startDate, details: selectedCal});
-
-            let date = {};
-            let time = [];
-            selectedCells.map(selectedCell => {
-                if(!date[selectedCell.date]) {
-                    date = { ...date, [selectedCell.date]: [selectedCell.yard] }
-                }
-                else {
-                    if(!date[selectedCell.date].includes(selectedCell.yard)) {
-                        date[selectedCell.date] = [...date[selectedCell.date], selectedCell.yard]
-                    }
-                }
-                if(!time.includes(selectedCell.time)) {
-                    time.push(selectedCell.time)
-                }
-            });
-            const identify = { date, time };
-            setIdentify(identify);
-        }
-        else {
-            setIdentify({
-                date: {},
-                time: []        
-            });
-        }
+            setCalData({...calData, startDate: startDate, details: selectedCal});        
+        }        
     }, [selectedCells, toggleModal])
 
     useEffect(() => {
@@ -1278,7 +1265,7 @@ const Calendar = () => {
                                             sx={[
                                                 ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
                                                 { borderRight: "1px solid #ccc", color: 'white', minWidth: 150},
-                                                identify.date[day.date] ? {backgroundColor: '#2AAA8A'} : {}
+                                                (identify.date == day.date) ? {backgroundColor: '#2AAA8A'} : {}
                                             ]}
                                         >
                                             <Box display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -1299,7 +1286,7 @@ const Calendar = () => {
                                                 sx={[
                                                     ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
                                                     { borderRight: "1px solid #ccc", color: 'white', minWidth: 70},
-                                                    (identify.date[day.date] && identify.date[day.date].includes(yard._id)) ? {backgroundColor: '#2AAA8A'} : {}
+                                                    (identify.date == day.date && identify.yard == yard._id) ? {backgroundColor: '#2AAA8A'} : {}
                                                 ]}
                                             >
                                                 <Typography variant="caption" fontWeight={'bold'}>{yard.name}</Typography>                                                
@@ -1619,7 +1606,7 @@ const Calendar = () => {
 
 const TableCellCustom = styled(TableCell)(({ theme }) => ({
     '&:hover': {
-        opacity: 0.6,
+        backgroundColor: '#2AAA8A',
         cursor: 'pointer',
     },
 }));
