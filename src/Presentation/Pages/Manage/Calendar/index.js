@@ -110,6 +110,10 @@ const Calendar = () => {
         }
     ];
     const inputRef = useRef(null);
+    const [identify, setIdentify] = useState({
+        date: {},
+        time: []        
+    });
 
     // const fetchInitial = () => {
     //     requestGetAll({startDate: formatDate(formatDateDot(filterSDate)), endDate: formatDate(formatDateDot(filterEDate))});
@@ -340,7 +344,6 @@ const Calendar = () => {
                 total: total+parseInt(calData.bonus ? calData.bonus : 0)
             };
         }
-        console.log(params);
         requestCreate(params);
     }
 
@@ -803,7 +806,8 @@ const Calendar = () => {
                 <TableCell
                     sx={[
                         isLunchTime(timeSlot.name) ? { backgroundColor: '#E97451' } : { backgroundColor: '#4682B4' },
-                        { borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, color: 'white' }
+                        { borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, color: 'white' },
+                        identify.time.includes(timeSlot.id) ? {backgroundColor: 'green'} : {}
                     ]}
                 >
                     <Typography variant="caption" fontWeight={'bold'}>
@@ -935,7 +939,7 @@ const Calendar = () => {
                 ))}
             </TableRow>
           ))          
-    }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells])
+    }, [timeSlots, daysOfWeek, yards, timeBooked, selectedCells, identify])
 
     useEffect(() => {                
         fetchInitial();
@@ -976,6 +980,30 @@ const Calendar = () => {
             });
             const startDate = formatDate(selectedCal[0].date);
             setCalData({...calData, startDate: startDate, details: selectedCal});
+
+            let date = {};
+            let time = [];
+            selectedCells.map(selectedCell => {
+                if(!date[selectedCell.date]) {
+                    date = { ...date, [selectedCell.date]: [selectedCell.yard] }
+                }
+                else {
+                    if(!date[selectedCell.date].includes(selectedCell.yard)) {
+                        date[selectedCell.date] = [...date[selectedCell.date], selectedCell.yard]
+                    }
+                }
+                if(!time.includes(selectedCell.time)) {
+                    time.push(selectedCell.time)
+                }
+            });
+            const identify = { date, time };
+            setIdentify(identify);
+        }
+        else {
+            setIdentify({
+                date: {},
+                time: []        
+            });
         }
     }, [selectedCells, toggleModal])
 
@@ -985,7 +1013,7 @@ const Calendar = () => {
 
     useEffect(() => {        
         handleReceiveErrorData();
-    }, [errorCreate, errorRemove, errorExport]);
+    }, [errorCreate, errorRemove, errorExport]);    
 
     useEffect(() => {
         if(hasFilter) {
@@ -1244,7 +1272,15 @@ const Calendar = () => {
                                         <Typography variant="body2">Ngày</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
-                                        <TableCell key={day.date + '_' + dayIndex} colSpan={yards.length} sx={[["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, { borderRight: "1px solid #ccc", color: 'white', minWidth: 150}]}>
+                                        <TableCell 
+                                            key={day.date + '_' + dayIndex} 
+                                            colSpan={yards.length} 
+                                            sx={[
+                                                ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
+                                                { borderRight: "1px solid #ccc", color: 'white', minWidth: 150},
+                                                identify.date[day.date] ? {backgroundColor: 'green'} : {}
+                                            ]}
+                                        >
                                             <Box display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
                                                 <Typography variant="body2">{day.name}</Typography>
                                                 <Typography variant="body2" fontWeight={'bold'}>{day.date}</Typography>
@@ -1258,7 +1294,14 @@ const Calendar = () => {
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
                                         yards.map((yard, yardIndex) => (
-                                            <TableCell key={day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} sx={[["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, { borderRight: "1px solid #ccc", color: 'white', minWidth: 70}]}>
+                                            <TableCell 
+                                                key={day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} 
+                                                sx={[
+                                                    ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
+                                                    { borderRight: "1px solid #ccc", color: 'white', minWidth: 70},
+                                                    (identify.date[day.date] && identify.date[day.date].includes(yard._id)) ? {backgroundColor: 'green'} : {}
+                                                ]}
+                                            >
                                                 <Typography variant="caption" fontWeight={'bold'}>{yard.name}</Typography>                                                
                                             </TableCell>
                                         ))
