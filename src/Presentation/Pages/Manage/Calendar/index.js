@@ -823,13 +823,13 @@ const Calendar = () => {
                             );
                 
                             const tooltipDetail = time[0].details.map(detail => ({
-                                dateCell: daysNameOfWeek[new Date(detail.date).getDay()] + ' - ' + formatDateDot(detail.date),
+                                dateCell: daysNameOfWeek[new Date(detail.date).getDay()] + (time[0].isCustomer ? '' : ' - ' + formatDateDot(detail.date)),
                                 timeCell: timeSlotsDetail.filter(timeSlotDetail => detail.periodTime.includes(timeSlotDetail.id)),
                                 yardCell: yards.find(y => y._id === detail.yard)?.name
                             }));
                 
                             tooltipDetail.sort((a, b) =>
-                                new Date(formatDate(a.dateCell.split(' - ')[1])) - new Date(formatDate(b.dateCell.split(' - ')[1]))
+                                new Date(time[0].isCustomer ? a.dateCell : formatDate(a.dateCell.split(' - ')[1])) - new Date(time[0].isCustomer ? b.dateCell : formatDate(b.dateCell.split(' - ')[1]))
                             );
                 
                             return (
@@ -1400,7 +1400,7 @@ const Calendar = () => {
                                             covertCalDetail().map((selectedCell, selectedCellIndex) => {                                        
                                                 const date = new Date(formatDate(selectedCell.date));
                                                 const dayOfWeekIndex = date.getDay();
-                                                const dateCell = daysNameOfWeek[dayOfWeekIndex] + ' - ' + selectedCell.date;                                                
+                                                const dateCell = daysNameOfWeek[dayOfWeekIndex] + (calData.isCustomer ? '' : ' - ' + selectedCell.date);
                                                 const times = selectedCell.time.map(timeId => {                                                                                        
                                                     const time = timeSlots.filter(timeSlot => timeSlot.id === timeId);                                            
                                                     return time[0];
