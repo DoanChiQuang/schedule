@@ -807,7 +807,7 @@ const Calendar = () => {
                     sx={[
                         isLunchTime(timeSlot.name) ? { backgroundColor: '#E97451' } : { backgroundColor: '#4682B4' },
                         { borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, color: 'white' },
-                        identify.time.includes(timeSlot.id) ? {backgroundColor: 'green'} : {}
+                        identify.time.includes(timeSlot.id) ? {backgroundColor: '#2AAA8A'} : {}
                     ]}
                 >
                     <Typography variant="caption" fontWeight={'bold'}>
@@ -1278,7 +1278,7 @@ const Calendar = () => {
                                             sx={[
                                                 ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
                                                 { borderRight: "1px solid #ccc", color: 'white', minWidth: 150},
-                                                identify.date[day.date] ? {backgroundColor: 'green'} : {}
+                                                identify.date[day.date] ? {backgroundColor: '#2AAA8A'} : {}
                                             ]}
                                         >
                                             <Box display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -1299,7 +1299,7 @@ const Calendar = () => {
                                                 sx={[
                                                     ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
                                                     { borderRight: "1px solid #ccc", color: 'white', minWidth: 70},
-                                                    (identify.date[day.date] && identify.date[day.date].includes(yard._id)) ? {backgroundColor: 'green'} : {}
+                                                    (identify.date[day.date] && identify.date[day.date].includes(yard._id)) ? {backgroundColor: '#2AAA8A'} : {}
                                                 ]}
                                             >
                                                 <Typography variant="caption" fontWeight={'bold'}>{yard.name}</Typography>                                                
