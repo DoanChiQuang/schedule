@@ -107,7 +107,7 @@ const Layout = (props) => {
     };
 
     const handleNavigateRoute = (route) => {
-        navigation(path.DASH_PATH + path.MANAGE_PATH + path.DASH_PATH + route)
+        navigation(path.DASH_PATH + path.STAFF_VIEW_PATH + path.DASH_PATH + route)
     }
 
     const drawer = (
