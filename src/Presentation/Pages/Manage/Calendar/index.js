@@ -698,8 +698,8 @@ const Calendar = () => {
                 <TableCell
                     sx={[
                         isLunchTime(timeSlot.name) ? { backgroundColor: '#E97451' } : { backgroundColor: '#4682B4' },
-                        { borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, color: 'white' },
-                        (identify.time == timeSlot.id) ? {backgroundColor: '#2AAA8A'} : {}
+                        { borderRight: "1px solid #ccc", position: 'sticky', left: 0, zIndex: 1, color: '#00FF00' },
+                        (identify.time == timeSlot.id) ? {backgroundColor: '#2AAA8A', color: '#E4DB22'} : {}
                     ]}
                 >
                     <Typography variant="caption" fontWeight={'bold'}>
@@ -736,7 +736,7 @@ const Calendar = () => {
                                 >
                                     {time[0].isCustomer && 
                                         <Box sx={{ position: 'absolute', top: 0, right: 0, mt: 0.1 }}>
-                                            <WorkspacePremiumIcon sx={{ color: 'yellow' }} />
+                                            <WorkspacePremiumIcon sx={{ color: '#00FF00' }} />
                                         </Box>
                                         ||
                                         <></>
@@ -1086,7 +1086,7 @@ const Calendar = () => {
                         <Table>
                             <TableHead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 2 }}>
                                 <TableRow>
-                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 90}}>
+                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: '#00FF00', minWidth: 90}}>
                                         <Typography variant="body2">Ngày</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
@@ -1095,8 +1095,8 @@ const Calendar = () => {
                                             colSpan={yards.length} 
                                             sx={[
                                                 ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
-                                                { borderRight: "1px solid #ccc", color: 'white', minWidth: 150},
-                                                (identify.date == day.date) ? {backgroundColor: '#2AAA8A'} : {}
+                                                { borderRight: "1px solid #ccc", color: '#00FF00', minWidth: 150},
+                                                (identify.date == day.date) ? {backgroundColor: '#2AAA8A', color: '#E4DB22'} : {}
                                             ]}
                                         >
                                             <Box display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}>
@@ -1107,7 +1107,7 @@ const Calendar = () => {
                                     ))}
                                 </TableRow>
                                 <TableRow>
-                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: 'white', minWidth: 90}}>
+                                    <TableCell style={{ borderRight: "1px solid #ccc", backgroundColor: '#6082B6', color: '#00FF00', minWidth: 90}}>
                                         <Typography variant="caption" fontWeight={'bold'}>Sân</Typography>
                                     </TableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
@@ -1116,8 +1116,8 @@ const Calendar = () => {
                                                 key={day.date + '_' + dayIndex + '_' + yard._id + '_' + yardIndex} 
                                                 sx={[
                                                     ["Thứ 7", "Chủ Nhật"].includes(day.name) ? {backgroundColor: '#E97451'} : { backgroundColor: '#6082B6' }, 
-                                                    { borderRight: "1px solid #ccc", color: 'white', minWidth: 70},
-                                                    (identify.date == day.date && identify.yard == yard._id) ? {backgroundColor: '#2AAA8A'} : {}
+                                                    { borderRight: "1px solid #ccc", color: '#00FF00', minWidth: 70},
+                                                    (identify.date == day.date && identify.yard == yard._id) ? {backgroundColor: '#2AAA8A', color: '#E4DB22'} : {}
                                                 ]}
                                             >
                                                 <Typography variant="caption" fontWeight={'bold'}>{yard.name}</Typography>                                                
