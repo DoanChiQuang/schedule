@@ -102,7 +102,7 @@ export const create = async (req, res, next) => {
                     });
                 }
             }
-            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:details.total,updatedAt:payDate?new Date(payDate):''});
+            const updateB = await BookingCal.updateOne({_id: id}, {isPay: isPay, note: note, endDate: endDate?new Date(endDate):'', bonus: isCustomer?0:bonus,cashier: isCustomer?'':cashier,total: isCustomer?0:total,updatedAt:payDate?new Date(payDate):''});
 
             return res.json({
                 status: 200,
