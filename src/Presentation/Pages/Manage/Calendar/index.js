@@ -319,6 +319,7 @@ const Calendar = () => {
                 type: calData.type,
                 cashier: calData.cashier,
                 bonus: calData.bonus,
+                total: calData.total,
                 details: calDetails
             });
             setEndDateCreate(calData.endDate);
