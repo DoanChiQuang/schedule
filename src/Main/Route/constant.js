@@ -10,6 +10,7 @@ import BookingCalendar from '../../Presentation/Pages/Manage/Calendar'
 import User from '../../Presentation/Pages/Manage/User'
 import ChangePass from '../../Presentation/Pages/Manage/User/changePass'
 import Logout from '../../Presentation/Pages/Auth/SignOut'
+import CalendarStaff from '../../Presentation/Pages/Manage/Calendar/CalendarStaff'
 const Routes = [
     {
         path: path.DASH_PATH,
@@ -36,7 +37,7 @@ const Routes = [
     {
         path: path.DASH_PATH + path.MANAGE_PATH + path.DASH_PATH,
         element: (
-            <ProtectedRoute>
+            <ProtectedRoute role={'admin'} path={path.DASH_PATH + path.MANAGE_PATH + path.DASH_PATH}>
                 <Outlet />
             </ProtectedRoute>
         ),
@@ -75,6 +76,40 @@ const Routes = [
             },
             {
                 path: '*',
+                element: <ErrorPage />
+            },
+            {
+                path: path.ERROR_PATH,
+                element: <ErrorPage />
+            }
+        ]
+    },
+    {
+        path: path.DASH_PATH + path.STAFF_VIEW_PATH + path.DASH_PATH,
+        element: (
+            <ProtectedRoute role={'staff'} path={path.DASH_PATH + path.STAFF_VIEW_PATH + path.DASH_PATH}>
+                <Outlet />
+            </ProtectedRoute>
+        ),
+        children: [
+            {
+                path: path.CALENDER_STAFF_PATH,
+                element: <CalendarStaff />
+            },
+            {
+                path: path.LOGOUT_PATH,
+                element: <Logout />
+            },
+            {
+                path: '',
+                element: <Navigate to={path.CALENDER_STAFF_PATH} replace />
+            },
+            {
+                path: '*',
+                element: <ErrorPage />
+            },
+            {
+                path: path.ERROR_PATH,
                 element: <ErrorPage />
             }
         ]
