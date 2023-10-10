@@ -27,7 +27,6 @@ import { API_URL } from "../../../Utils/axiosIntance";
 import { saveAs } from 'file-saver';
 
 const TIME = 30
-const PRICE = 80000
 
 const Calendar = () => {
 
@@ -62,6 +61,7 @@ const Calendar = () => {
         type: 0, // 0 is day , 1 is month
         isPay: 0,
         bonus: 0,
+        total: 0,
         cashier: "1",
         note: "",
         details: []
@@ -109,7 +109,8 @@ const Calendar = () => {
             "value": "3"
         }
     ];
-    const inputRef = useRef(null);
+    const inputRefBonusPrice = useRef(null);
+    const inputRefYardPrice = useRef(null);
     const [identify, setIdentify] = useState({
         date: '',
         time: '',
@@ -242,6 +243,29 @@ const Calendar = () => {
                 });
                 setCalError(false);
                 break;
+            case 'total':
+                if(!numberRegExp.test(formatNumberWithoutComma(value))) {
+                    setCalErrorData({
+                        key: key,
+                        message: 'Giá không đúng định dạng.'
+                    });
+                    setCalError(true);
+                    return;
+                }
+                if(formatNumberWithoutComma(value) < 0) {
+                    setCalErrorData({
+                        key: key,
+                        message: 'Giá không được âm.'
+                    });
+                    setCalError(true);
+                    return;
+                }                
+                setCalErrorData({
+                    key: '',
+                    message: ''
+                });
+                setCalError(false);
+                break;
         }
     }
 
@@ -307,13 +331,8 @@ const Calendar = () => {
         setSelectedCells([]);
     }
 
-    const onCreateCalendar = () => {
-        let total = 0;
-        const calDetails = calData.details.map(detail => {            
-            let data = [];
-            data.push(detail);
-            total += calculateTotalPrice(data);
-
+    const onCreateCalendar = () => {        
+        const calDetails = calData.details.map(detail => {
             const times = detail.time.map(timeId => {                                                                                        
                 const time = timeSlots.filter(timeSlot => timeSlot.id === timeId);                                            
                 return time[0];
@@ -333,18 +352,16 @@ const Calendar = () => {
             params = {
                 ...calData,
                 endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
-                details: calDetails,
-                total: total+parseInt(calData.bonus ? calData.bonus : 0),
+                details: calDetails,                
                 payDate: dayjs()
             };
         } else {
             params = {
                 ...calData,
                 endDate: endDateCreate ? formatDate(formatDateDot(endDateCreate)) : '',
-                details: calDetails,
-                total: total+parseInt(calData.bonus ? calData.bonus : 0)
+                details: calDetails
             };
-        }
+        }        
         requestCreate(params);
     }
 
@@ -571,14 +588,7 @@ const Calendar = () => {
             }            
         }
         return true;
-    }
-    
-    const calculateTotalPrice = (data) => {
-        let totalPrice = 0;
-        const totalCount = data.reduce((count, item) => count + item.time.length, 0);
-        totalPrice = (((totalCount * TIME)/60)*PRICE);
-        return totalPrice;
-    }
+    }    
 
     const handleReceiveSuccessData = () => {
         if(dataCreate) {
@@ -1031,10 +1041,17 @@ const Calendar = () => {
 
     useEffect(() => {
         const formattedValue = formatNumberWithComma(calData.bonus);
-        if (inputRef.current != null) {
-            inputRef.current.value = formattedValue;
+        if (inputRefBonusPrice.current != null) {
+            inputRefBonusPrice.current.value = formattedValue;
         }
     }, [calData.bonus]);
+
+    useEffect(() => {
+        const formattedValue = formatNumberWithComma(calData.total);
+        if (inputRefYardPrice.current != null) {
+            inputRefYardPrice.current.value = formattedValue;
+        }
+    }, [calData.total]);
     
     const downloadFile = async (fileName) => {
         try {
@@ -1532,10 +1549,14 @@ const Calendar = () => {
                                         />
                                         <Box display={'flex'} mb={2}>
                                             <TextField
-                                                label="Số tiền cố định (VND/H)"                                    
-                                                value={formatNumberWithComma(80000)}
-                                                disabled={true}
+                                                label="Tổng tiền sân (VND)"
+                                                defaultValue={formatNumberWithComma(calData.total)}
+                                                onChange={(e) => onChangeCalData('total', formatNumberWithoutComma(e.target.value))}
+                                                error={calError && calErrorData.key === 'total' && true}
+                                                disabled={blockUpdate}
+                                                helperText={calError && calErrorData.key === 'total' && calErrorData.message}
                                                 fullWidth
+                                                inputRef={inputRefYardPrice}
                                                 sx={{mr: 1}}
                                             />
                                             <TextField
@@ -1546,13 +1567,13 @@ const Calendar = () => {
                                                 disabled={blockUpdate}
                                                 helperText={calError && calErrorData.key === 'bonus' && calErrorData.message}
                                                 fullWidth
-                                                inputRef={inputRef}
+                                                inputRef={inputRefBonusPrice}
                                                 sx={{ml: 1}}
                                             />
                                         </Box>
                                         <TextField
                                             label="Tổng tiền"
-                                            value={formatNumberWithComma(calculateTotalPrice(calData.details)+parseInt(calData.bonus ? calData.bonus : 0))}
+                                            value={formatNumberWithComma(parseInt(calData.total)+parseInt(calData.bonus ? calData.bonus : 0))}
                                             disabled={true}
                                             fullWidth
                                             sx={{mb: 2}}
