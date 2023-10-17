@@ -1,11 +1,18 @@
 import { Typography, Box, Container, Grid, Button } from '@mui/material'
 import ErrorBannerImg from './assets/page_not_found.jpg'
 
-const onBack = () => {
-    window.location="/manager";
-}
 
-export default function ErrorPage() {
+export default function ErrorPage() {    
+    const onBack = () => {
+        const user = localStorage.getItem('user');
+        const role = JSON.parse(user).role;
+        if(role == 'admin') {
+            window.location='/manage';
+        }
+        if(role == 'staff') {
+            window.location='/staff';
+        }       
+    }
     return (
         <>
         <Box
