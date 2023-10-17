@@ -151,6 +151,8 @@ const Calendar = () => {
             }
             return [...prevSelectedCells, { date: date, time: idTime, yard: idYard }];
         });
+        setOpenExport(false);
+        setOpenFilter(false);
     }    
 
     const onChangeSelect = (event) => {
