@@ -10,13 +10,13 @@ export const signup = async (req, res, next) => {
             email: 'email@gmail.com',
             password: hashedString,
         })
-        
-        delete user.password;
-        
-        req.resObject = user;
-        res.resMessage = 'Your account has been created';
-        
-        return next();
+
+        delete user.password
+
+        res.send({
+            msg: 'Your account has been created',
+            data: user,
+        })
     } catch (error) {
         next(error)
     }
