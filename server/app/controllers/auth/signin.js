@@ -18,8 +18,6 @@ export const signin = async (req, res, next) => {
             return
         }
 
-        delete user.password
-
         // 3. Compare Client password with DB password
         let isPasswordMatch = await bcrypt.compare(password, user.password)
         if (!isPasswordMatch) {
@@ -35,16 +33,25 @@ export const signin = async (req, res, next) => {
             return
         }
 
-        // 5. Send to Client
+        // 5. SetCookie for JWT
+        res.cookie('access_token', token, {
+            httpOnly: true,
+            SameSite: 'Lax',
+            secure: true,
+        })
+
+        // 6. Prepare response data
+        user = user?.toObject()
+        delete user.password;
+        
+        // 7. Send to Client
         const message = {
             msg: 'Login successful',
             data: {
-                token,
                 user,
             },
         }
         res.send(message)
-
     } catch (err) {
         next(err)
     }
