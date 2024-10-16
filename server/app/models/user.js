@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-const { Schema } = mongoose
+import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
     email: {
@@ -16,10 +16,14 @@ const userSchema = new Schema({
         required: true,
         default: 'User',
     },
+    roles: {
+        type: Array,
+        default: ['user'],
+    },
     del: {
         type: Number,
         default: 0,
     },
-})
+});
 
-export default mongoose.model('User', userSchema)
+export const User = mongoose.model('User', userSchema);
