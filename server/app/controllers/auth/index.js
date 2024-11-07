@@ -1,4 +1,4 @@
-import { signin } from './signin.js';
-import { signup } from './signup.js';
-
-export default { signin, signup };
+export * from './signin.js';
+export * from './signup.js';
+export * from './resetPassword.js';
+export * from './forgotPassword.js';
