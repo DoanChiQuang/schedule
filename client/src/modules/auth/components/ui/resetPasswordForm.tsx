@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CircleAlert, MailCheck } from 'lucide-react';
+import { CheckCircle, CircleAlert } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import resetPasswordAction from '@/store/auth/actions/resetPassword';
 
@@ -51,7 +51,7 @@ const ResetPasswordForm = () => {
 
     // Define Redux State & Dispatch
     const dispatch = useAppDispatch();
-    const { loading, error } = useAppSelector((state: RootState) => state.auth);
+    const { loading, error, success } = useAppSelector((state: RootState) => state.auth);
 
     // Define Form
     const form = useForm<z.infer<typeof formSchema>>({
@@ -73,10 +73,16 @@ const ResetPasswordForm = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {error && (
                     <Alert variant={'destructive'}>
-                        <CircleAlert className="h-4 w-4" />
-                        <MailCheck className="h-4 w-4" />
+                        <CircleAlert className="h-4 w-4" />                        
                         <AlertTitle>Error!</AlertTitle>
                         <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
+                {success && (
+                    <Alert variant={'default'}>
+                        <CheckCircle className="h-4 w-4" />                        
+                        <AlertTitle>Success!</AlertTitle>
+                        <AlertDescription>Reset password successfully</AlertDescription>
                     </Alert>
                 )}
                 <FormField

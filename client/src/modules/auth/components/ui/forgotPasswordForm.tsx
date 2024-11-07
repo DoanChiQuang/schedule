@@ -15,7 +15,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CircleAlert, MailCheck } from 'lucide-react';
-import forgotPasswordAction from '@/store/auth/actions/forgotpassword';
+import forgotPasswordAction from '@/store/auth/actions/forgotPassword';
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -46,8 +46,7 @@ const ForgotPasswordForm = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {error && (
                     <Alert variant={'destructive'}>
-                        <CircleAlert className="h-4 w-4" />
-                        <MailCheck className="h-4 w-4" />
+                        <CircleAlert className="h-4 w-4" />                        
                         <AlertTitle>Error!</AlertTitle>
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
