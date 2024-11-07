@@ -1,5 +1,5 @@
 import { User } from '../../models/user.js';
-import { sign } from '../../services/jwt.js';
+import { sign, verify } from '../../services/jwt.js';
 import { prepareHtml, send } from '../../services/mailer.js';
 
 export const forgotPassword = async (req, res, next) => {
@@ -21,7 +21,7 @@ export const forgotPassword = async (req, res, next) => {
         if (user.resetPasswordToken) {
             const verified = verify(user.resetPasswordToken, RESET_PASSWORD_SECRET_KEY);
             if (verified) {
-                res.status(400).send({ msg: 'Bad Request' });
+                res.status(400).send({ msg: 'Reset password in progress' });
                 return;
             }
         }

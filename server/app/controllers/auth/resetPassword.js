@@ -14,7 +14,8 @@ export const resetPassword = async (req, res, next) => {
         const RESET_PASSWORD_SECRET_KEY = process.env.RESET_PASSWORD_SECRET_KEY;
         const verified = verify(token, RESET_PASSWORD_SECRET_KEY);
         if (!verified) {
-            throw new Error();
+            res.status(400).send({ msg: 'Expired reset password' });
+            return;
         }
 
         const userId = verified.sub;
