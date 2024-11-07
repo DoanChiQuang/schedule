@@ -31,7 +31,7 @@ export const forgotPassword = async (req, res, next) => {
 
         const receipients = `${user.name} <${user.email}>`;
         const subject = 'Reset your Schedule password';
-        const url = 'http://localhost:5173//reset-password?token=' + token;
+        const url = `http://localhost:5173/reset-password/${token}`;
         const html = prepareHtml({
             title: 'Reset your Schedule password',
             content: 'Reset your Schedule password',
