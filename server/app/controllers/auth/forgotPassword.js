@@ -17,6 +17,11 @@ export const forgotPassword = async (req, res, next) => {
             return;
         }
 
+        if (user.resetPasswordToken) {
+            res.status(400).send({ msg: 'Bad Request' });
+            return;
+        }
+
         const RESET_PASSWORD_SECRET_KEY = process.env.RESET_PASSWORD_SECRET_KEY;
         const RESET_PASSWORD_LIFE = process.env.RESET_PASSWORD_LIFE;
         const payload = { sub: user._id };
@@ -44,7 +49,8 @@ export const forgotPassword = async (req, res, next) => {
         });
 
         send({ receipients, subject, html })
-            .then(() => {
+            .then(async () => {
+                await User.findOneAndUpdate({ _id: user._id }, { resetPasswordToken: token })
                 const response = {
                     msg: 'Please check your mail to reset password',
                 };

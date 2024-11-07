@@ -18,9 +18,20 @@ export const resetPassword = async (req, res, next) => {
         }
 
         const userId = verified.sub;
+        const user = await User.findOne({ _id: userId });
+        if (!user) {
+            res.status(401).send({ msg: 'User not found' });
+            return;
+        }
+
+        if (user.resetPasswordToken != token) {
+            res.status(400).send({ msg: 'Bad Request' });
+            return;
+        }
+
         const hashed = await hash(password);
 
-        await User.findOneAndUpdate({ _id: userId }, { password: hashed });
+        await User.updateOne({ _id: userId }, { password: hashed, resetPasswordToken: '' });
 
         res.send({ msg: 'Reset password successful' });
     } catch (error) {

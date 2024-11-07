@@ -24,6 +24,10 @@ const userSchema = new Schema({
         type: Number,
         default: 0,
     },
+    resetPasswordToken: {
+        type: String,
+        default: ''
+    }
 });
 
 export const User = mongoose.model('User', userSchema);
