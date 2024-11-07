@@ -5,17 +5,17 @@ import {
     CardDescription,
     CardContent,
 } from '@/components/ui/card';
-import ForgotPasswordForm from '@/modules/auth/components/ui/forgotPasswordForm';
+import ResetPasswordForm from '@/modules/auth/components/ui/resetPasswordForm';
 
-const ForgotPasswordPage = () => {
+const ResetPasswordPage = () => {
     return (
         <Card className="sm:w-[350px] sm:mx-auto mx-10 my-20">
             <CardHeader className="text-center">
-                <CardTitle>Forgot Password?</CardTitle>
+                <CardTitle>Reset Password</CardTitle>
                 <CardDescription>Fill your information</CardDescription>
             </CardHeader>
             <CardContent>
-                <ForgotPasswordForm />
+                <ResetPasswordForm />
                 <div className="text-center mt-6">
                     <a className="text-sm" href="/signin">
                         Back to Signin
@@ -26,4 +26,4 @@ const ForgotPasswordPage = () => {
     );
 };
 
-export default ForgotPasswordPage;
+export default ResetPasswordPage;

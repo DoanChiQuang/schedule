@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import signinAction from '@/store/auth/actions/signin';
 import { TAuth } from '@/store/auth/types/auth';
+import forgotPasswordAction from '@/store/auth/actions/forgotpassword';
 
 const initialState: TAuth = {
     loading: false,
@@ -8,6 +9,7 @@ const initialState: TAuth = {
     error: '',
     success: false,
     isLogged: false,
+    isSent: false,
 };
 
 const authSlice = createSlice({
@@ -33,6 +35,23 @@ const authSlice = createSlice({
             })
             .addCase(
                 signinAction.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.loading = false;
+                    state.error = action.payload;
+                    state.success = false;
+                },
+            )
+            .addCase(forgotPasswordAction.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(forgotPasswordAction.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = true;
+                state.isSent = true;
+            })
+            .addCase(
+                forgotPasswordAction.rejected,
                 (state, action: PayloadAction<any>) => {
                     state.loading = false;
                     state.error = action.payload;
