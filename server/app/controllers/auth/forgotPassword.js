@@ -17,12 +17,15 @@ export const forgotPassword = async (req, res, next) => {
             return;
         }
 
-        if (user.resetPasswordToken) {
-            res.status(400).send({ msg: 'Bad Request' });
-            return;
-        }
-
         const RESET_PASSWORD_SECRET_KEY = process.env.RESET_PASSWORD_SECRET_KEY;
+        if (user.resetPasswordToken) {
+            const verified = verify(user.resetPasswordToken, RESET_PASSWORD_SECRET_KEY);
+            if (verified) {
+                res.status(400).send({ msg: 'Bad Request' });
+                return;
+            }
+        }
+        
         const RESET_PASSWORD_LIFE = process.env.RESET_PASSWORD_LIFE;
         const payload = { sub: user._id };
         const token = sign(
@@ -31,7 +34,7 @@ export const forgotPassword = async (req, res, next) => {
             RESET_PASSWORD_LIFE,
         );
         if (!token) {
-            throw new Error('');
+            throw new Error();
         }
 
         const receipients = `${user.name} <${user.email}>`;
