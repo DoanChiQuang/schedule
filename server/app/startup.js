@@ -1,8 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import AuthRoute from './auth.js';
-import { auth } from '../middlewares/auth.js';
+import AuthRoute from './routes/auth.js';
 
 const startup = (app) => {
     app.use(

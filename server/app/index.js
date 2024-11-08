@@ -1,7 +1,7 @@
 import express from 'express';
 import 'dotenv/config';
 import './db/conn.js';
-import startup from './routes/index.js';
+import startup from './startup.js';
 
 const app = express();
 startup(app);

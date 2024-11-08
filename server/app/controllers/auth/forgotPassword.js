@@ -2,6 +2,9 @@ import { User } from '../../models/user.js';
 import { sign, verify } from '../../services/jwt.js';
 import { prepareHtml, send } from '../../services/mailer.js';
 
+const RESET_PASSWORD_SECRET_KEY = process.env.RESET_PASSWORD_SECRET_KEY;
+const RESET_PASSWORD_LIFE = process.env.RESET_PASSWORD_LIFE;
+
 export const forgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
@@ -16,17 +19,18 @@ export const forgotPassword = async (req, res, next) => {
             res.status(401).send({ msg: 'User not found' });
             return;
         }
-
-        const RESET_PASSWORD_SECRET_KEY = process.env.RESET_PASSWORD_SECRET_KEY;
+        
         if (user.resetPasswordToken) {
-            const verified = verify(user.resetPasswordToken, RESET_PASSWORD_SECRET_KEY);
+            const verified = verify(
+                user.resetPasswordToken,
+                RESET_PASSWORD_SECRET_KEY,
+            );
             if (verified) {
                 res.status(400).send({ msg: 'Reset password in progress' });
                 return;
             }
         }
         
-        const RESET_PASSWORD_LIFE = process.env.RESET_PASSWORD_LIFE;
         const payload = { sub: user._id };
         const token = sign(
             payload,
@@ -53,9 +57,12 @@ export const forgotPassword = async (req, res, next) => {
 
         send({ receipients, subject, html })
             .then(async () => {
-                await User.findOneAndUpdate({ _id: user._id }, { resetPasswordToken: token })
+                await User.findOneAndUpdate(
+                    { _id: user._id },
+                    { resetPasswordToken: token },
+                );
                 const response = {
-                    msg: 'Please check your mail to reset password',
+                    msg: 'Sent mail successful',
                 };
                 res.send(response);
             })

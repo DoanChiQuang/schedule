@@ -2,6 +2,8 @@ import { User } from '../../models/user.js';
 import { hash } from '../../services/bcrypt.js';
 import { verify } from '../../services/jwt.js';
 
+const RESET_PASSWORD_SECRET_KEY = process.env.RESET_PASSWORD_SECRET_KEY;
+
 export const resetPassword = async (req, res, next) => {
     try {
         const { token, password } = req.body;
@@ -10,8 +12,7 @@ export const resetPassword = async (req, res, next) => {
             res.status(401).send({ msg: 'Token or Password not found' });
             return;
         }
-
-        const RESET_PASSWORD_SECRET_KEY = process.env.RESET_PASSWORD_SECRET_KEY;
+        
         const verified = verify(token, RESET_PASSWORD_SECRET_KEY);
         if (!verified) {
             res.status(400).send({ msg: 'Expired reset password' });
@@ -32,7 +33,10 @@ export const resetPassword = async (req, res, next) => {
 
         const hashed = await hash(password);
 
-        await User.updateOne({ _id: userId }, { password: hashed, resetPasswordToken: '' });
+        await User.updateOne(
+            { _id: userId },
+            { password: hashed, resetPasswordToken: '' },
+        );
 
         res.send({ msg: 'Reset password successful' });
     } catch (error) {
