@@ -5,7 +5,7 @@ import { compare } from '../../services/bcrypt.js';
 export const signin = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        
+
         if (!email || !password) {
             res.status(401).send({ msg: 'Unauthorized' });
             return;
@@ -37,7 +37,7 @@ export const signin = async (req, res, next) => {
             SameSite: 'Lax',
             secure: true,
         });
-        
+
         user = user?.toObject();
         delete user.password;
 

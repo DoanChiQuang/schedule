@@ -12,7 +12,7 @@ export const resetPassword = async (req, res, next) => {
             res.status(401).send({ msg: 'Token or Password not found' });
             return;
         }
-        
+
         const verified = verify(token, RESET_PASSWORD_SECRET_KEY);
         if (!verified) {
             res.status(400).send({ msg: 'Expired reset password' });

@@ -19,7 +19,7 @@ export const forgotPassword = async (req, res, next) => {
             res.status(401).send({ msg: 'User not found' });
             return;
         }
-        
+
         if (user.resetPasswordToken) {
             const verified = verify(
                 user.resetPasswordToken,
@@ -30,7 +30,7 @@ export const forgotPassword = async (req, res, next) => {
                 return;
             }
         }
-        
+
         const payload = { sub: user._id };
         const token = sign(
             payload,
