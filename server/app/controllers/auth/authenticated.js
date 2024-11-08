@@ -4,7 +4,7 @@ const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
 
 export const authenticated = async (req, res, next) => {
     try {
-        const tokenCookie = req.cookies.access_token;
+        const tokenCookie = req.cookies.token;
         if (!tokenCookie) {
             res.status(400).send({ msg: 'Request missing Authorization Data' });
             return;
