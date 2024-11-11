@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import AuthLayout from '@/layouts/auth';
 import SigninPage from '@/modules/auth/pages/signin';
-import ForgotPasswordPage from '@/modules/auth/pages/forgotPassword';
-import ResetPasswordPage from '@/modules/auth/pages/resetPassword';
+import ForgotPasswordPage from '@/modules/auth/pages/forgot-password';
+import ResetPasswordPage from '@/modules/auth/pages/reset-password';
 
 export const authRouter = [
     {

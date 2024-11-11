@@ -13,32 +13,29 @@ import {
 import { Input } from '@/components/ui/input';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store';
+import signinAction from '@/store/auth/actions/signin';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CircleAlert, MailCheck } from 'lucide-react';
-import forgotPasswordAction from '@/store/auth/actions/forgotPassword';
+import { CircleAlert } from 'lucide-react';
 
 const formSchema = z.object({
-    email: z.string().email(),
+    email: z.string().email({ message: 'Email không đúng định dạng.' }),
+    password: z.string(),
 });
 
-const ForgotPasswordForm = () => {
-    // Define Redux State & Dispatch
+const SigninForm = () => {
     const dispatch = useAppDispatch();
-    const { loading, error, isSent } = useAppSelector(
-        (state: RootState) => state.auth,
-    );
+    const { loading, error } = useAppSelector((state: RootState) => state.auth);
 
-    // Define Form
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: '',
+            password: '',
         },
     });
 
-    // Define SubmitHandler
     const onSubmit = (fields: z.infer<typeof formSchema>) => {
-        dispatch(forgotPasswordAction(fields));
+        dispatch(signinAction(fields));
     };
 
     return (
@@ -46,16 +43,9 @@ const ForgotPasswordForm = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {error && (
                     <Alert variant={'destructive'}>
-                        <CircleAlert className="h-4 w-4" />                        
-                        <AlertTitle>Error!</AlertTitle>
+                        <CircleAlert className="h-4 w-4" />
+                        <AlertTitle>Thông báo!</AlertTitle>
                         <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
-                {isSent && (
-                    <Alert variant={'default'}>
-                        <MailCheck className="h-4 w-4" />
-                        <AlertTitle>Success!</AlertTitle>
-                        <AlertDescription>Checkout your email</AlertDescription>
                     </Alert>
                 )}
                 <FormField
@@ -65,18 +55,46 @@ const ForgotPasswordForm = () => {
                         <FormItem className="space-y-1">
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input placeholder="Input email" {...field} />
+                                <Input
+                                    placeholder="Điền Email"
+                                    {...field}
+                                    required
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+                <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                        <FormItem className="space-y-1">
+                            <FormLabel>Mật khẩu</FormLabel>
+                            <FormControl>
+                                <Input
+                                    placeholder="Điền mật khẩu"
+                                    {...field}
+                                    required
+                                    type="password"
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <a
+                    className="float-end inline-block text-sm"
+                    href="/forgot-password"
+                >
+                    Quên mật khẩu?
+                </a>
                 <Button type="submit" disabled={!!loading} className="w-full">
-                    Submit
+                    Đăng nhập
                 </Button>
             </form>
         </Form>
     );
 };
 
-export default ForgotPasswordForm;
+export default SigninForm;

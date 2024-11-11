@@ -13,7 +13,7 @@ const AuthLayout = ({ children }: Props) => {
 
     useEffect(() => {
         if (isLogged) {
-            navigate('/');
+            navigate('/dashboard');
         }
     }, [isLogged]);
 

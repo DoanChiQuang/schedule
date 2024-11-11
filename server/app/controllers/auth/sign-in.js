@@ -2,24 +2,23 @@ import { sign } from '../../services/jwt.js';
 import { User } from '../../models/user.js';
 import { compare } from '../../services/bcrypt.js';
 
-export const signin = async (req, res, next) => {
+export const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            res.status(401).send({ msg: 'Unauthorized' });
-            return;
+            throw new Error();
         }
 
         let user = await User.findOne({ email: email, del: 0 });
         if (!user) {
-            res.status(401).send({ msg: 'User not found' });
+            res.status(401).send({ msg: 'Tài khoản chưa được đăng ký.' });
             return;
         }
 
         let isPasswordMatch = await compare(password, user.password);
         if (!isPasswordMatch) {
-            res.status(401).send({ msg: 'Invalid credentials' });
+            res.status(401).send({ msg: 'Xác thực không thành công.' });
             return;
         }
 
@@ -28,8 +27,7 @@ export const signin = async (req, res, next) => {
         const payload = { sub: user._id };
         const token = sign(payload, TOKEN_SECRET_KEY, TOKEN_LIFE);
         if (!token) {
-            res.status(401).send({ msg: 'Unauthorized' });
-            return;
+            throw new Error();
         }
 
         res.cookie('token', token, {
@@ -42,7 +40,7 @@ export const signin = async (req, res, next) => {
         delete user.password;
 
         const message = {
-            msg: 'Signin successful',
+            msg: 'Đăng nhập thành công.',
             data: {
                 user,
             },

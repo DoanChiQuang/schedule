@@ -4,20 +4,18 @@ const TOKEN_SECRET_KEY = process.env.TOKEN_SECRET_KEY;
 
 export const authenticated = async (req, res, next) => {
     try {
-        const tokenCookie = req.cookies.token;
-        if (!tokenCookie) {
-            res.status(400).send({ msg: 'Request missing Authorization Data' });
+        const token = req.cookies.token;
+        if (!token) {
+            res.status(400).send({ msg: 'Phiên đăng nhập hết hạn.' });
             return;
         }
 
-        const token = tokenCookie.split(' ')[1];
         const verified = verify(token, TOKEN_SECRET_KEY);
         if (!verified) {
-            res.status(401).send({ msg: 'Unauthorized' });
-            return;
+            throw new Error();
         }
 
-        res.status(200).send({ msg: 'Authenticated' })
+        res.status(200).send({ msg: 'Xác thực thành công.' });
     } catch (error) {
         next(error);
     }

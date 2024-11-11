@@ -7,6 +7,10 @@ export type TAuth = {
     isSent: boolean;
 };
 
+export type TAuthenticatedData = {
+    msg: string;
+};
+
 export type TSigninDTO = {
     email: string;
     password: string;

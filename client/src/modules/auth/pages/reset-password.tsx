@@ -5,20 +5,20 @@ import {
     CardDescription,
     CardContent,
 } from '@/components/ui/card';
-import ResetPasswordForm from '@/modules/auth/components/ui/resetPasswordForm';
+import ResetPasswordForm from '@/modules/auth/components/reset-password-form';
 
 const ResetPasswordPage = () => {
     return (
-        <Card className="sm:w-[350px] sm:mx-auto mx-10 my-20">
+        <Card className="mx-10 my-20 sm:mx-auto sm:w-[400px]">
             <CardHeader className="text-center">
-                <CardTitle>Reset Password</CardTitle>
-                <CardDescription>Fill your information</CardDescription>
+                <CardTitle>Đổi mật khẩu</CardTitle>
+                <CardDescription>Điền thông tin mật khẩu mới</CardDescription>
             </CardHeader>
             <CardContent>
                 <ResetPasswordForm />
-                <div className="text-center mt-6">
+                <div className="mt-6 text-center">
                     <a className="text-sm" href="/signin">
-                        Back to Signin
+                        Quay lại đăng nhập
                     </a>
                 </div>
             </CardContent>

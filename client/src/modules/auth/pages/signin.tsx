@@ -1,4 +1,4 @@
-import SigninForm from '@/modules/auth/components/ui/siginForm';
+import SigninForm from '@/modules/auth/components/sigin-form';
 import {
     Card,
     CardContent,
@@ -9,10 +9,12 @@ import {
 
 const SigninPage = () => {
     return (
-        <Card className="sm:w-[350px] sm:mx-auto mx-10 my-20">
+        <Card className="mx-10 my-20 sm:mx-auto sm:w-[400px]">
             <CardHeader className="text-center">
-                <CardTitle>Welcome to Schedule!</CardTitle>
-                <CardDescription>Sign in your account</CardDescription>
+                <CardTitle>Schedule</CardTitle>
+                <CardDescription>
+                    Điền thông tin để đăng nhập vào hệ thống
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <SigninForm />

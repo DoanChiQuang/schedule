@@ -10,23 +10,24 @@ export const forgotPassword = async (req, res, next) => {
         const { email } = req.body;
 
         if (!email) {
-            res.status(401).send({ msg: 'Email not found' });
-            return;
+            throw new Error();
         }
 
         let user = await User.findOne({ email: email, del: 0 });
         if (!user) {
-            res.status(401).send({ msg: 'User not found' });
+            res.status(401).send({ msg: 'Tài khoản chưa được đăng ký.' });
             return;
         }
 
-        if (user.resetPasswordToken) {
+        if (user.resetPassToken) {
             const verified = verify(
-                user.resetPasswordToken,
+                user.resetPassToken,
                 RESET_PASSWORD_SECRET_KEY,
             );
             if (verified) {
-                res.status(400).send({ msg: 'Reset password in progress' });
+                res.status(400).send({
+                    msg: 'Thay đổi mật khẩu đang được thực hiện.',
+                });
                 return;
             }
         }
@@ -42,27 +43,27 @@ export const forgotPassword = async (req, res, next) => {
         }
 
         const receipients = `${user.name} <${user.email}>`;
-        const subject = 'Reset your Schedule password';
+        const subject = 'Thay đổi mật khẩu Schedule';
         const url = `http://localhost:5173/reset-password/${token}`;
         const html = prepareHtml({
-            title: 'Reset your Schedule password',
-            content: 'Reset your Schedule password',
-            bodyTitle: 'Reset password',
+            title: 'Thay đổi mật khẩu Schedule',
+            content: 'Thay đổi mật khẩu Schedule',
+            bodyTitle: 'Đổi mật khẩu',
             bodyUser: user.name,
             bodyMessage:
-                'To access your Schedule account, you need to reset your password.',
+                'Để đăng nhập vào Schedule, bạn cần phải thay đổi mật khẩu.',
             bodyUrl: url,
-            bodyButtonText: 'Reset my password',
+            bodyButtonText: 'Đổi mật khẩu',
         });
 
         send({ receipients, subject, html })
             .then(async () => {
                 await User.findOneAndUpdate(
                     { _id: user._id },
-                    { resetPasswordToken: token },
+                    { resetPassToken: token },
                 );
                 const response = {
-                    msg: 'Sent mail successful',
+                    msg: 'Đã gửi yêu cầu.',
                 };
                 res.send(response);
             })

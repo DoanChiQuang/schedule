@@ -5,20 +5,22 @@ import {
     CardDescription,
     CardContent,
 } from '@/components/ui/card';
-import ForgotPasswordForm from '@/modules/auth/components/ui/forgotPasswordForm';
+import ForgotPasswordForm from '@/modules/auth/components/forgot-password-form';
 
 const ForgotPasswordPage = () => {
     return (
-        <Card className="sm:w-[350px] sm:mx-auto mx-10 my-20">
+        <Card className="mx-10 my-20 sm:mx-auto sm:w-[400px]">
             <CardHeader className="text-center">
-                <CardTitle>Forgot Password?</CardTitle>
-                <CardDescription>Fill your information</CardDescription>
+                <CardTitle>Quên mật khẩu</CardTitle>
+                <CardDescription>
+                    Điền thông tin để có thể lấy lại mật khẩu
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <ForgotPasswordForm />
-                <div className="text-center mt-6">
+                <div className="mt-6 text-center">
                     <a className="text-sm" href="/signin">
-                        Back to Signin
+                        Quay lại đăng nhập
                     </a>
                 </div>
             </CardContent>

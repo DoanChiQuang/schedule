@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import signinAction from '@/store/auth/actions/signin';
-import forgotPasswordAction from '@/store/auth/actions/forgotPassword';
-import resetPasswordAction from '@/store/auth/actions/resetPassword';
 import { TAuth } from '@/store/auth/types/auth';
+import signinAction from '@/store/auth/actions/signin';
+import forgotPasswordAction from '@/store/auth/actions/forgot-password';
+import resetPasswordAction from '@/store/auth/actions/reset-password';
+import authenticatedAction from '@/store/auth/actions/authenticated';
 
 const initialState: TAuth = {
     loading: false,
@@ -66,7 +67,7 @@ const authSlice = createSlice({
             })
             .addCase(resetPasswordAction.fulfilled, (state, action) => {
                 state.loading = false;
-                state.success = true;                
+                state.success = true;
             })
             .addCase(
                 resetPasswordAction.rejected,
@@ -74,6 +75,25 @@ const authSlice = createSlice({
                     state.loading = false;
                     state.error = action.payload;
                     state.success = false;
+                },
+            )
+            .addCase(authenticatedAction.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(authenticatedAction.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = true;
+                state.isLogged = true;
+            })
+            .addCase(
+                authenticatedAction.rejected,
+                (state, action: PayloadAction<any>) => {
+                    state.loading = false;
+                    state.error = action.payload;
+                    state.success = false;
+                    state.isLogged = false;
+                    state.userInfo = {};
                 },
             );
     },

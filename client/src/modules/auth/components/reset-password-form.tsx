@@ -16,11 +16,11 @@ import { RootState } from '@/store';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, CircleAlert } from 'lucide-react';
 import { useParams } from 'react-router-dom';
-import resetPasswordAction from '@/store/auth/actions/resetPassword';
+import resetPasswordAction from '@/store/auth/actions/reset-password';
 
 const passwordError = {
     message:
-        'Your password must be at least 8 characters long, contain at least one number and have a mixture of uppercase and lowercase letters.',
+        'Mật khẩu của bạn phải dài ít nhất 8 ký tự, chứa ít nhất 1 chữ số, chữ hoa và chữ thường.',
 };
 
 const formSchema = z
@@ -41,7 +41,7 @@ const formSchema = z
             return values.password === values.confirmPassword;
         },
         {
-            message: 'Passwords must match',
+            message: 'Mật khẩu không trùng khớp.',
             path: ['confirmPassword'],
         },
     );
@@ -49,11 +49,11 @@ const formSchema = z
 const ResetPasswordForm = () => {
     const { token } = useParams();
 
-    // Define Redux State & Dispatch
     const dispatch = useAppDispatch();
-    const { loading, error, success } = useAppSelector((state: RootState) => state.auth);
+    const { loading, error, success } = useAppSelector(
+        (state: RootState) => state.auth,
+    );
 
-    // Define Form
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -63,7 +63,6 @@ const ResetPasswordForm = () => {
         },
     });
 
-    // Define SubmitHandler
     const onSubmit = (fields: z.infer<typeof formSchema>) => {
         dispatch(resetPasswordAction(fields));
     };
@@ -73,16 +72,18 @@ const ResetPasswordForm = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {error && (
                     <Alert variant={'destructive'}>
-                        <CircleAlert className="h-4 w-4" />                        
-                        <AlertTitle>Error!</AlertTitle>
+                        <CircleAlert className="h-4 w-4" />
+                        <AlertTitle>Thông báo!</AlertTitle>
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 )}
                 {success && (
                     <Alert variant={'default'}>
-                        <CheckCircle className="h-4 w-4" />                        
-                        <AlertTitle>Success!</AlertTitle>
-                        <AlertDescription>Reset password successfully</AlertDescription>
+                        <CheckCircle className="h-4 w-4" />
+                        <AlertTitle>Thông báo!</AlertTitle>
+                        <AlertDescription>
+                            Thay đổi mật khẩu thành công.
+                        </AlertDescription>
                     </Alert>
                 )}
                 <FormField
@@ -90,12 +91,13 @@ const ResetPasswordForm = () => {
                     name="password"
                     render={({ field }) => (
                         <FormItem className="space-y-1">
-                            <FormLabel>New password</FormLabel>
+                            <FormLabel>Mật khẩu mới</FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder="Input new password"
+                                    placeholder="Điền mật khẩu mới"
                                     {...field}
                                     type="password"
+                                    required
                                 />
                             </FormControl>
                             <FormMessage />
@@ -107,12 +109,13 @@ const ResetPasswordForm = () => {
                     name="confirmPassword"
                     render={({ field }) => (
                         <FormItem className="space-y-1">
-                            <FormLabel>Confirm password</FormLabel>
+                            <FormLabel>Xác nhận lại mật khẩu</FormLabel>
                             <FormControl>
                                 <Input
-                                    placeholder="Input confirm password"
+                                    placeholder="Điền lại mật khẩu mới"
                                     {...field}
                                     type="password"
+                                    required
                                 />
                             </FormControl>
                             <FormMessage />
@@ -120,7 +123,7 @@ const ResetPasswordForm = () => {
                     )}
                 />
                 <Button type="submit" disabled={!!loading} className="w-full">
-                    Submit
+                    Xác nhận
                 </Button>
             </form>
         </Form>

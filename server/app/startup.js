@@ -18,13 +18,15 @@ const startup = (app) => {
     app.use(function (err, req, res, next) {
         res.status(err.status || 500);
         res.send({
-            msg: err.message || 'Something goes wrong. Please contact us',
+            msg:
+                err.message ||
+                'Lỗi không xác định. Vui lòng liên hệ chúng tôi: support@email.com.',
         });
     });
 
     app.use((req, res) => {
         res.status(404);
-        res.send({ msg: "Sorry, can't find that" });
+        res.send({ msg: 'Yêu cầu không tồn tại.' });
     });
 };
 
