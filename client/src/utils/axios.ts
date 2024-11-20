@@ -27,7 +27,7 @@ axiosInstance.interceptors.response.use(
             return Promise.reject({ msg: error.response.data.msg });
         }
         return Promise.reject({
-            msg: 'Something went wrong. Please try again!',
+            msg: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
         });
     },
 );

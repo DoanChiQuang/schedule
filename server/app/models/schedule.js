@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const scheduleSchema = new Schema({
-    title: {
-        type: String,
-        required: true,
-    },
     weekday: {
         type: Array,
         default: [],
@@ -14,7 +10,7 @@ const scheduleSchema = new Schema({
         type: Date,
         default: Date.now,
     },
-    until: {
+    dateTimeUntil: {
         type: Date,
         default: Date.now,
     },
@@ -22,11 +18,23 @@ const scheduleSchema = new Schema({
         type: String,
         default: '01:00',
     },
+    status: {
+        type: Number,
+        default: 0,
+    },
     customerId: {
         type: mongoose.Schema.ObjectId,
         required: true,
     },
     userId: {
+        type: mongoose.Schema.ObjectId,
+        required: true,
+    },
+    timeId: {
+        type: mongoose.Schema.ObjectId,
+        required: true,
+    },
+    yardId: {
         type: mongoose.Schema.ObjectId,
         required: true,
     },

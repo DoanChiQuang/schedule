@@ -1,0 +1,62 @@
+.fc-theme-standard tr {
+    border-bottom: 1px solid var(--fc-border-color);
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border: none;
+}
+
+.fc-theme-standard th + th {
+    border-left: 1px solid var(--fc-border-color);
+}
+
+.fc .fc-scrollgrid {
+    border: 1px solid var(--fc-border-color);
+    border-radius: 8px;
+}
+
+.fc .fc-scrollgrid .fc-col-header-cell {
+    padding: 16px 0px;
+}
+
+.fc .fc-timegrid-slot-minor {
+    border: none;
+}
+
+.fc-timegrid-event-harness-inset .fc-timegrid-event,
+.fc-timegrid-event.fc-event-mirror,
+.fc-timegrid-more-link {
+    box-shadow: none;
+}
+
+/* Month */
+.fc-theme-standard .fc-dayGridMonth-view td + td {
+    border-left: 1px solid var(--fc-border-color);
+}
+
+/* Week */
+.fc-theme-standard .fc-timeGridWeek-view tr {
+    border: none;
+}
+
+.fc-theme-standard .fc-timeGridWeek-view tr:nth-of-type(2n + 2) {
+    border-bottom: 1px solid var(--fc-border-color);
+}
+
+.fc-theme-standard .fc-timeGridWeek-view td + td {
+    border-left: 1px solid var(--fc-border-color);
+}
+
+/* Day */
+.fc-theme-standard .fc-timeGridDay-view tr {
+    border: none;
+}
+
+.fc-theme-standard .fc-timeGridDay-view tr:nth-of-type(2n + 2) {
+    border-bottom: 1px solid var(--fc-border-color);
+}
+
+.fc-theme-standard .fc-timeGridDay-view td + td {
+    border-left: 1px solid var(--fc-border-color);
+}

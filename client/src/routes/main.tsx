@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
-import MainLayout from '@/layouts/main';
-import DashboardPage from '@/modules/main/pages/dashboard';
-import CalendarPage from '@/modules/main/pages/calendar';
+import MainLayout from '@/modules/layouts/main';
+import DashboardPage from '@/modules/pages/dashboard';
+import SchedulePage from '@/modules/pages/schedule';
 
 export const mainRouter = [
     {
@@ -18,7 +18,7 @@ export const mainRouter = [
             },
             {
                 path: 'calendar',
-                element: <CalendarPage />,
+                element: <SchedulePage />,
             },
         ],
     },
