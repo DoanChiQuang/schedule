@@ -61,7 +61,7 @@
 
         --fc-more-link-bg-color: hsl(var(--muted));
         --fc-more-link-text-color: inherit;
-        
+
         --fc-today-bg-color: rgb(254 202 202);
     }
     .dark {

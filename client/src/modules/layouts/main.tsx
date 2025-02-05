@@ -9,6 +9,7 @@ import authenticatedAction from '@/stores/auth/actions/authenticated';
 import { useAppDispatch, useAppSelector } from '@/stores/hooks';
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Typography } from '../components/ui/typography';
 
 type Props = {
     children?: ReactNode;
@@ -35,7 +36,13 @@ const MainLayout = ({ children }: Props) => {
             <AppSidebar />
             <main className="container">
                 {isMobile && <SidebarTrigger />}
-                <div className="m-4">{children}</div>
+                <div className="m-4 space-y-2">
+                    {/* Breadcrumb */}
+
+                    {/* Title */}
+                    <Typography variant="h2" content="Bảng điều khiển" />
+                    {children}
+                </div>
             </main>
         </SidebarProvider>
     );

@@ -50,15 +50,15 @@ const SchedulePage = () => {
     const [open, setOpen] = useState(false);
 
     return (
-        <div className="space-y-4">
-            <Typography variant="h2" content="Lịch" />
+        <div>
             <BigCalendar events={events} onClick={setOpen} />
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetContent>
                     <SheetHeader>
                         <SheetTitle>Thêm sự kiện mới</SheetTitle>
                         <SheetDescription>
-                            Vui lòng điền đầy đủ thông tin có gán (*) và bấm lưu khi hoàn thành.
+                            Vui lòng điền đầy đủ thông tin có gán (*) và bấm lưu
+                            khi hoàn thành.
                         </SheetDescription>
                     </SheetHeader>
                     <EventForm />

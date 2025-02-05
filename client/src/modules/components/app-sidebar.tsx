@@ -39,7 +39,7 @@ const mainMenu = [
 const manageMenu = [
     {
         title: 'Tài khoản',
-        url: '/account',
+        url: '/accounts',
         icon: LockKeyhole,
     },
     {
@@ -61,9 +61,9 @@ const manageMenu = [
 
 export function AppSidebar() {
     const isActive = (path: string) => {
-        const match = useMatch(path);        
+        const match = useMatch(path);
         return Boolean(match);
-    }
+    };
     return (
         <Sidebar>
             <SidebarHeader>
@@ -80,7 +80,10 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {mainMenu.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        isActive={isActive(item.url)}
+                                    >
                                         <Link to={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
@@ -97,7 +100,10 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {manageMenu.map((item) => (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        isActive={isActive(item.url)}
+                                    >
                                         <Link to={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>

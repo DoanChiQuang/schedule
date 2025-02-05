@@ -8,7 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { vi } from 'date-fns/locale/vi';
 import { setDefaultOptions } from 'date-fns';
 
-setDefaultOptions({ locale: vi })
+setDefaultOptions({ locale: vi });
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <Provider store={store}>
